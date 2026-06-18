@@ -177,7 +177,10 @@ turning the Tier-2 "soft read-only" convention into a hard guarantee.
 The agents are generic. To make them sharp for a given project, give that project:
 
 1. A root `CLAUDE.md` stating the stack, build/test commands, and where the standards docs
-   live (coding standards, API standards, security rules, testing guide, etc.).
+   live (coding standards, API standards, security rules, testing guide, etc.). A
+   fill-in-the-blanks starter — the full Analyze→Validate methodology with a Project Facts /
+   canonical-commands table — ships at [`templates/CLAUDE.md`](templates/CLAUDE.md); copy it to
+   your project root and complete §0.
 2. Path-scoped `.claude/rules/` (copy from [`rules/`](rules/) and edit the globs) that point
    the agents at those docs for the relevant directories.
 
@@ -191,6 +194,7 @@ any other project.
 .claude-plugin/{plugin.json, marketplace.json}
 agents/            11 specialist + orchestrator definitions (stack-agnostic)
 commands/          /self-review slash command
+templates/CLAUDE.md   fill-in-the-blanks project guideline (full Analyze→Validate methodology)
 templates/feature/ the audit-log scaffold (progress.md + 00–06) + ADR-TEMPLATE.md
 rules/             generic path-scoped rule starters to copy into a project
 docs/architecture.md  design rationale (the briefing)
