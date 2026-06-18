@@ -17,6 +17,9 @@ not in this repo.
 > in practice; the *implementation/review/test/build* half has not been run end-to-end yet.
 > Treat that half as untested until you've trialled it. See [`docs/architecture.md`](docs/architecture.md).
 
+> **New here? Start with [`docs/getting-started.md`](docs/getting-started.md)** — the mental model,
+> two ways to install, and how to drive it day to day.
+
 ## The pipeline
 
 The orchestrator runs the requirement through six stages, spawning one specialist per step and
