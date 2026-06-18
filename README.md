@@ -47,6 +47,7 @@ demonstrably met. New here? → **[docs/getting-started.md](docs/getting-started
 | [templates/STORY-TEMPLATE.md](templates/STORY-TEMPLATE.md) | The user-story input format the agents consume |
 | [settings/](settings/) | Permission starters — orchestrator allow + enforced reviewer deny |
 | [rules/](rules/) | Path-scoped rule starters + universal engineering defaults (`general.md`) |
+| [standards/](standards/) | Starter **coding-standards / security-rules (OWASP-mapped) / api-standards** to adopt out of the box |
 
 ## The pipeline
 
@@ -238,6 +239,7 @@ templates/CLAUDE.md   fill-in-the-blanks project guideline (full Analyze→Valid
 templates/STORY-TEMPLATE.md  one-story-per-file input format the agents consume
 templates/feature/ the audit-log scaffold (progress.md + 00–06) + ADR-TEMPLATE.md
 rules/             generic path-scoped rule starters to copy into a project
+standards/         starter coding-standards / security-rules (OWASP) / api-standards docs
 settings/          ready-to-merge permission starters (orchestrator allow + reviewer deny)
 docs/architecture.md  design rationale (the briefing)
 docs/enterprise.md    enterprise hardening: enforced-vs-conventional, evidence, what's owed

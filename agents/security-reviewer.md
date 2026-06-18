@@ -19,7 +19,7 @@ endpoints, session handling, or data access.
 ## What you check
 
 **Manual** (against the project's security-rules and authentication docs — find them via
-`CLAUDE.md`):
+`CLAUDE.md`; if the project has none, fall back to the `standards/security-rules.md` baseline):
 - OWASP Top 10 — injection (SQLi/XSS/command), broken access control, etc.
 - Token / session handling and any auth/OIDC flows
 - CSRF protection on state-changing endpoints (e.g. the double-submit pattern on a BFF)
@@ -60,5 +60,22 @@ prioritised finding list (critical / warning / suggestion), each with file:line 
 remediation, plus the dependency-scan output. **Severity calibration:** a spec/security
 deviation with a demonstrable exploit → Critical/Warning by impact; a latent one with no
 demonstrated exploit → Suggestion/Warning (per impact), noted as latent.
+
+Also produce a **Compliance coverage** table — map the change's controls to the OWASP Top 10
+**and** to each compliance band the project declares in `CLAUDE.md` §0 (e.g. PDPA, IM8, GDPR,
+SOC2, WCAG), marking each **covered / N-A (with reason) / GAP**:
+
+```
+## Compliance coverage
+| Control / band | Status | Evidence / reason |
+|---|---|---|
+| A01 Broken Access Control | covered | authz enforced server-side at <file:line> |
+| A03 Injection | N-A | no untrusted-input sink in this change |
+| PDPA (no PII logged) | covered | logging reviewed, no PII at <file:line> |
+| …                        | GAP  | <what's missing> → blocker if high/critical |
+```
+
+A GAP on a high/critical control is a **merge blocker**. This table is what makes security
+compliance auditable in the completion report — don't omit it.
 
 Keep known vuln patterns and prior findings in your memory.
