@@ -106,7 +106,14 @@ from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded her
 - **Tier 2 — soft read-only.** code-reviewer, security-reviewer, db-migration-engineer need
   `Bash` to run real scanners, so "never edits source" is enforced by **convention** plus an
   optional project-level `settings.json` deny rule (see [Permissions](#permissions)). They
-  write only their own `05-review.md`.
+  write only their own `05-review.md`. For enterprise/regulated use, **enforce** it by running
+  reviewers with the shipped [`settings/settings.reviewer.json`](settings/) (denies source writes).
+
+> **Enterprise hardening.** The agents embed the enterprise discipline — authoritative-spec-governs,
+> operational sense-check, gate-green ≠ requirement-complete, a mandatory independent adversarial
+> AC cross-check before "done", shared-primitive prerequisites, and honest "N/A — not configured"
+> over faked gates. See [`docs/enterprise.md`](docs/enterprise.md) for what is enforced vs.
+> conventional, the test evidence, and what is still owed before "certified enterprise-grade".
 
 ## Install
 
@@ -140,26 +147,28 @@ Once installed, start a feature by routing the requirement through the orchestra
 ## Permissions
 
 A plugin **cannot ship a tool-permission allowlist** — permissions are project/user level.
-Add the following to the consuming project's `.claude/settings.json` (or `settings.local.json`)
-so the orchestrator and Tier-2 reviewers work smoothly. The first block lets the orchestrator
-persist the audit log; the optional deny block hardens the "reviewers never edit source"
-convention when you run reviewers in a dedicated session.
+Two ready-to-merge starters ship in [`settings/`](settings/):
 
-```json
-{
-  "permissions": {
-    "allow": [
-      "Write(artifacts/feature/**)",
-      "Edit(artifacts/feature/**)",
-      "Write(docs/decisions/**)",
-      "Edit(docs/decisions/**)"
-    ]
+- **`settings/settings.json`** — merge into the consuming project's `.claude/settings.json` (or
+  `settings.local.json`) so the orchestrator can persist `artifacts/feature/**` + `docs/decisions/**`
+  without an approval prompt on every write:
+
+  ```json
+  {
+    "permissions": {
+      "allow": [
+        "Write(artifacts/feature/**)",
+        "Edit(artifacts/feature/**)",
+        "Write(docs/decisions/**)",
+        "Edit(docs/decisions/**)"
+      ]
+    }
   }
-}
-```
+  ```
 
-For a dedicated reviewer session you can additionally **deny** writes to your source paths,
-turning the Tier-2 "soft read-only" convention into a hard guarantee.
+- **`settings/settings.reviewer.json`** — load it as the settings for a **dedicated reviewer
+  session** to **deny** writes to your source paths, turning the Tier-2 "soft read-only"
+  convention into a hard, enforced guarantee. Edit the deny globs to match your source roots.
 
 ## Caveats when running as a plugin
 
@@ -197,5 +206,7 @@ commands/          /self-review slash command
 templates/CLAUDE.md   fill-in-the-blanks project guideline (full Analyze→Validate methodology)
 templates/feature/ the audit-log scaffold (progress.md + 00–06) + ADR-TEMPLATE.md
 rules/             generic path-scoped rule starters to copy into a project
+settings/          ready-to-merge permission starters (orchestrator allow + reviewer deny)
 docs/architecture.md  design rationale (the briefing)
+docs/enterprise.md    enterprise hardening: enforced-vs-conventional, evidence, what's owed
 ```

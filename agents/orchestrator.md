@@ -56,9 +56,23 @@ Drive features through this sequence, spawning one specialist per step:
 7. **Review** — `@code-reviewer` then `@security-reviewer` → `05-review.md`
 8. **Test** — `@test-engineer` → `06-test.md`
 9. **Build** — `@devops-engineer` (touched module(s) only)
+10. **AC cross-check (mandatory done gate)** — route an INDEPENDENT adversarial pass to a
+    reviewer that is NOT the implementer (e.g. `@code-reviewer`, spawned fresh for this
+    purpose) to confirm **each** acceptance criterion in `00-stories.md` is demonstrably met
+    against the authoritative spec, and to actively try to break the "done" claim. The
+    feature is NOT done until this pass confirms every AC. Persist its verdict in
+    `06-test.md` (or a `## AC cross-check` section of `05-review.md`).
+
+> **Done gate — gate-green ≠ requirement-complete (P3).** Lint/types/tests/build/scan all
+> passing is necessary but NOT sufficient. A feature is "done" only when step 10 confirms
+> every AC is demonstrably met against the authoritative spec. The **authoritative spec
+> governs**: a detailed governing spec outranks a coarse AC summary, which outranks the
+> code — flag and reconcile conflicts, never silently follow the weaker source. Any blocking
+> question raised at any step hard-stops the pipeline until the user clears it.
 
 Skip steps that don't apply (e.g. no UI flow for a backend-only change, no schema review
 when there is no migration) — but say so in `progress.md` rather than silently dropping them.
+Step 10 never skips for a feature that carries acceptance criteria.
 
 **Blocking-question gate (hard stop before step 2).** The requirements-analyst tags
 each open question BLOCKING or NON-BLOCKING and self-resolves the non-blocking ones.

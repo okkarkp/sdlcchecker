@@ -1,0 +1,11 @@
+{
+  "//": "Normal pipeline session settings — lets the orchestrator persist the audit log + ADRs without prompting. Merge into your project's .claude/settings.json (or settings.local.json).",
+  "permissions": {
+    "allow": [
+      "Write(artifacts/feature/**)",
+      "Edit(artifacts/feature/**)",
+      "Write(docs/decisions/**)",
+      "Edit(docs/decisions/**)"
+    ]
+  }
+}

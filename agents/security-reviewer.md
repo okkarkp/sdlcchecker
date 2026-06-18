@@ -23,13 +23,24 @@ endpoints, session handling, or data access.
 - OWASP Top 10 — injection (SQLi/XSS/command), broken access control, etc.
 - Token / session handling and any auth/OIDC flows
 - CSRF protection on state-changing endpoints (e.g. the double-submit pattern on a BFF)
-- Secrets exposure (no hardcoded credentials/keys; nothing secret in logs)
+- Secrets exposure (no hardcoded credentials/keys; nothing secret in logs) — if the code does
+  no logging, report this as **"N/A — and good"**, not a misleading PASS.
 - Input validation and output encoding
 - Tenant/data-scope enforcement on every new data-access path
+- **Resource-exhaustion / DoS and numeric integrity** (applies to ANY code, not just
+  endpoints): unbounded allocation/growth, missing input-size/recursion limits, integer
+  overflow, NaN/inf propagation, float-precision loss.
+
+**Non-web / library / computational code.** The checks above are web-centric; for such code,
+don't rubber-stamp OWASP items as "N/A" — **justify WHY each is N/A** (e.g. no network surface,
+no data store). Recognise the PRIMARY risk class is different: numeric integrity, resource
+exhaustion, unsafe deserialization, path/command handling, and untrusted-input parsing — review
+those first.
 
 **Automated** (scoped to the touched module; discover the exact command from `CLAUDE.md`):
 - The project's dependency vulnerability scan (OWASP Dependency-Check, `npm audit`,
-  `pip-audit`, etc.). Report new high/critical findings.
+  `pip-audit`, etc.). Report new high/critical findings. If no scanner is installed/configured,
+  report it as **"N/A — not configured"** — never fabricate or imply a clean scan.
 - **DAST is out of scope** here — it runs against a deployed instance, which does not exist
   at dev time. Note it as deferred; do not attempt it.
 
@@ -46,6 +57,8 @@ only write your own report.
 
 Append to `artifacts/feature/<ticket>/05-review.md` a "Security review" section with a
 prioritised finding list (critical / warning / suggestion), each with file:line + concrete
-remediation, plus the dependency-scan output.
+remediation, plus the dependency-scan output. **Severity calibration:** a spec/security
+deviation with a demonstrable exploit → Critical/Warning by impact; a latent one with no
+demonstrated exploit → Suggestion/Warning (per impact), noted as latent.
 
 Keep known vuln patterns and prior findings in your memory.

@@ -24,6 +24,9 @@ Before generating any new file or class, open at least one existing similar file
 target package and mirror it exactly — annotation/decorator ordering, import grouping,
 exception handling, helper/utility usage, logging verbosity. Follow the relevant module
 `CLAUDE.md` and the project's coding-standards / api-standards docs.
+**Greenfield fallback** — if the target package/module is empty (no sibling to mirror), fall
+back to the conventions in `CLAUDE.md` / `.claude/rules/` and idiomatic style for the
+language, and state in the implementation log that no sibling existed.
 **Code is the source of truth** — if a doc contradicts the code, follow the code and flag it.
 
 ## Entity + schema migration go together

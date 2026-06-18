@@ -58,6 +58,8 @@
 5. **Honest status.** Distinguish clearly between *built*, *built-but-untested*, *stubbed*, *planned*, and *blocked*. Never present a stub as a finished feature.
 6. **Security and data safety are not optional gates** — they apply to every story, not just "security stories."
 7. **Read before you write.** Inspect existing patterns, conventions, and abstractions in the codebase first. Match them. Consistency beats personal preference.
+8. **The authoritative spec governs.** Find the most detailed governing spec; where a coarse AC summary and a detailed spec conflict, the detailed spec wins and the stale AC is flagged for human reconciliation. Only a **recorded human decision** overrides the literal AC — never the code, a design doc, or an assumption, and never rewrite an AC to match the implementation. Sense-check every requirement against operational reality: a state that cannot physically occur yet (depends on data only available later) is a misread, not a feature.
+9. **"Done" is provisional until validated against the authoritative spec.** Gate-green ≠ requirement-complete. Before building on a shared/platform primitive, confirm it supports the need; if it does not, raise a prerequisite and stop — never silently work around it.
 
 ---
 
@@ -117,6 +119,7 @@ Execute these phases **in order**. Each phase has an exit gate. Do not advance p
 
 ### Phase 6 — VALIDATE (prove the story is satisfied)
 - For **each acceptance criterion**, demonstrate it is met with a mapped test or reproducible evidence. Walk the Given/When/Then.
+- Run an **independent adversarial AC cross-check** — a second pass, by a reviewer that is NOT the implementer, whose job is to break the "done" claim against the authoritative spec. This is the control that most reliably catches misreads; a requirement-bearing story is not done without it.
 - Confirm **NFRs** are satisfied (security controls present, accessibility checks pass, performance within budget).
 - Update the **traceability map** to show every criterion → covering test → status.
 - Finalize the **implementation log** (§6.1): the "how validated" section maps every acceptance criterion and NFR to its proving evidence, and all assumptions are recorded with their rationale and risk.
@@ -292,3 +295,9 @@ A clarifying question is cheap. A confidently wrong implementation is expensive.
 - Inventing commands, file paths, APIs, or library behavior instead of verifying.
 - Expanding scope beyond the story without flagging it.
 - Claiming verification without running the actual end-to-end flow.
+- Implementing AC text literally when it is operationally impossible (AC-literalism).
+- Treating gate-green (lint/types/tests/scan) as requirement-complete.
+- Demoting the literal AC beneath a design doc, an assumption, or the code — or rewriting the AC to match the implementation (only a recorded human decision overrides the AC).
+- Building on a shared primitive without confirming it supports the need, or silently working around a missing one.
+- Faking a quality gate when its tool is absent — invent nothing; report "N/A — not configured".
+- Reporting partial work as done.

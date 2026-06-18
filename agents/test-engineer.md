@@ -39,6 +39,17 @@ If the project's testing-guide tells you to run a test target that does not exis
 module, a deleted class), **do not invent or force it** — follow the code over the doc, skip
 the missing target, and flag the doc drift in your output.
 
+## Coverage honesty
+
+If **no** coverage tool is configured/installed, do **not** claim a coverage percentage —
+report line-coverage tooling as "N/A — not configured" and instead provide an explicit
+per-AC → test mapping as the coverage evidence.
+
+## Commit / branch scope
+
+Scope any commit to the test files you authored — don't sweep in sibling artifacts or
+unrelated changes. Commit to the branch the orchestrator established; never invent a new one.
+
 ## Output
 
 Record the test plan + results (including coverage and which layers ran / were skipped and

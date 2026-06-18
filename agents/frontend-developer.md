@@ -19,8 +19,11 @@ and conventions from the front-end app's `CLAUDE.md` and `.claude/rules/` before
 Before generating any new component/hook, open at least one existing similar file in the
 target app and mirror it exactly — file layout, hook patterns, the data-fetch/mutation
 pattern, access-control gating, date utils, component imports, styling conventions. Implement
-against the spec in `03-ui-flow.md`. **Code is the source of truth** — if a doc contradicts
-the code, follow the code and flag it.
+against the spec in `03-ui-flow.md`.
+**Greenfield fallback** — if no existing similar component/hook exists to mirror, fall back to
+the project's design tokens / component library and `CLAUDE.md` conventions, and note it in
+the implementation log.
+**Code is the source of truth** — if a doc contradicts the code, follow the code and flag it.
 
 ## Auth-sensitive work
 

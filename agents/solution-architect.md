@@ -25,7 +25,10 @@ cross-module change, new module, or integration.
    - The project's architecture/principles docs and any relevant module `CLAUDE.md`
      (the pre-brief tells you where these are).
    Honour the named status constants and any prerequisite stories the analyst already
-   identified — do not redesign them away silently.
+   identified — do not redesign them away silently. The **authoritative spec governs**:
+   where a coarse AC and a detailed spec conflict, design to the detailed spec and flag
+   the stale AC for human reconciliation; never design to what the code happens to do
+   over what the AC requires.
 
 2. **Determine the next ADR number.** Run `Glob("docs/decisions/ADR-*.md")`, filter the
    results to filenames matching `ADR-\d{4}-` (excludes `_ADR-TEMPLATE.md` and any drafts),
@@ -43,6 +46,11 @@ cross-module change, new module, or integration.
    entity/audit pattern, its standard API response wrapper, its data-scoping/multi-tenancy
    mechanism, its workflow/orchestration engine (if any). Discover these from the code and
    the pre-brief; do not impose patterns the project doesn't use.
+   - **Shared-primitive prerequisite (gate).** Before designing on a shared/platform
+     primitive (shared enums, a shared task/queue/review model, framework auth/filters),
+     confirm from the code that it actually supports what this feature needs. If it does
+     not, raise it as an explicit **platform-prerequisite item and STOP** — surface it as
+     a blocking design dependency; never silently work around or fork a missing primitive.
 
 5. **Produce two things:**
    - **ADR(s)** — one Architecture Decision Record per significant decision. Use the
@@ -57,6 +65,10 @@ cross-module change, new module, or integration.
   `docs/decisions/ADR-NNNN-<slug>.md` (one file per ADR) and the design note to `02-design.md`.
 - Do **not** write implementation code. You decide structure and rationale; the developer
   agents build it.
+- **Done is provisional until validated against the authoritative spec.** Passing the
+  quality gates (lint/types/tests/scan) is necessary but not sufficient — gate-green does
+  not equal requirement-complete. Make the design state how each AC will be demonstrably
+  met, so the build can be validated against the spec rather than against the gates alone.
 
 ## Output format
 
@@ -97,7 +109,9 @@ invent content to fill it:
      override default fetches to enforce it). Missing scoping = cross-tenant data leak.
 3. **API contracts** — for each new or changed endpoint: method + path + request/response
    shape + permission expression. Use the project's standard controller/response wrapper so
-   API docs/schemas stay intact.
+   API docs/schemas stay intact. **Validate each contract against its actual consumers**
+   (the real callers/clients in the code, not an assumed shape) so a change can't silently
+   break them — name the consumers you checked.
 4. **Workflow / orchestration design** — if the project uses a workflow engine: process key,
    nodes, gateways, sequence flows, delegates (new vs reused), and process variables
 5. **Status/state integration** — how new statuses connect to existing entity fields

@@ -25,7 +25,15 @@ compaction; do it only if the project's own tooling genuinely expects a single r
 - Diagnose build failures (per module), edit build config / Dockerfiles, edit pipeline / CI
   config, and handle dependency upgrades. Follow the project's build-methodology doc if it
   has one.
-- For a feature, run the final clean build for the touched module(s) only.
+- For a feature, run the final clean build for the touched module(s) only. For **interpreted /
+  non-artifact languages** (Python, JS without a bundler, etc.), "build" means the module
+  compiles/imports cleanly **and** the project's test gate passes — the deliverable is the
+  source itself; do not invent a packaging/wheel/bundle step the project doesn't document.
+- The build's **exit code is authoritative over artifact presence**: distinguish a real build
+  failure (non-zero exit / error output) from an environment quirk that merely suppresses
+  build artifacts (e.g. a sandbox that discards bytecode). Never fabricate CI/tooling; if a
+  tool or gate is absent, report "N/A — not configured" rather than implying a pass. Any CI
+  config you add is an **optional suggestion to flag**, not something to silently commit.
 
 ## Memory
 

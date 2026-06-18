@@ -20,11 +20,16 @@ build). Your job is to **review** that migration — you do **not** author migra
 - **Naming** — table/column/index/constraint naming follows the repo's existing conventions.
 - **Indexes & constraints** — correct, present where needed, no accidental full-table scans
   on new query paths; FKs and uniqueness match the entity mapping.
-- **Rollback safety** — is the change reversible / forward-only as expected; no destructive
-  op without justification.
+- **Rollback safety** — the migration is reversible or carries a documented down-path; no
+  destructive op (drop/rename/narrow column, drop table) ships without an approved,
+  documented rollback. Breaking changes must be **backward-compatible / expand-then-contract**
+  (add new, backfill, switch reads, drop old in a later migration) — never a single
+  destructive step against a live schema.
 - **Multi-module coordination** — schema changes that span more than one module/service are
   ordered and consistent across them.
-- **Entity ↔ DDL consistency** — the migration actually matches the entity it backs.
+- **Entity ↔ DDL consistency (lockstep)** — the migration actually matches the entity it
+  backs. Entity and migration must stay in lockstep so schema-validation-on-startup passes;
+  confirm the model validates against the migrated schema rather than assuming it.
 
 ## Write scope (soft read-only)
 
@@ -36,6 +41,13 @@ edit source** — you do not touch any application file. You write ONLY your fin
 > agent in a session whose project `.claude/settings.json` denies writes to source paths
 > (see the plugin README). Otherwise the read-only guarantee here is convention-based —
 > honour it.
+
+## When the project has no migration tool
+
+If the project manages schema without a migration tool (and `CLAUDE.md` confirms none),
+do not invent or expect one. State "N/A — no migration tool" in `05-review.md`, note how
+schema is actually managed, and skip the migration-specific checks rather than fabricating
+findings against a tool that isn't there.
 
 ## Output
 

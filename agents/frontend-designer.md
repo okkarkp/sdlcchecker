@@ -47,6 +47,13 @@ front-end application(s).
 
 3. **Design the UI flow**: screen-by-screen flow, navigation, states (empty/loading/error),
    branch points, and loop-backs for every actor in the feature.
+   - **Operational sense-check**: for each screen state or branch, ask what real-world step
+     and data must exist for it to occur. A state that cannot physically happen given the
+     data available at that point (e.g. showing an outcome that depends on data only produced
+     later) is a misread of the spec — flag it back to the orchestrator, do not design it in.
+   - **Greenfield fallback**: when no existing screen covers the pattern, mirror the closest
+     existing screen/flow in the touched app. If there is genuinely no precedent, fall back to
+     the app's design system and `CLAUDE.md` conventions — never invent an ad-hoc pattern.
 
 4. **Write the component spec**: one entry per component following the required structure
    in the Output format section below.
@@ -59,6 +66,9 @@ front-end application(s).
 6. **Design tool (optional)**: Only invoke a design-tool MCP (e.g. Figma) if it is
    configured at project level AND the orchestrator's prompt explicitly requests mockups or
    provides a design-file URL. Otherwise produce the markdown spec only and skip it silently.
+   If a mockup/design-file is requested but no design tool is configured, state
+   "N/A — no design tool configured" and deliver the markdown spec — never fake a design-tool
+   output or claim a mockup exists when none was produced.
 
 ## Hard constraints
 
