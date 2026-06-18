@@ -17,8 +17,17 @@ not in this repo.
 > in practice; the *implementation/review/test/build* half has not been run end-to-end yet.
 > Treat that half as untested until you've trialled it. See [`docs/architecture.md`](docs/architecture.md).
 
-> **New here? Start with [`docs/getting-started.md`](docs/getting-started.md)** — the mental model,
-> two ways to install, and how to drive it day to day.
+## 📖 Documentation
+
+| Guide | What it covers |
+|---|---|
+| **[docs/getting-started.md](docs/getting-started.md)** | **Start here.** Mental model · install (2 ways) · day-to-day use · authoring user stories |
+| [docs/architecture.md](docs/architecture.md) | Design rationale · the pipeline · hook-free write-scope enforcement |
+| [docs/enterprise.md](docs/enterprise.md) | Enterprise hardening — what's *enforced* vs. *conventional*, test evidence, what's still owed |
+| [templates/CLAUDE.md](templates/CLAUDE.md) | Fill-in-the-blanks project guideline (the full Analyze→Validate methodology) |
+| [templates/STORY-TEMPLATE.md](templates/STORY-TEMPLATE.md) | The user-story input format the agents consume |
+| [settings/](settings/) | Permission starters — orchestrator allow + enforced reviewer deny |
+| [rules/](rules/) | Path-scoped rule starters + universal engineering defaults (`general.md`) |
 
 ## The pipeline
 
