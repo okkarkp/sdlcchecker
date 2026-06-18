@@ -112,8 +112,8 @@ from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded her
 
 ```bash
 # 1. Add this repo as a marketplace (local path, a git URL, or owner/repo on GitHub)
-/plugin marketplace add /Users/o.kyu.pe/aisle/aisle-agents
-#   or:  /plugin marketplace add your-org/aisle-agents
+/plugin marketplace add okkarkp/sdlcchecker
+#   or, from a local clone:  /plugin marketplace add /path/to/sdlcchecker
 
 # 2. Install the plugin from it
 /plugin install delivery-team@aisle-agents
@@ -188,12 +188,44 @@ The orchestrator reads all of this in its pre-brief and passes it downstream, so
 specialists behave as if purpose-built for that stack — while the same plugin still works in
 any other project.
 
+## Quality gates & failure handling
+
+The orchestrator treats **every stage as a gate** with a binary status (GREEN / RED /
+SKIPPED), recorded in each feature's `progress.md` **Gate ledger**. A RED gate (a Critical
+review finding, a new high/critical vuln, a failing test, or a broken build) never advances
+the pipeline: the orchestrator runs a **bounded remediation loop** — re-spawning the owning
+specialist with the specific findings, at most twice — and **escalates to the user** if the
+gate is still RED. It never disables a check or marks a finding "won't fix" on its own
+authority. A feature only flips to `DONE` after the **Definition-of-Done** gate passes (all
+gates GREEN/SKIPPED, every acceptance criterion mapped to evidence, no open Critical, build
+GREEN); otherwise it is reported `PARTIAL`.
+
+## Requirement intake (any source format)
+
+Sources arrive in many formats. The advisory agents read text, markdown, CSV, images, and
+**PDFs** directly. For binary office formats (`.xlsx`/`.docx`) the orchestrator normalizes
+them to markdown/CSV under `artifacts/feature/<ticket>/00-source/` first — preserving the
+original and recording the conversion command and any dropped data for audit — then hands the
+analyst the normalized artifact. Backlog exports are normalized **column-complete** so the
+analyst reads every field of every story, not just the summary.
+
+## Validation / CI
+
+The plugin ships no executable code, so "CI" means proving the artifact is well-formed.
+`scripts/validate_plugin.py` checks the JSON manifests, every agent's YAML frontmatter, the
+tool allowlist (catches typo'd tool names that silently disable an agent), `@agent`
+cross-references, README/agent-count consistency, and the template scaffold. Run it locally
+with `python3 scripts/validate_plugin.py` (needs `pip install pyyaml`); it also runs on every
+push and PR via [`.github/workflows/validate.yml`](.github/workflows/validate.yml).
+
 ## Layout
 
 ```
 .claude-plugin/{plugin.json, marketplace.json}
-agents/            11 specialist + orchestrator definitions (stack-agnostic)
+agents/            11 agents — orchestrator + 10 specialists (stack-agnostic)
 commands/          /self-review slash command
+scripts/           validate_plugin.py — structural validator (CI gate)
+.github/workflows/ validate.yml — runs the validator on push/PR
 templates/CLAUDE.md   fill-in-the-blanks project guideline (full Analyze→Validate methodology)
 templates/feature/ the audit-log scaffold (progress.md + 00–06) + ADR-TEMPLATE.md
 rules/             generic path-scoped rule starters to copy into a project

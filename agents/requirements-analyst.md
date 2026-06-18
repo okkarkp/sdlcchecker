@@ -36,6 +36,17 @@ the implementation team needs exact, unambiguous names rather than prose.
      short request for it as your final message and do nothing else until it arrives.
    - Once you have the source, read it (and any cross-referenced sections it points to)
      and note the exact source IDs and line/section ranges so you can link back to them.
+   - **Source formats.** Your `Read` tool handles text, markdown, CSV, images, and PDFs
+     directly — read those as given. For binary office formats (`.xlsx`/`.docx`), the
+     orchestrator normalizes them to markdown/CSV under `00-source/` first and passes you
+     that path plus the original; read the normalized artifact and cross-check column
+     headings against `00-source/README.md` so no field is lost. If you are handed a binary
+     you cannot open and no normalized version exists, treat it as a missing source: stop and
+     ask the orchestrator/user to provide a normalized export. Never guess at a binary's
+     contents.
+   - When the source is a backlog export (one row per story), read **every column of every
+     row** — title, description, acceptance criteria, NFR/compliance, priority, dependencies,
+     labels — not just the summary. A story understood from its AC alone is a misread story.
 2. **Ground in the codebase before flagging anything.** Grep/Glob for existing
    patterns the feature touches BEFORE deciding something is new scope. Look for:
    - existing approval / review / workflow flows the feature resembles
