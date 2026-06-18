@@ -45,7 +45,10 @@ orchestrator uses when `${CLAUDE_PLUGIN_ROOT}` isn't set (i.e. when vendored).
 **Start a new session** so the agents load. Then:
 
 ```
-# Full pipeline — route a requirement through the orchestrator (the entry point):
+# Easiest — one command, does the pre-flight checks + hands off to the orchestrator:
+/deliver docs/stories/PROJ-1-my-feature.md
+
+# Equivalent, explicit — route a requirement through the orchestrator (the entry point):
 @orchestrator deliver the feature described in <path-to-story-or-spec>
 
 # One specialist, one-off (no full pipeline):
@@ -58,7 +61,10 @@ orchestrator uses when `${CLAUDE_PLUGIN_ROOT}` isn't set (i.e. when vendored).
 ```
 
 What the orchestrator does: runs **clarify → design → (UI) → implement → (schema review) →
-review → test → build → AC cross-check**, spawning one specialist per step. It copies
+review → test → build → verify-and-iterate loop → AC cross-check**, spawning one specialist per
+step. The build→verify→validate part is a **loop**: it runs the gates + exercises the real flow,
+routes each failure back to the owning specialist, and re-runs — converging (capped at 3 cycles,
+then it escalates) until everything's green and every AC is demonstrably met. It copies
 `templates/feature/` into `artifacts/feature/<ticket>/` and keeps a running `progress.md` +
 `00`–`06` logs — the audit trail.
 

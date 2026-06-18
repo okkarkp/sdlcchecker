@@ -17,6 +17,25 @@ not in this repo.
 > in practice; the *implementation/review/test/build* half has not been run end-to-end yet.
 > Treat that half as untested until you've trialled it. See [`docs/architecture.md`](docs/architecture.md).
 
+## Quickstart
+
+```bash
+# 1. Install once (or vendor into .claude/ — see getting-started)
+/plugin marketplace add <path-or-owner/repo>
+/plugin install delivery-team@<marketplace>
+
+# 2. Write one story file (copy templates/STORY-TEMPLATE.md)
+#    docs/stories/PROJ-1-my-feature.md
+
+# 3. Deliver it end-to-end — one command
+/deliver docs/stories/PROJ-1-my-feature.md
+```
+
+`/deliver` runs clarify → design → implement → review → test → build → **verify-and-iterate loop**
+→ AC cross-check, logging everything to `artifacts/feature/<ticket>/`. It **stops to ask** if a
+requirement is ambiguous, and won't call a feature "done" until every acceptance criterion is
+demonstrably met. New here? → **[docs/getting-started.md](docs/getting-started.md)**.
+
 ## 📖 Documentation
 
 | Guide | What it covers |

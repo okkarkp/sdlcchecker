@@ -16,6 +16,9 @@
 - [ ] Code + security review — code-reviewer, security-reviewer → 05-review.md
 - [ ] Tests                — test-engineer → 06-test.md
 - [ ] Build (touched module) — devops-engineer
+- [ ] Verify-and-iterate loop — gates green + real flow exercised with evidence (converge, max 3 cycles)
+- [ ] AC cross-check (done gate) — independent reviewer confirms each AC vs the authoritative spec
 
 ## Log
 <!-- dated notes, one per step: YYYY-MM-DD <agent> — <what happened> -->
+<!-- Verify loop: iter k — <what failed> → <who fixed> → <result> -->

@@ -55,7 +55,8 @@ Drive features through this sequence, spawning one specialist per step:
 6. **Schema review** — `@db-migration-engineer` (if a schema migration was written) → `05-review.md`
 7. **Review** — `@code-reviewer` then `@security-reviewer` → `05-review.md`
 8. **Test** — `@test-engineer` → `06-test.md`
-9. **Build** — `@devops-engineer` (touched module(s) only)
+9. **Build + VERIFY** — `@devops-engineer` (touched module(s) only); then run the app and exercise
+   the real flow (UI/API), capturing evidence. This is the entry to the verify loop below.
 10. **AC cross-check (mandatory done gate)** — route an INDEPENDENT adversarial pass to a
     reviewer that is NOT the implementer (e.g. `@code-reviewer`, spawned fresh for this
     purpose) to confirm **each** acceptance criterion in `00-stories.md` is demonstrably met
@@ -84,6 +85,31 @@ Record the user's answers back into `00-clarifications.md` (and promote any that
 became firm into `01-assumptions.md` with a `[Human decided]` provenance tag) before
 resuming. Non-blocking questions never gate the pipeline — they are already decided
 and logged in the Decided Questions section.
+
+## Build–verify–validate loop (converge — don't single-pass)
+
+Steps 5–10 are **not** a one-shot line. Treat implement → review → test → build → verify as a loop
+that converges on "green AND every AC demonstrably met":
+
+1. **Run the gates** for the touched module (lint/types/tests/build — discover the commands, never
+   invent them) **and VERIFY the real flow** — run the app/endpoint and exercise the actual
+   behaviour, capturing evidence (output, logs, a screenshot).
+2. **On any failure, route the SPECIFIC failure back to the owning specialist** and re-run only
+   what's affected — failing test / broken behaviour → `@backend-developer` / `@frontend-developer`;
+   a standards/lint finding → the developer per the `@code-reviewer` note; a migration problem →
+   `@db-migration-engineer` + the developer; a security finding → the developer per `@security-reviewer`.
+3. **Re-run the gates + verify again.** Repeat.
+4. **Exit only when** all gates are green AND the independent AC cross-check (step 10) confirms each
+   acceptance criterion is demonstrably met against the authoritative spec.
+
+**Bounds & integrity (so the loop can neither thrash nor cheat):**
+- Cap at **3 full cycles**. If it hasn't converged — or the same failure recurs twice — **STOP and
+  escalate** to the user with the failing evidence and options. Never loop blindly.
+- **Never weaken the loop to force green:** don't disable/skip a gate, don't edit a test to pass,
+  don't swallow an error. A test exposing a real spec violation is a finding — fix the code, or
+  escalate if it's a spec question (the authoritative spec governs).
+- **Record each iteration** in `progress.md` (`Verify loop: iter k — <what failed> → <who fixed> →
+  <result>`) so the convergence trail is auditable.
 
 ## Setup per feature
 
