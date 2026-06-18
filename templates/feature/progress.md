@@ -1,8 +1,13 @@
 # <ticket> — <feature title>   (status: IN PROGRESS)
 
-> Resumability anchor. Keep the `status:` marker as `IN PROGRESS` until done, then `DONE`.
-> The orchestrator greps for `IN PROGRESS` on resume and cats this file to reload state.
+> Resumability anchor. Keep the `status:` marker as `IN PROGRESS` until the Definition of
+> Done is fully met, then `DONE` (or `PARTIAL` if anything remains). The orchestrator greps
+> for `IN PROGRESS` on resume, cats this file to reload state, and reconciles every ticked
+> box against the artifact on disk before trusting it.
 
+## Checklist
+
+- [ ] Intake & normalization — orchestrator → 00-source/ (skip if source is plain text/md/csv)
 - [ ] BA stories           — requirements-analyst → 00-stories.md
 - [ ] Clarification        — requirements-analyst → 00-clarifications.md
 - [ ] Assumptions logged   — requirements-analyst → 01-assumptions.md
@@ -19,6 +24,32 @@
 - [ ] Verify-and-iterate loop — gates green + real flow exercised with evidence (converge, max 3 cycles)
 - [ ] AC cross-check (done gate) — independent reviewer confirms each AC vs the authoritative spec
 
+## Gate ledger
+
+> Each gate is GREEN (passed), RED (failed — pipeline must not advance), SKIPPED (+reason),
+> or blank (not yet reached). The orchestrator runs a bounded remediation loop on RED (≤2
+> re-spawns) and escalates to the user if still RED. Resume from the first RED/blank gate.
+
+| Gate | Status | Attempts | Notes |
+|---|---|---|---|
+| Blocking-question gate | | | |
+| Schema review | | | |
+| Code review | | | |
+| Security review | | | |
+| Test | | | |
+| Build | | | |
+
+## Definition of Done (final gate)
+
+- [ ] Every checklist item ticked or explicitly SKIPPED with a reason
+- [ ] Every gate GREEN or SKIPPED (none RED or blank)
+- [ ] No unresolved BLOCKING question in 00-clarifications.md
+- [ ] Every acceptance criterion maps to covering evidence in 06-test.md
+- [ ] No open Critical finding in 05-review.md
+- [ ] Build GREEN for the touched module(s)
+
 ## Log
-<!-- dated notes, one per step: YYYY-MM-DD <agent> — <what happened> -->
+<!-- dated notes, one per step/attempt: YYYY-MM-DD <agent> — <what happened / gate outcome> -->
 <!-- Verify loop: iter k — <what failed> → <who fixed> → <result> -->
+<!-- AC cross-check: <reviewer> confirmed N/N ACs against the authoritative spec -->
+

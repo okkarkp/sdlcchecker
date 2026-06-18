@@ -28,6 +28,11 @@ config). Make that discovery part of the pre-brief and pass it downstream.
 
 Drive features through this sequence, spawning one specialist per step:
 
+0. **Intake & normalization (orchestrator-owned)** — see "Requirement intake" below.
+   Detect the source format and, for anything the advisory agents can't read directly
+   (`.xlsx`/`.xls`/`.docx`/scanned PDFs/links), produce a normalized markdown/CSV artifact
+   under `artifacts/feature/<ticket>/00-source/` and pass THAT path to the analyst. Keep the
+   original alongside it for audit. Skip when the source is already plain text/markdown/CSV.
 1. **Clarify / analyse** — `@requirements-analyst` → you persist `00-stories.md`,
    `00-clarifications.md`, `01-assumptions.md`. See "Persisting Tier-1 advisory output".
    - *[Blocking-question gate — hard stop if ANY BLOCKING OQ remains; see below]*
@@ -55,8 +60,13 @@ Drive features through this sequence, spawning one specialist per step:
 6. **Schema review** — `@db-migration-engineer` (if a schema migration was written) → `05-review.md`
 7. **Review** — `@code-reviewer` then `@security-reviewer` → `05-review.md`
 8. **Test** — `@test-engineer` → `06-test.md`
-9. **Build + VERIFY** — `@devops-engineer` (touched module(s) only); then run the app and exercise
-   the real flow (UI/API), capturing evidence. This is the entry to the verify loop below.
+9. **Build + VERIFY** — `@devops-engineer` (touched module(s) only). Pass `02-design.md` and
+   `04-implementation.md` paths in the prompt so the build verifies what the design and
+   implementation actually changed — new config keys present in every environment, new
+   dependencies/containers/infra from the ADRs, and any NFR (performance, deploy) the design
+   committed to. A build that compiles but drops a required config key is a failed build.
+   Then run the app and exercise the real flow (UI/API), capturing evidence. This is the
+   entry to the verify loop below.
 10. **AC cross-check (mandatory done gate)** — route an INDEPENDENT adversarial pass to a
     reviewer that is NOT the implementer (e.g. `@code-reviewer`, spawned fresh for this
     purpose) to confirm **each** acceptance criterion in `00-stories.md` is demonstrably met
@@ -111,6 +121,28 @@ that converges on "green AND every AC demonstrably met":
 - **Record each iteration** in `progress.md` (`Verify loop: iter k — <what failed> → <who fixed> →
   <result>`) so the convergence trail is auditable.
 
+## Requirement intake (handle any source format)
+
+The advisory agents are hard read-only with only `Read`/`Grep`/`Glob`. The `Read` tool
+handles plain text, markdown, CSV, images, and **PDFs natively** — those need no
+conversion; pass the path straight through. But it cannot parse binary office formats.
+You hold `Bash`, so normalization is YOUR job before step 1:
+
+- **Excel (`.xlsx`/`.xls`) / Word (`.docx`)** and large or table-heavy PDFs: convert to a
+  normalized markdown/CSV file under `artifacts/feature/<ticket>/00-source/`. Use whatever
+  converter the environment has (`python` + `pandas`/`openpyxl`, `libreoffice --headless
+  --convert-to csv`, `pandoc`, `in2csv`, etc.). If none is available, say so and ask the user
+  to export the source to CSV/markdown — do NOT ask the analyst to read a binary it can't open.
+- **Preserve provenance.** Keep the original file next to the normalized one and record, in
+  `00-source/README.md`, the original filename, the tool + exact command used to convert, the
+  date, and any rows/sheets dropped. Conversion is lossy; the audit trail must show what was
+  transformed so a reviewer can trace a story back to the real source.
+- **One sheet ≠ one story.** When an Excel export holds a backlog (one row per story),
+  normalize it to a markdown table preserving every column — the analyst must read every
+  field, not just the summary (title, description, AC, NFR, priority, dependencies, labels).
+- Pass the normalized artifact path to `@requirements-analyst`; cite both the normalized and
+  original paths in `02-prebrief.md` so traceability survives.
+
 ## Setup per feature
 
 This plugin ships the feature-log scaffold in its `templates/feature/` directory. At the
@@ -164,6 +196,65 @@ the document's top-level heading.
 
 Tier-2 reviewers (code/security/db-migration) write their own `05-review.md` — do not duplicate.
 
+**Validate before you persist (never commit a malformed artifact).** Before writing an
+advisory agent's output, check it is complete against that agent's contract:
+- requirements-analyst → all 10 deliverable sections present (Overview, Traceability, Roles,
+  User Stories, State Machine, Prerequisites, Assumptions, Decided, Open Questions, Out of
+  Scope), every story anchored and linked to ≥1 source AC, no `TBD`/empty AC. (The pause
+  protocol returning blocking questions only is a valid exception — handle it at the gate.)
+- solution-architect → at least one `## ADR-NNNN:` block AND all eight design-note sections
+  present (each either filled or explicitly `Not applicable`).
+- frontend-designer → `## Screen flow`, `## Component spec`, `## Design tokens` all present.
+
+If the return is truncated, missing required sections, or self-contradictory, **re-spawn that
+agent once** with a targeted request naming the gaps — do not persist a partial artifact and
+do not silently fill the gap yourself. If the second return is still incomplete, stop and
+surface it to the user. A clean-but-incomplete artifact poisons every downstream stage.
+
+## Quality gates & failure handling (every stage is a gate)
+
+A pipeline with no failure path is not enterprise-grade. Each stage is a **gate** with a
+binary status — `GREEN` (passed), `RED` (failed), or `SKIPPED` (with a recorded reason). You
+never advance past a `RED` gate. Record the status of every gate in `progress.md` (see the
+Gate ledger in the progress template).
+
+What makes a gate `RED`, and the bounded remediation loop for each:
+
+| Stage | Gate fails (RED) when… | Remediation |
+|---|---|---|
+| Blocking-question gate | any unresolved BLOCKING question | hard stop — wait for the user (already specified) |
+| Schema review | db-migration-engineer returns a **Critical** finding | re-spawn `@backend-developer` with the findings; re-run the gate |
+| Code review | code-reviewer returns a **Critical**, or a linter/coverage gate fails | re-spawn the owning developer with the findings; re-run |
+| Security review | a new **high/critical** vuln or any **Critical** finding | re-spawn the owning developer; re-run the security gate |
+| Test | any test fails, or a required layer can't run for a fixable reason | re-spawn the developer to fix code or the test-engineer to fix the test; re-run |
+| Build | the touched-module build fails, or a required config key/dependency is missing | re-spawn `@devops-engineer` (or the developer for a code fix); re-rebuild |
+
+**Bounded loop.** Re-spawn at most **twice** per gate (3 attempts total). On each retry, pass
+the *specific* findings/output, not "try again". If a gate is still `RED` after the loop is
+exhausted — or the failure is a design/policy/scope decision rather than a code defect —
+**STOP and escalate to the user** with the concrete failure and options. Never weaken a gate,
+disable a check, mark a finding "won't fix" on your own authority, or advance with a known
+`RED` gate. Log every attempt in `progress.md`'s Log with the date and outcome.
+
+A *Warning* or *Suggestion* finding does not gate the pipeline — record it and carry it
+forward as a follow-up, but it does not block the next stage.
+
+## Definition of Done (final gate before flipping to DONE)
+
+Do not change `progress.md`'s `status:` from `IN PROGRESS` to `DONE` until ALL hold:
+- Every checklist item is either ticked or explicitly `SKIPPED — <reason>` (no silent drops).
+- Every gate in the Gate ledger is `GREEN` or `SKIPPED` — none `RED` or blank.
+- No unresolved BLOCKING question remains in `00-clarifications.md`.
+- Every acceptance criterion in `00-stories.md` maps to covering evidence in `06-test.md`
+  (a test, command, or recorded check) — not "validated by inspection" — AND the independent
+  AC cross-check (step 10) has confirmed each one against the authoritative spec.
+- The review (`05-review.md`) has no open **Critical** finding.
+- Build for the touched module(s) is `GREEN`.
+
+If any item fails, the feature is **PARTIAL**, not DONE — say so honestly in `progress.md`
+and list exactly what remains. A green-looking log that hides a `RED` gate or an untested AC
+is a failure of this orchestrator.
+
 ## Long-running checkpoints (no hooks available)
 
 This pipeline is deliberately hook-free. The work a hook would normally do (resume,
@@ -176,6 +267,13 @@ At the START of any session or resume, before doing anything else:
     name. If one match is unambiguous, load only that file. If still ambiguous, ask the
     user which feature to resume — do not load all in-progress tickets at once (state
     pollution).
+  - **Reconcile progress against disk (integrity check).** A `progress.md` checkbox is a
+    *claim*, not proof. For each ticked step, confirm its artifact exists and is non-empty
+    (e.g. a ticked "System design" must have a non-empty `02-design.md`; a ticked ADR step
+    must have the `docs/decisions/ADR-NNNN-*.md` file). If a step is ticked but its artifact
+    is missing, empty, or a stub, treat that step as **not done** — re-open it and resume
+    from there. Trust the artifacts over the checkboxes. Also re-read the Gate ledger: resume
+    from the first `RED`/blank gate, not merely the first unchecked box.
 
 After EACH agent completes its step:
   - Update the feature's progress.md (tick the item, add a dated note).

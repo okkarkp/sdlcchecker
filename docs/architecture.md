@@ -56,6 +56,24 @@ With no hooks, no single rule is both per-agent and per-path, so enforcement is 
   Back it with a project-level `settings.json` deny rule when running reviewers in a
   dedicated session (a plugin cannot ship one — see the README).
 
+## Quality gates & failure handling
+
+Every stage is a **gate** with a binary status (GREEN / RED / SKIPPED), tracked in each
+feature's `progress.md` Gate ledger. The orchestrator never advances past a RED gate (a
+Critical review finding, a new high/critical vulnerability, a failing test, or a broken
+build): it runs a **bounded remediation loop** — re-spawning the owning specialist with the
+specific findings, at most twice — then escalates to the user if still RED. A feature reaches
+`DONE` only through an explicit **Definition-of-Done** gate; otherwise it is reported
+`PARTIAL`. This is what turns the sequence from a happy-path script into a pipeline.
+
+## Requirement intake (format-agnostic)
+
+The advisory agents are read-only (`Read`/`Grep`/`Glob`) and read text, markdown, CSV,
+images, and PDFs directly. Binary office formats (`.xlsx`/`.docx`) are normalized by the
+orchestrator (which holds `Bash`) into markdown/CSV under `00-source/`, with the original and
+the conversion provenance kept for audit, before the analyst sees them. So the pipeline is
+agnostic to the *format* a requirement arrives in, not just its *stack*.
+
 ## The audit log (resumability)
 
 The orchestrator copies `templates/feature/` to `artifacts/feature/<ticket>/` in the
@@ -81,6 +99,7 @@ hand-offs and the template/permission wiring need adjusting.
 |---|---|
 | Agent definitions | [`agents/`](../agents/) — 11 `*.md` files |
 | Slash command | [`commands/self-review.md`](../commands/self-review.md) |
+| Structural validator + CI | [`scripts/validate_plugin.py`](../scripts/validate_plugin.py), [`.github/workflows/validate.yml`](../.github/workflows/validate.yml) |
 | Feature-log scaffold | [`templates/feature/`](../templates/feature/) |
 | ADR template | [`templates/ADR-TEMPLATE.md`](../templates/ADR-TEMPLATE.md) |
 | Generic rule starters | [`rules/`](../rules/) |

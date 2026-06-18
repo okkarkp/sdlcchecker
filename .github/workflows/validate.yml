@@ -1,0 +1,33 @@
+name: validate-plugin
+
+# The plugin ships no executable code, so "CI" means: prove the artifact is
+# well-formed and internally consistent before it can be merged or published.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  structure:
+    name: Structural validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Validate plugin structure
+        run: python3 scripts/validate_plugin.py
+
+      - name: Validate JSON manifests parse
+        run: |
+          python3 -c "import json,sys; json.load(open('.claude-plugin/plugin.json')); json.load(open('.claude-plugin/marketplace.json')); print('manifests OK')"

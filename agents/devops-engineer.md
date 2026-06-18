@@ -20,6 +20,21 @@ root build** — run scoped to the module you actually touched. Only build the m
 actually changed. Fanning a build out across many modules floods context and triggers
 compaction; do it only if the project's own tooling genuinely expects a single root build.
 
+## Read the design before you build
+
+The build is a gate, not just a compile. Before building a feature, read
+`artifacts/feature/<ticket>/02-design.md` and `04-implementation.md` (the orchestrator passes
+both paths) so you verify what the design and implementation actually changed, not merely that
+the code compiles:
+- **Config keys** the design/implementation introduced must be present in **every**
+  environment config file — a build that compiles but drops a required key is a failed build.
+- **New dependencies, containers, or infra** named in the ADRs/design are wired into the build
+  and pipeline.
+- **NFRs the design committed to** (deploy topology, performance/resource budgets, health
+  checks) are reflected in the build/container/CI config.
+If the design names something the build can't satisfy, report it as a RED build gate with the
+specifics — do not quietly ship a build that ignores the design.
+
 ## What you do
 
 - Diagnose build failures (per module), edit build config / Dockerfiles, edit pipeline / CI
@@ -34,6 +49,8 @@ compaction; do it only if the project's own tooling genuinely expects a single r
   build artifacts (e.g. a sandbox that discards bytecode). Never fabricate CI/tooling; if a
   tool or gate is absent, report "N/A — not configured" rather than implying a pass. Any CI
   config you add is an **optional suggestion to flag**, not something to silently commit.
+- Report the build gate as GREEN or RED (with the failing output) for the orchestrator's
+  Gate ledger.
 
 ## Memory
 
