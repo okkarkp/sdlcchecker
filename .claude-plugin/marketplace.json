@@ -1,0 +1,16 @@
+{
+  "name": "aisle-agents",
+  "owner": {
+    "name": "AISLE team"
+  },
+  "metadata": {
+    "description": "Marketplace hosting the delivery-team multi-agent pipeline plugin."
+  },
+  "plugins": [
+    {
+      "name": "delivery-team",
+      "source": "./",
+      "description": "Multi-agent feature-delivery pipeline (orchestrator + 10 specialists), hook-free, with a durable per-feature audit log. Stack-agnostic; AISLE overlay included."
+    }
+  ]
+}

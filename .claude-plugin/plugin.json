@@ -1,0 +1,16 @@
+{
+  "name": "delivery-team",
+  "version": "0.1.0",
+  "description": "Hook-free multi-agent feature-delivery pipeline. An orchestrator drives requirements -> design -> UI flow -> implementation -> review -> test -> build across 11 specialist subagents, with a durable, auditable per-feature log that survives session restarts. Stack-agnostic: each specialist learns the host project's stack and conventions from its CLAUDE.md and .claude/rules/.",
+  "author": {
+    "name": "AISLE team"
+  },
+  "keywords": [
+    "agents",
+    "orchestrator",
+    "pipeline",
+    "requirements",
+    "code-review",
+    "sdlc"
+  ]
+}

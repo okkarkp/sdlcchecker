@@ -1,0 +1,14 @@
+# Per-feature audit logs are produced in consuming projects, not here.
+# This repo ships only the templates under templates/feature/.
+
+# OS / editor noise
+.DS_Store
+*.swp
+*~
+
+# Local, machine-specific agent memory (devops-engineer uses memory: local)
+.claude/agent-memory-local/
+
+# Project-specific overlays are kept in the consuming project, not published here.
+# (The AISLE overlay lives on disk for local use but is intentionally untracked.)
+examples/
