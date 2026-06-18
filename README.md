@@ -17,6 +17,69 @@ not in this repo.
 > in practice; the *implementation/review/test/build* half has not been run end-to-end yet.
 > Treat that half as untested until you've trialled it. See [`docs/architecture.md`](docs/architecture.md).
 
+## The pipeline
+
+The orchestrator runs the requirement through six stages, spawning one specialist per step and
+owning the per-feature audit log. Green = exercised in practice; dashed = not yet run end-to-end.
+
+```mermaid
+flowchart TD
+    O["<b>orchestrator</b> — router<br/>spawns one specialist per step · owns the audit log"]
+    LOG["artifacts/feature/&lt;ticket&gt;/<br/>00–06.md · progress.md"]
+    O -.->|persists| LOG
+
+    O --> RA
+    subgraph S1["1 · CLARIFY"]
+      RA["<b>requirements-analyst</b><br/>Tier-1 · read-only (no write tools)"]
+    end
+    RA --> GATE{{"blocking-question gate<br/>pipeline hard-stops until cleared by the user"}}
+
+    GATE --> S2
+    subgraph S2["2 · DESIGN"]
+      SA["<b>solution-architect</b><br/>Tier-1 · read-only · ADRs"]
+      FD["<b>frontend-designer</b><br/>Tier-1 · read-only · UI flow"]
+    end
+
+    S2 --> S3
+    subgraph S3["3 · IMPLEMENT"]
+      BD["<b>backend-developer</b><br/>server code + schema migration"]
+      FE["<b>frontend-developer</b><br/>client code + BFF"]
+    end
+
+    S3 --> S4
+    subgraph S4["4 · REVIEW"]
+      DB["<b>db-migration-engineer</b><br/>Tier-2 · schema gate"]
+      CR["<b>code-reviewer</b><br/>Tier-2 · standards + linters"]
+      SR["<b>security-reviewer</b><br/>Tier-2 · OWASP + deps"]
+    end
+
+    S4 --> S5
+    subgraph S5["5 · TEST"]
+      TE["<b>test-engineer</b><br/>unit · integration · E2E"]
+    end
+
+    S5 --> S6
+    subgraph S6["6 · BUILD"]
+      DO["<b>devops-engineer</b><br/>build · container · CI"]
+    end
+
+    classDef router fill:#1f3a5f,stroke:#4a90d9,color:#fff;
+    classDef tested fill:#2e4a1f,stroke:#7cb342,color:#fff;
+    classDef untested fill:#333,stroke:#888,stroke-dasharray:5 5,color:#ddd;
+    classDef gate fill:#5a3a10,stroke:#c8841f,color:#fff;
+    classDef log fill:#333,stroke:#888,color:#bbb;
+    class O router;
+    class RA,SA,FD tested;
+    class BD,FE,DB,CR,SR,TE,DO untested;
+    class GATE gate;
+    class LOG log;
+```
+
+Agents are never auto-triggered — work is routed through `@orchestrator`, which decides which
+specialists to spawn (or `@`-mention one for a one-off). The stack-specific details each
+specialist uses (build tool, migration framework, test stack, lint/SAST tooling) are discovered
+from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded here.
+
 ## The roster (11 agents)
 
 | Agent | Stage | Responsibility | Tools |
