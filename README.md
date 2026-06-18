@@ -207,6 +207,7 @@ any other project.
 agents/            11 specialist + orchestrator definitions (stack-agnostic)
 commands/          /self-review slash command
 templates/CLAUDE.md   fill-in-the-blanks project guideline (full Analyze→Validate methodology)
+templates/STORY-TEMPLATE.md  one-story-per-file input format the agents consume
 templates/feature/ the audit-log scaffold (progress.md + 00–06) + ADR-TEMPLATE.md
 rules/             generic path-scoped rule starters to copy into a project
 settings/          ready-to-merge permission starters (orchestrator allow + reviewer deny)

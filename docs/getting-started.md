@@ -101,3 +101,35 @@ The advisory half (clarify/design) is well-exercised; the implement→review→t
 newer. For your first run: pick **one small, low-risk story**, run it on a **throwaway git
 worktree/branch**, and watch the hand-offs. Treat it as a shakedown, then scale up. See
 [`enterprise.md`](enterprise.md) for what's enforced vs. still owed.
+
+## 7. Authoring the stories you feed it
+
+**Format.** Use [`../templates/STORY-TEMPLATE.md`](../templates/STORY-TEMPLATE.md) — one story per
+file. The non-negotiable part is the **Given/When/Then acceptance criteria**: the analyst rewrites
+ACs into Given/When/Then anyway, so writing them that way up front removes ambiguity and gives the
+test-engineer a 1:1 mapping. The analyst reads *every* field (actor, priority, dependencies, NFRs,
+links), so fill them — a blank relevant field is treated as a question to resolve, not "nothing
+required." The agent can also read a pasted ticket or any existing spec; the template just makes the
+*house style* consistent.
+
+**Where to put them.** Convention: one Markdown file per story at
+```
+docs/stories/<ID>-<slug>.md        e.g. docs/stories/HSA-1-view-filter-cases.md
+```
+Keep the `<ID>` stable — the orchestrator uses it as the ticket key, the audit-log folder
+(`artifacts/feature/<ID>/`), and the branch name. Then:
+```
+@orchestrator deliver docs/stories/HSA-1-view-filter-cases.md
+```
+If your stories live in a tracker (Jira) or a spreadsheet export (JSON/CSV), that's fine too — point
+the orchestrator at the file or paste the ticket; the analyst is source-agnostic. A single
+source-of-truth register (one folder, or one exported file) beats scattered copies.
+
+**Staying consistent + user-friendly.**
+- One story = one file = one stable ID. Don't split a story across files or reuse IDs.
+- Every AC is testable Given/When/Then — no "TBD", no prose-only status, name exact constants.
+- Always fill *Out of scope* — it's the cheapest defence against scope creep.
+- Put the link to the **authoritative/detailed spec** in the header. The AC summary is not the spec;
+  where they conflict the detailed spec wins and the analyst flags the stale AC.
+- Let the analyst's **handover self-check** be your linter — if it keeps flagging the same gaps
+  (missing actor, vague status, no out-of-scope), tighten the template fields for your team.
