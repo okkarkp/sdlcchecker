@@ -12,7 +12,7 @@ port is faithful where the platforms align and honest where they don't.
 |---|---|---|
 | Shared engineering rules (`rules/`) | `.github/copilot-instructions.md` | **Full** — applied to every request |
 | `/deliver`, `/self-review` commands | `.github/prompts/*.prompt.md` (run as `/deliver`) | **Full** — reusable prompt files |
-| 11 specialist agents | `.github/chatmodes/*.chatmode.md` personas | **Partial** — see below |
+| 11 specialist agents | 11 `.github/chatmodes/*.chatmode.md` personas (1:1) | **Full** — names + tiers map directly |
 | Orchestrator spawns sub-agents **in parallel**, each in its own context | One agent session at a time; personas are walked **sequentially** | **Adapted** |
 | Read-only tiers enforced by withholding write tools | `tools:` allowlist per chat mode (omit `editFiles`) | **Full** — read-only personas have no edit tool |
 | Per-feature audit log under `artifacts/feature/<id>/` | Same — the prompt writes the same files | **Full** |
@@ -40,10 +40,14 @@ your-repo/
       orchestrator.chatmode.md
       requirements-analyst.chatmode.md
       solution-architect.chatmode.md
+      frontend-designer.chatmode.md
+      backend-developer.chatmode.md
+      frontend-developer.chatmode.md
+      db-migration-engineer.chatmode.md
       code-reviewer.chatmode.md
       security-reviewer.chatmode.md
-      db-migration-engineer.chatmode.md
       test-engineer.chatmode.md
+      devops-engineer.chatmode.md          # 11 personas, 1:1 with the Claude agents
 ```
 
 Then in VS Code enable prompt/instruction files (Settings → search
