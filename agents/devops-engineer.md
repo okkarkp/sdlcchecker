@@ -35,27 +35,24 @@ the code compiles:
 If the design names something the build can't satisfy, report it as a RED build gate with the
 specifics — do not quietly ship a build that ignores the design.
 
-## Verify through the single harness
+## Verify the change (run the project's real gates)
 
-The whole pipeline verifies through **one harness**: `python scripts/harness.py`. It runs the
-gates listed in the project's `.harness.json` (lint / types / test / build / scan), prints a
-PASS/FAIL summary, and exits non-zero on any required failure — that exit code is the RED/GREEN
-signal the verify-loop reads. Use it instead of ad-hoc one-off commands.
+**Default — no extra tooling.** Verify by running the project's own quality gates — the
+build/test/lint commands you discovered from `CLAUDE.md`/CI (never invented): e.g. `make verify`,
+`dotnet test`, `npm run check`, `mvn test`, `pytest -q`. Run them, attach the output; the exit
+code is the RED/GREEN signal the verify-loop reads. This needs nothing beyond the project's own
+toolchain — **no Python, no bundled script.**
 
-- **If the project has a `.harness.json`**, run `python scripts/harness.py` and attach its output.
-- **If it doesn't yet**, create one (copy `templates/harness.example.json` → `.harness.json`).
-  **Delegate-first:** wrap the project's existing verify command as a single gate
-  (`make verify` / `mvn test` / `gradle test` / `dotnet test` / `npm run check`) so the harness
-  runs the team's *real* CI, not a parallel copy. Only list raw per-tool gates when the project
-  has no runner yet (greenfield). The harness is stack-agnostic — it runs any shell command, so
-  this works for Python, Java, C#/.NET, Node/TS, Go, etc.
-  That single file is how the harness is maintained — add a gate when the project adds a check;
-  never run a hidden check outside it.
-- During the loop, re-run just the affected gate with `python scripts/harness.py --only <name>`,
-  then run the full harness once more before declaring GREEN. Never edit a gate to force a pass.
-- **Optionally add a mutation gate** (`scripts/mutation_gate.py`, `required:false`) — it edits the
-  code and confirms a test fails, catching the "green suite that checks nothing" trap. Prefer a
-  language-native tool (mutmut / Stryker / Pitest) once the suite is mature.
+**Optional — one uniform command across stacks.** If you want a single entry point, the bundled
+`scripts/harness.py` reads a `.harness.json` and returns one RED/GREEN. It is **delegate-first**:
+wrap the project's existing verify command as one gate (`{"name":"verify","cmd":"make verify"}`),
+so it runs the team's *real* CI, not a parallel copy. It needs Python and is **not required** —
+the pipeline verifies fine without it. Use `--only <gate>` to re-run just the affected gate during
+the loop. Never edit a gate to force a pass.
+
+**Optional — verify the tests themselves** with a mutation gate (`scripts/mutation_gate.py`,
+`required:false`): it edits the code and confirms a test fails, catching the "green suite that
+checks nothing" trap. Prefer a language-native tool (mutmut / Stryker / Pitest) at scale.
 
 ## What you do
 

@@ -158,6 +158,11 @@ from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded her
 /plugin install delivery-team@acnhps-agents
 ```
 
+**No Python (or anything) to install.** The plugin is markdown — the orchestrator, the 11 agents,
+and the 2 commands. Installing copies those files; nothing is compiled or run as a service. The
+`scripts/` (harness, validator, mutation gate) are **optional power-ups** — see `scripts/README.md`;
+the pipeline runs without them (verification just runs your project's own test/build command).
+
 Once installed, start a feature by routing the requirement through the orchestrator:
 
 ```

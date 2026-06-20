@@ -122,12 +122,11 @@ and logged in the Decided Questions section.
 Steps 5–10 are **not** a one-shot line. Treat implement → review → test → build → verify as a loop
 that converges on "green AND every AC demonstrably met":
 
-1. **Run the gates through the single harness** — `python scripts/harness.py` runs every gate in
-   the project's `.harness.json` (lint/types/tests/build/scan, discovered — never invented) and
-   its exit code is the RED/GREEN signal. If there is no `.harness.json` yet, have
-   `@devops-engineer` create one from the discovered commands (see `templates/harness.example.json`).
-   Then **VERIFY the real flow** — run the app/endpoint and exercise the actual behaviour,
-   capturing evidence (output, logs, a screenshot).
+1. **Run the gates** — have `@devops-engineer` run the project's real build/test/lint commands
+   (discovered, never invented); the exit code is the RED/GREEN signal. *(Optional: the bundled
+   `scripts/harness.py` wraps those into one command via `.harness.json` — convenient but not
+   required, and it needs Python.)* Then **VERIFY the real flow** — run the app/endpoint and
+   exercise the actual behaviour, capturing evidence (output, logs, a screenshot).
 2. **On any failure, route the SPECIFIC failure back to the owning specialist** and re-run only
    what's affected — failing test / broken behaviour → `@backend-developer` / `@frontend-developer`;
    a standards/lint finding → the developer per the `@code-reviewer` note; a migration problem →

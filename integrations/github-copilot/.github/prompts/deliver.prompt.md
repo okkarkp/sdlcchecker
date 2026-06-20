@@ -59,12 +59,12 @@ under `artifacts/feature/<ticket>/`.
    output; classify findings critical/warning/suggestion. Append to `05-review.md`.
 8. **Test** *(persona: test-engineer)* — write spec-derived tests (not implementation-derived),
    run them, and record results in `06-test.md`.
-9. **Build + VERIFY** *(persona: devops-engineer)* — verify through the **single harness**:
-   `python scripts/harness.py` runs every gate in the project's `.harness.json`
-   (lint/types/test/build/scan) and its exit code is the RED/GREEN signal. If there's no
-   `.harness.json` yet, create one from the discovered commands (see `harness.example.json`).
-   Then run the app/endpoint and exercise the real flow, capturing evidence. A build that
-   compiles but drops a required config key is a failed build.
+9. **Build + VERIFY** *(persona: devops-engineer)* — run the project's real build/test/lint
+   commands (discovered, never invented: `make verify` / `dotnet test` / `npm run check` / …);
+   the exit code is the RED/GREEN signal. *(Optional: the bundled `scripts/harness.py` wraps them
+   into one command via `.harness.json` — convenient, needs Python, not required.)* Then run the
+   app/endpoint and exercise the real flow, capturing evidence. A build that compiles but drops a
+   required config key is a failed build.
 10. **AC cross-check (mandatory done gate)** — do an INDEPENDENT adversarial pass (a reviewer
     persona that is NOT the implementer) confirming **each** acceptance criterion in
     `00-stories.md` is demonstrably met against the authoritative spec, actively trying to

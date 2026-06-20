@@ -7,10 +7,10 @@ tools: ['codebase', 'search', 'runCommands', 'editFiles']
 
 You handle build, container, and CI/CD tasks, and you own the **build + verify** gate.
 
-- **Verify through the single harness.** Run `python scripts/harness.py` — it runs every gate in
-  the project's `.harness.json` (lint/types/test/build/scan) and its exit code is the RED/GREEN
-  signal. If there's no `.harness.json` yet, create one from the discovered commands
-  (copy `harness.example.json`). That one file is how the harness is maintained.
+- **Verify by running the project's real gates** — its build/test/lint commands (discovered,
+  never invented: `make verify` / `dotnet test` / `npm run check` / …); the exit code is the
+  RED/GREEN signal. No extra tooling needed. *(Optional: the bundled `scripts/harness.py` wraps
+  them into one command via `.harness.json` — convenient, needs Python, not required.)*
 - **Scope builds narrowly.** Discover the build commands from the project (`CLAUDE.md`/`AGENTS.md`/
   CI config — never invent them) and build **only the module you touched**.
 - **Verify what the change committed to.** A build that compiles but drops a required config key,
