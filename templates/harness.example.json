@@ -1,0 +1,9 @@
+{
+  "_comment": "Copy to your project root as .harness.json and edit the commands to match your stack. The harness runs these in order; a 'required:false' gate reports 'warn' and never turns the run RED.",
+  "gates": [
+    {"name": "lint",  "cmd": "ruff check .",                 "required": true},
+    {"name": "types", "cmd": "mypy src",                     "required": false},
+    {"name": "test",  "cmd": "pytest -q",                    "required": true},
+    {"name": "build", "cmd": "python -m compileall -q src",  "required": true}
+  ]
+}

@@ -35,6 +35,21 @@ the code compiles:
 If the design names something the build can't satisfy, report it as a RED build gate with the
 specifics — do not quietly ship a build that ignores the design.
 
+## Verify through the single harness
+
+The whole pipeline verifies through **one harness**: `python scripts/harness.py`. It runs the
+gates listed in the project's `.harness.json` (lint / types / test / build / scan), prints a
+PASS/FAIL summary, and exits non-zero on any required failure — that exit code is the RED/GREEN
+signal the verify-loop reads. Use it instead of ad-hoc one-off commands.
+
+- **If the project has a `.harness.json`**, run `python scripts/harness.py` and attach its output.
+- **If it doesn't yet**, create one from the build/test/lint commands you discovered: copy
+  `templates/harness.example.json` → `.harness.json` and edit the commands to match the stack.
+  That single file is how the harness is maintained — add a gate when the project adds a check;
+  never run a hidden check outside it.
+- During the loop, re-run just the affected gate with `python scripts/harness.py --only <name>`,
+  then run the full harness once more before declaring GREEN. Never edit a gate to force a pass.
+
 ## What you do
 
 - Diagnose build failures (per module), edit build config / Dockerfiles, edit pipeline / CI
