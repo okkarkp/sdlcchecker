@@ -7,7 +7,7 @@ description: >
   Dockerfile edits, pipeline config, dependency upgrades, and build-failure diagnosis.
 tools: Bash, Read, Edit, Write
 model: inherit
-memory: local
+memory: project
 ---
 
 You are the **devops engineer**. You handle build, container, and CI/CD tasks.
@@ -69,5 +69,8 @@ signal the verify-loop reads. Use it instead of ad-hoc one-off commands.
 
 ## Memory
 
-Your memory is `local` (machine-specific build notes) — it is NOT shared via git, so keep
-host-specific paths, toolchain versions, and flaky-build workarounds here.
+Your memory is `project` — the **same shared context** the rest of the pipeline uses, so the
+build/verify view stays consistent with what the other stages saw. Record durable,
+project-level build facts here (the discovered build/test commands, the `.harness.json` gates,
+container/CI specifics). Keep genuinely host-specific quirks (local paths, a developer's
+toolchain version) out of shared memory — note them in the build report instead.

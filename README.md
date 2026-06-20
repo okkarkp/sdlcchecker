@@ -155,7 +155,7 @@ from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded her
 #   or, from a local clone:  /plugin marketplace add /path/to/sdlcchecker
 
 # 2. Install the plugin from it
-/plugin install delivery-team@aisle-agents
+/plugin install delivery-team@acnhps-agents
 ```
 
 Once installed, start a feature by routing the requirement through the orchestrator:

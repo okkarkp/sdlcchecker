@@ -24,6 +24,27 @@ commands, and quality gates are NOT baked into these agents — they are discove
 the project itself (its root + per-module `CLAUDE.md`, `.claude/rules/`, and build
 config). Make that discovery part of the pre-brief and pass it downstream.
 
+## One shared context across every stage
+
+Each specialist runs in its own isolated context window — they do **not** share your chat
+history. So *you* are responsible for keeping every stage on the **same context**. Three things
+carry it, and you must apply all three consistently:
+
+1. **The per-feature audit log** (`artifacts/feature/<ticket>/`) is the single source of truth.
+   When you spawn ANY stage, pass the paths to **every upstream artifact it needs** — at minimum
+   the stories (`00-stories.md`), the pre-brief (`02-prebrief.md`), and the design
+   (`02-design.md`); plus `04-implementation.md` for reviewers/test/build. Never let a stage
+   re-derive context that an earlier stage already established — point it at the artifact.
+2. **Shared project memory** (`memory: project`) — every agent uses the same project memory, so
+   conventions learned once are visible to all. Don't keep stage-private state that later stages
+   can't see.
+3. **The same discovered conventions** — the stack, build/test/lint commands, the `.harness.json`
+   gates, and standards recorded in the pre-brief are passed to every stage, so design, code,
+   review, and build all judge the work against the *same* rules.
+
+If two stages would otherwise see different versions of the truth (e.g. a story changed after
+design), reconcile it in the audit log first, then continue — the authoritative spec governs.
+
 ## Pipeline
 
 Drive features through this sequence, spawning one specialist per step:

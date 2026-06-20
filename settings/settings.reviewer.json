@@ -1,6 +1,6 @@
 {
   "//": "DEDICATED REVIEWER SESSION settings — turns Tier-2 'soft read-only' into a HARD guarantee.",
-  "//edit": "Replace the deny globs with YOUR project's source roots (e.g. aisle-be/**, packages/*/src/**). Reviewers can still write their own 05-review.md under artifacts/feature/**.",
+  "//edit": "Replace the deny globs with YOUR project's source roots (e.g. acnhps-be/**, packages/*/src/**). Reviewers can still write their own 05-review.md under artifacts/feature/**.",
   "permissions": {
     "deny": [
       "Edit(src/**)",

@@ -1,7 +1,7 @@
 {
-  "name": "aisle-agents",
+  "name": "acnhps-agents",
   "owner": {
-    "name": "AISLE team"
+    "name": "ACNHPS team"
   },
   "metadata": {
     "description": "Marketplace hosting the delivery-team multi-agent pipeline plugin."
@@ -10,7 +10,7 @@
     {
       "name": "delivery-team",
       "source": "./",
-      "description": "Multi-agent feature-delivery pipeline (orchestrator + 10 specialists), hook-free, with a durable per-feature audit log. Stack-agnostic; AISLE overlay included."
+      "description": "Multi-agent feature-delivery pipeline (orchestrator + 10 specialists), hook-free, with a durable per-feature audit log. Stack-agnostic; ACNHPS overlay included."
     }
   ]
 }
