@@ -43,8 +43,12 @@ PASS/FAIL summary, and exits non-zero on any required failure — that exit code
 signal the verify-loop reads. Use it instead of ad-hoc one-off commands.
 
 - **If the project has a `.harness.json`**, run `python scripts/harness.py` and attach its output.
-- **If it doesn't yet**, create one from the build/test/lint commands you discovered: copy
-  `templates/harness.example.json` → `.harness.json` and edit the commands to match the stack.
+- **If it doesn't yet**, create one (copy `templates/harness.example.json` → `.harness.json`).
+  **Delegate-first:** wrap the project's existing verify command as a single gate
+  (`make verify` / `mvn test` / `gradle test` / `dotnet test` / `npm run check`) so the harness
+  runs the team's *real* CI, not a parallel copy. Only list raw per-tool gates when the project
+  has no runner yet (greenfield). The harness is stack-agnostic — it runs any shell command, so
+  this works for Python, Java, C#/.NET, Node/TS, Go, etc.
   That single file is how the harness is maintained — add a gate when the project adds a check;
   never run a hidden check outside it.
 - During the loop, re-run just the affected gate with `python scripts/harness.py --only <name>`,

@@ -1,9 +1,16 @@
 {
-  "_comment": "Copy to your project root as .harness.json and edit the commands to match your stack. The harness runs these in order; a 'required:false' gate reports 'warn' and never turns the run RED.",
+  "_comment": "DELEGATE-FIRST: wrap your project's existing verify command as ONE gate so the harness runs your real CI, not a parallel copy. The harness is stack-agnostic — 'cmd' is any shell command. Per stack: Python -> 'pytest -q' or 'make verify' | Java -> 'mvn -q test' or 'gradle test' | C#/.NET -> 'dotnet test' | Node/TS -> 'npm run check'. Use the multi-gate '_greenfield_example' below only when the project has NO runner yet.",
+
   "gates": [
-    {"name": "lint",  "cmd": "ruff check .",                 "required": true},
-    {"name": "types", "cmd": "mypy src",                     "required": false},
-    {"name": "test",  "cmd": "pytest -q",                    "required": true},
-    {"name": "build", "cmd": "python -m compileall -q src",  "required": true}
-  ]
+    {"name": "verify", "cmd": "make verify", "required": true}
+  ],
+
+  "_greenfield_example": {
+    "gates": [
+      {"name": "lint",  "cmd": "ruff check .",                  "required": true},
+      {"name": "types", "cmd": "mypy src",                      "required": false},
+      {"name": "test",  "cmd": "pytest -q",                     "required": true},
+      {"name": "build", "cmd": "python -m compileall -q src",   "required": true}
+    ]
+  }
 }
