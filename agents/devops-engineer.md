@@ -53,6 +53,9 @@ signal the verify-loop reads. Use it instead of ad-hoc one-off commands.
   never run a hidden check outside it.
 - During the loop, re-run just the affected gate with `python scripts/harness.py --only <name>`,
   then run the full harness once more before declaring GREEN. Never edit a gate to force a pass.
+- **Optionally add a mutation gate** (`scripts/mutation_gate.py`, `required:false`) — it edits the
+  code and confirms a test fails, catching the "green suite that checks nothing" trap. Prefer a
+  language-native tool (mutmut / Stryker / Pitest) once the suite is mature.
 
 ## What you do
 
