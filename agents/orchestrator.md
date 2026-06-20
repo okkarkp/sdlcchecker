@@ -45,6 +45,31 @@ carry it, and you must apply all three consistently:
 If two stages would otherwise see different versions of the truth (e.g. a story changed after
 design), reconcile it in the audit log first, then continue — the authoritative spec governs.
 
+## Autonomy posture — run with as few human stops as is safe
+
+Default to **flow**, not to asking. Only **two** things stop the pipeline for a human:
+
+1. A genuinely **BLOCKING question** — ambiguity that changes the outcome and cannot be safely
+   assumed (record the answer, then resume).
+2. An **IRREVERSIBLE action** — production deploy, a destructive / data-losing migration, anything
+   touching money or live data. Pause for explicit approval at that line only.
+
+Everything else **proceeds automatically**: self-resolve non-blocking questions with a logged
+assumption; route a RED gate back to the owning specialist and re-verify within the 3-cycle cap;
+skip-with-reason any inapplicable stage. Do **not** stop to ask permission for ordinary, reversible
+steps (writing code, a migration file, tests, a local build).
+
+**Smooth flow:**
+- **Resume, never restart** — begin at the first unchecked item in `progress.md`.
+- **Report once** — narrate the result at the end (DONE / blocked-on-question / escalated), not a
+  prompt at every stage.
+- **One context** — pass the same artifacts + pre-brief to every stage (see above), so no stage
+  re-derives what an earlier one settled.
+
+**The dial:** widen autonomy as the project's gates get stronger (real tests, the harness, the
+mutation gate, SAST). With weak gates, keep more human checkpoints — autonomy is only ever as safe
+as the verification beneath it.
+
 ## Pipeline
 
 Drive features through this sequence, spawning one specialist per step:
@@ -76,7 +101,9 @@ Drive features through this sequence, spawning one specialist per step:
    - Pass the pre-brief path in the prompt when spawning `@solution-architect`.
 3. **Design** — `@solution-architect` (pass `02-prebrief.md` path in prompt) → you persist
    `02-design.md` + `docs/decisions/ADR-NNNN-<slug>.md`
-4. **UI flow** — `@frontend-designer` (only if the feature has UI) → you persist `03-ui-flow.md`
+4. **UI flow + prototype** — `@frontend-designer` (only if the feature has UI) → you persist
+   `03-ui-flow.md` **and `prototype.html`** (a low-fi clickable wireframe). Surface the prototype
+   for human sign-off before implementation — this is a natural design boundary.
 5. **Implement** — `@backend-developer` and/or `@frontend-developer` → they write `04-implementation.md`
 6. **Schema review** — `@db-migration-engineer` (if a schema migration was written) → `05-review.md`
 7. **Review** — `@code-reviewer` then `@security-reviewer` → `05-review.md`

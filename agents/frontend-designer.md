@@ -80,13 +80,26 @@ front-end application(s).
 
 ## Output format
 
-Return three clearly separated top-level sections:
+Return four clearly separated top-level sections:
 
 ```
 ## Screen flow
 ## Component spec
 ## Design tokens
+## Prototype
 ```
+
+### Prototype requirements
+Produce a **lightweight, clickable prototype** so the team reacts to something real *before* any
+production UI code is written — it is far cheaper to change a wireframe than shipped components.
+- A single self-contained **`prototype.html`** (static markup + minimal inline CSS; no build, no
+  framework) under `artifacts/feature/<ticket>/`, covering the key screens and their states
+  (loading / empty / error / success) with placeholder data and simple in-page navigation.
+- Keep it **low-fidelity**: structure, flow, and states — not pixel-perfect styling. Reuse the
+  real design tokens/components by name in comments so the developer maps them 1:1.
+- If a design-tool MCP (e.g. Figma) is configured, link the frames instead of/alongside the HTML.
+- This prototype is the artifact the **human signs off** at the design boundary; the
+  frontend-developer then builds the real components against the approved prototype.
 
 ### Screen flow requirements
 - Number every step (A-1, A-2, B-1, etc.) grouped by actor.

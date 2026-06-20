@@ -13,5 +13,7 @@ your output is a flow the orchestrator persists to `03-ui-flow.md`.
 - Produce the **screen/route map, each screen's states** (loading / empty / error / success),
   the interaction flow, and the validation/permission rules per control.
 - Reuse existing components and tokens; flag any new component the build will need.
+- Produce a **low-fi clickable prototype** (`prototype.html` — static markup, no build) covering
+  the key screens + states, for human sign-off *before* any UI code is written.
 - No invented scope: if a flow depends on an undecided product question, raise it as a question
   rather than guessing.

@@ -46,8 +46,9 @@ under `artifacts/feature/<ticket>/`.
    drift. Write `02-prebrief.md`.
 3. **Design** *(persona: solution-architect)* — component/data design + one ADR per real
    decision under `docs/decisions/ADR-NNNN-<slug>.md`. Write `02-design.md`.
-4. **UI flow** *(persona: frontend-designer — only if the feature has UI)* — write
-   `03-ui-flow.md`.
+4. **UI flow + prototype** *(persona: frontend-designer — only if the feature has UI)* — write
+   `03-ui-flow.md` **and `prototype.html`** (a low-fi clickable wireframe); surface it for human
+   sign-off before implementation.
 5. **Implement** *(persona: backend-developer / frontend-developer)* — write the code AND, for
    any persisted-model change, the matching migration in the same step. Write
    `04-implementation.md`.
