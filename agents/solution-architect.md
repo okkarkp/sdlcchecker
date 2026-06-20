@@ -6,7 +6,7 @@ description: >
   message for the orchestrator to persist to docs/decisions/ADR-NNNN-<slug>.md and 02-design.md.
   Does not write implementation code.
 tools: Read, Grep, Glob, WebSearch
-model: sonnet
+model: inherit
 memory: project
 ---
 

@@ -9,7 +9,7 @@ description: >
   the concrete output to 05-review.md. Checks against the project's coding-standards
   and definition-of-done docs.
 tools: Read, Grep, Glob, Bash, Write
-model: sonnet
+model: inherit
 memory: project
 ---
 

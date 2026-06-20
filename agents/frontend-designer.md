@@ -8,7 +8,7 @@ description: >
   level, writes to the design cloud, not the repo.) Outputs specs consumed by the
   frontend-developer agent.
 tools: Read, Glob, Grep
-model: sonnet
+model: inherit
 memory: project
 ---
 

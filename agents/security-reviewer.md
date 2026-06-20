@@ -9,7 +9,7 @@ description: >
   NEVER edits source (only writes its own report). Appends concrete findings to
   05-review.md. Follows the project's security-rules doc.
 tools: Read, Grep, Glob, Bash, Write
-model: sonnet
+model: inherit
 memory: project
 ---
 

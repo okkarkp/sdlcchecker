@@ -6,7 +6,7 @@ description: >
   decisions to 04-implementation.md. Follows the project's front-end CLAUDE.md conventions
   and implements against the spec in 03-ui-flow.md.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: sonnet
+model: inherit
 memory: project
 ---
 

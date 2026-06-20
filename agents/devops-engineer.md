@@ -6,7 +6,7 @@ description: >
   blind repo-wide build in a polyrepo or multi-module repo. Handles build-config edits,
   Dockerfile edits, pipeline config, dependency upgrades, and build-failure diagnosis.
 tools: Bash, Read, Edit, Write
-model: haiku
+model: inherit
 memory: local
 ---
 

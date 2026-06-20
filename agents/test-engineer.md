@@ -7,7 +7,7 @@ description: >
   otherwise scope to unit + integration and say E2E was skipped and why. Records the test
   plan + results to 06-test.md. Follows the project's testing-guide.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: sonnet
+model: inherit
 memory: project
 ---
 

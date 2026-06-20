@@ -7,7 +7,7 @@ description: >
   application files); writes ONLY its findings to 05-review.md. Does NOT author
   migrations itself.
 tools: Read, Grep, Glob, Bash, Write
-model: sonnet
+model: inherit
 memory: project
 ---
 
