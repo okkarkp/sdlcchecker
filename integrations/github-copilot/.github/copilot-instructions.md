@@ -34,6 +34,19 @@ discover the project's conventions from its root `README`/`CONTRIBUTING`, any `C
 - **Auth/session discipline** — keep public and internal/privileged paths separate; preserve
   CSRF protection on state-changing endpoints; validate token/session expiry before acting.
 
+## Compliance bands (hybrid default)
+Enforce the **Compliance bands** declared in the project's `CLAUDE.md` §0. The hybrid default:
+- **OWASP Top 10** and the **coding standards** apply **always**, on every change.
+- **WCAG 2.2 AA** applies to **any UI** work — keyboard operability + visible focus, accessible
+  names/labels, AA contrast, non-colour-only status, focus management for overlays.
+- **IM8** and **PDPA** apply **when declared** (ON by default in the ACNHPS profile). **PDPA:**
+  no PII logged/echoed, masked in outputs, access-controlled, purpose/retention honoured.
+  **IM8:** secrets only via a manager/env, TLS + at-rest protection, least-privilege with audit
+  logging, fail-closed on auth errors.
+
+The security-review persona records every applicable band in a **Compliance coverage** table
+(covered / N-A-with-reason / GAP); a high/critical GAP blocks the change.
+
 ## Honesty (non-negotiable)
 - **Evidence over assertion** — never claim something works without a passing test or a
   reproducible check. Report status honestly: built / partial / deferred — never present a

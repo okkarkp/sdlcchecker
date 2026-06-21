@@ -21,7 +21,7 @@
 | Repo strategy | `<monorepo / polyrepo / hybrid>` |
 | Branch model | `<trunk-based / GitFlow>` |
 | Test stack | `<e.g. Vitest, Pytest, Playwright>` |
-| Compliance bands | `<e.g. IM8, PDPA, WCAG 2.2 AA, SOC2 — or "none">` |
+| Compliance bands | `IM8, PDPA, WCAG 2.2 AA, OWASP Top 10` (ACNHPS default — edit for your project; drop a band only with a recorded decision) |
 | Target environments | `<local / dev / staging / prod>` |
 
 ### Canonical commands (use these, do not invent)
@@ -46,6 +46,19 @@
 ```
 
 > If a command is missing here, **ask** rather than guessing. Do not run destructive commands (`db reset`, `force push`, `rm -rf`) without explicit confirmation.
+
+### Compliance bands — how they apply (hybrid default)
+
+The agents enforce the bands declared in the table above:
+- **OWASP Top 10** and the **coding standards** — always, on every change.
+- **WCAG 2.2 AA** — whenever the change touches UI (designed and implemented by the frontend
+  agents, audited by the security-reviewer).
+- **IM8** and **PDPA** — when declared here (ON by default in the ACNHPS profile). **PDPA** guards
+  personal data (no PII logged/echoed, masked in outputs, access-controlled and tenant-scoped,
+  purpose/retention/consent honoured); **IM8** guards government infosec (secrets in a manager/env,
+  TLS in transit + protection at rest, least-privilege with audit logging on privileged actions,
+  fail-closed on auth errors). `@security-reviewer` records each in a **Compliance coverage** table
+  (covered / N-A-with-reason / GAP); a high/critical GAP blocks the merge.
 
 ---
 

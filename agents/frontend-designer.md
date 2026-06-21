@@ -135,5 +135,20 @@ current codebase. Reused components must match names found in step 2 of "What yo
 - New constants to add (permissions, feature flags) — show the exact key/value format
   matching the existing file structure confirmed in step 2.
 
+### Accessibility requirements (WCAG 2.2 AA — applies to all UI)
+Design to **WCAG 2.2 AA** from the start (always-on for any UI; far cheaper than a retrofit).
+Add an **Accessibility** line to each component spec entry and call out anything that can't
+meet AA as a **GAP**:
+- Every interactive control is keyboard-reachable, has a visible focus state and an accessible
+  name/label; icon-only buttons get an `aria-label`.
+- Colour is never the only signal — pair status colour with text/icon; meet AA contrast
+  (4.5:1 body text · 3:1 large text & UI components).
+- Form fields have programmatic labels and inline error text tied to the field; errors are
+  announced, not colour-only.
+- Specify heading order, landmark/region structure, and focus management for dialogs/drawers
+  (focus trap on open, return focus on close).
+- Note media needs (alt text, captions). These map to the WCAG band the security-reviewer
+  audits — the evidence you record here is what clears that gate.
+
 Keep design tokens and recurring design-system patterns in your memory for consistency
 across features.

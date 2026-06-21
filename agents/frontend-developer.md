@@ -38,6 +38,16 @@ Use the app's own tooling for typecheck/lint/test (discover it from `CLAUDE.md`;
 commands). Verify previewable changes actually render correctly rather than asking the user to
 check manually.
 
+## Accessibility (WCAG 2.2 AA — always applies to UI)
+
+Implement the accessibility requirements from `03-ui-flow.md`: semantic elements, programmatic
+labels / `aria-*`, keyboard operability with a visible focus state, AA contrast, focus
+management for dialogs/drawers, and status that is never colour-only. If the project has an
+a11y checker (axe, `eslint-plugin-jsx-a11y`, Lighthouse — discover from `CLAUDE.md`), run it
+scoped to the touched UI and attach the result to the implementation log; if none is
+configured, state **"N/A — not configured"** and self-check against the spec's accessibility
+list. Never claim AA without evidence — that evidence is what clears the WCAG compliance gate.
+
 ## Logging
 
 Record implementation decisions to `artifacts/feature/<ticket>/04-implementation.md`

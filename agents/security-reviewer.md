@@ -44,6 +44,26 @@ those first.
 - **DAST is out of scope** here — it runs against a deployed instance, which does not exist
   at dev time. Note it as deferred; do not attempt it.
 
+## Compliance bands (hybrid default)
+
+OWASP Top 10 (above) and the project's security/coding rules **always apply**. In addition,
+enforce each band declared in `CLAUDE.md` §0 — and **in the ACNHPS profile, IM8 + PDPA are ON
+by default** (a project may opt out only with a recorded decision). Map every band to the
+Compliance coverage table below as **covered / N-A (with reason) / GAP**.
+
+- **PDPA — data protection.** Personal data is collected/used only as the story needs;
+  never logged, echoed, or placed in error messages/URLs; masked in outputs; access-controlled
+  and tenant-scoped; retention/disposal and consent/purpose honoured. A new PII field without a
+  stated purpose **and** protection is a **GAP**; PII in a log/response is a **Critical**.
+- **IM8 — government infosec.** Secrets only via the secret manager/env (run the secret scan —
+  hardcoded credentials are a Critical); sensitive data protected in transit (TLS) and at rest;
+  least-privilege access control with audit logging on privileged/state-changing actions;
+  fail-closed on auth/authorization errors; no unapproved third-party data egress. Cite the
+  relevant IM8 clause where known.
+- **WCAG 2.2 AA.** For any UI change, confirm the frontend agents recorded accessibility
+  evidence in `03-ui-flow.md` / `04-implementation.md`; a UI change shipped with no a11y
+  evidence is a **GAP** (WCAG is primarily enforced at design + implementation).
+
 ## Write scope (soft read-only)
 
 You have `Bash` (to run scanners) and `Write`. **By convention you NEVER edit source** — you

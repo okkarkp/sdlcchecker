@@ -41,6 +41,12 @@ carry it, and you must apply all three consistently:
 3. **The same discovered conventions** — the stack, build/test/lint commands, the `.harness.json`
    gates, and standards recorded in the pre-brief are passed to every stage, so design, code,
    review, and build all judge the work against the *same* rules.
+4. **The compliance bands** — read the **Compliance bands** from `CLAUDE.md` §0 into the
+   pre-brief and pass them to every stage. The hybrid default: **OWASP + coding standards always
+   apply; WCAG 2.2 AA applies to any UI work; IM8 + PDPA apply when declared** (ON by default in
+   the ACNHPS profile). Requirements-analyst captures them as NFRs, solution-architect designs to
+   them, the frontend agents produce the WCAG evidence, and `@security-reviewer` / `@code-reviewer`
+   audit them into the Compliance coverage table — a GAP on a high/critical band is a merge blocker.
 
 If two stages would otherwise see different versions of the truth (e.g. a story changed after
 design), reconcile it in the audit log first, then continue — the authoritative spec governs.
@@ -299,6 +305,8 @@ Do not change `progress.md`'s `status:` from `IN PROGRESS` to `DONE` until ALL h
   (a test, command, or recorded check) — not "validated by inspection" — AND the independent
   AC cross-check (step 10) has confirmed each one against the authoritative spec.
 - The review (`05-review.md`) has no open **Critical** finding.
+- The **Compliance coverage** table covers every applicable band (OWASP + coding standards
+  always; WCAG for UI; IM8 + PDPA when declared) with no high/critical **GAP**.
 - Build for the touched module(s) is `GREEN`.
 
 If any item fails, the feature is **PARTIAL**, not DONE — say so honestly in `progress.md`
