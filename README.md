@@ -19,6 +19,9 @@ not in this repo.
 
 ## Quickstart
 
+Works the same in the **Claude Code CLI, the desktop app, and the IDE extensions** (VS Code /
+JetBrains) — the plugin and its commands are identical across all of them.
+
 ```bash
 # 1. Install once (or vendor into .claude/ — see getting-started)
 /plugin marketplace add <path-or-owner/repo>
@@ -27,11 +30,16 @@ not in this repo.
 # 2. Write one story file (copy templates/STORY-TEMPLATE.md)
 #    docs/stories/PROJ-1-my-feature.md
 
-# 3. Deliver it end-to-end — one command
-/deliver docs/stories/PROJ-1-my-feature.md
+# 3. Deliver it end-to-end — one command (plugin commands are NAMESPACED)
+/delivery-team:deliver docs/stories/PROJ-1-my-feature.md
 ```
 
-`/deliver` runs clarify → design → implement → review → test → build → **verify-and-iterate loop**
+> **Namespacing.** Plugin commands are invoked as `/<plugin>:<command>`, so it's
+> `/delivery-team:deliver` and `/delivery-team:self-review` — **not** bare `/deliver`. If you
+> just installed, run `/reload-plugins`, then `/help` (or `/plugin`) to see the exact names.
+> (In GitHub Copilot the prompt file is invoked as `/deliver` — namespacing is Claude-side only.)
+
+`/delivery-team:deliver` runs clarify → design → implement → review → test → deploy → **verify-and-iterate loop**
 → AC cross-check, logging everything to `artifacts/feature/<ticket>/`. It **stops to ask** if a
 requirement is ambiguous, and won't call a feature "done" until every acceptance criterion is
 demonstrably met. New here? → **[docs/getting-started.md](docs/getting-started.md)**.
