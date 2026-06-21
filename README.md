@@ -22,15 +22,19 @@ not in this repo.
 Works the same in the **Claude Code CLI, the desktop app, and the IDE extensions** (VS Code /
 JetBrains) — the plugin and its commands are identical across all of them.
 
+**Easiest (team, one click):** commit [`settings/install.settings.json`](settings/install.settings.json)
+as your project's `.claude/settings.json`. Anyone who opens the repo — CLI **or desktop app** —
+gets a single *"Trust this folder + install?"* prompt; the plugin auto-enables with nothing to
+type. **Desktop GUI:** click the **+** by the prompt box → **Plugins** → add `okkarkp/sdlcchecker`
+→ install `delivery-team`.
+
 ```bash
-# 1. Install once (or vendor into .claude/ — see getting-started)
-/plugin marketplace add <path-or-owner/repo>
-/plugin install delivery-team@<marketplace>
+# Manual install (CLI or desktop) — if you're not using install.settings.json
+/plugin marketplace add okkarkp/sdlcchecker
+/plugin install delivery-team@acnhps-agents
+/reload-plugins
 
-# 2. Write one story file (copy templates/STORY-TEMPLATE.md)
-#    docs/stories/PROJ-1-my-feature.md
-
-# 3. Deliver it end-to-end — one command (plugin commands are NAMESPACED)
+# Then: write one story (copy templates/STORY-TEMPLATE.md), and deliver it end-to-end
 /delivery-team:deliver docs/stories/PROJ-1-my-feature.md
 ```
 

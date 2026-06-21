@@ -1,0 +1,14 @@
+{
+  "//": "ONE-CLICK INSTALL. Commit this as <your-project>/.claude/settings.json (merge if it exists). Anyone who opens the project in Claude Code (CLI, desktop app, or IDE extension) is prompted once to trust the folder + install the marketplace; the delivery-team plugin is then auto-enabled with NO /plugin commands. Commands appear namespaced as /delivery-team:deliver and /delivery-team:self-review.",
+  "extraKnownMarketplaces": {
+    "acnhps-agents": {
+      "source": {
+        "source": "github",
+        "repo": "okkarkp/sdlcchecker"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "delivery-team@acnhps-agents": true
+  }
+}
