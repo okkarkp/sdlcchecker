@@ -19,10 +19,16 @@ files are ready-to-merge starters.
    “Directory” search is browse-only — it won't add a custom repo; use the Marketplaces tab.)*
 3. **Slash commands (manual).** `/plugin marketplace add okkarkp/sdlcchecker` then
    `/plugin install delivery-team@acnhps-agents` then `/reload-plugins`.
-4. **Vendor — zero install, bare commands.** Copy the plugin's `agents/` and `commands/` into
-   `<project>/.claude/agents/` and `.claude/commands/` and commit. Commands then appear with
-   **no namespace** (`/deliver`, `/self-review`) and no install step — at the cost of manual
-   updates (re-copy to upgrade).
+4. **Vendor — zero install, bare commands, works *everywhere*.** Copy the plugin's `agents/`
+   and `commands/` into `<project>/.claude/agents/` and `.claude/commands/` and commit. Commands
+   then appear with **no namespace** (`/deliver`, `/self-review`) and no install step — at the
+   cost of manual updates (re-copy to upgrade).
+
+> **Local vs cloud sessions.** `/plugin` works in **local / SSH** Claude Code sessions (CLI,
+> IDE extension, and the Desktop app's **Code** tab). **Cloud / web** sessions (claude.ai/code,
+> or a remote Code session) have **no `/plugin`** — use the **vendor** path (4) there, or rely on
+> org-managed plugins. The Desktop app's **Chat / Cowork** tabs are not Claude Code at all → use
+> the chat-app port in [`../integrations/claude-app`](../integrations/claude-app).
 
 ## Why the reviewer file matters for enterprise use
 Tier-1 agents (requirements-analyst, solution-architect, frontend-designer) are hard read-only
