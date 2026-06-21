@@ -14,8 +14,9 @@ files are ready-to-merge starters.
 1. **One-click for a team (recommended).** Commit `install.settings.json` as the project's
    `.claude/settings.json`. Teammates open the repo → click **Trust** once → done. Nothing to
    type. (Merge the orchestrator `allow` block from `settings.json` into the same file.)
-2. **Desktop GUI.** Click the **+** next to the prompt box → **Plugins** → add marketplace
-   `okkarkp/sdlcchecker` → install `delivery-team` → choose scope → `/reload-plugins`.
+2. **Desktop GUI.** Type `/plugin` → **Marketplaces** tab → add `okkarkp/sdlcchecker` →
+   **Discover** tab → install `delivery-team` → choose scope → `/reload-plugins`. *(The Plugins
+   “Directory” search is browse-only — it won't add a custom repo; use the Marketplaces tab.)*
 3. **Slash commands (manual).** `/plugin marketplace add okkarkp/sdlcchecker` then
    `/plugin install delivery-team@acnhps-agents` then `/reload-plugins`.
 4. **Vendor — zero install, bare commands.** Copy the plugin's `agents/` and `commands/` into

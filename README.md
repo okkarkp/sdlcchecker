@@ -24,9 +24,10 @@ JetBrains) — the plugin and its commands are identical across all of them.
 
 **Easiest (team, one click):** commit [`settings/install.settings.json`](settings/install.settings.json)
 as your project's `.claude/settings.json`. Anyone who opens the repo — CLI **or desktop app** —
-gets a single *"Trust this folder + install?"* prompt; the plugin auto-enables with nothing to
-type. **Desktop GUI:** click the **+** by the prompt box → **Plugins** → add `okkarkp/sdlcchecker`
-→ install `delivery-team`.
+gets a single *"Trust this folder + install?"* prompt — confirm once and the marketplace is
+added + the plugin enabled. **Desktop GUI (manual):** type `/plugin` → **Marketplaces** tab →
+add `okkarkp/sdlcchecker` → **Discover** tab → install `delivery-team` → `/reload-plugins`.
+*(The Plugins “Directory” search only browses already-added sources — it can't add a custom repo.)*
 
 ```bash
 # Manual install (CLI or desktop) — if you're not using install.settings.json
