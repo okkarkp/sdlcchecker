@@ -24,6 +24,58 @@ commands, and quality gates are NOT baked into these agents — they are discove
 the project itself (its root + per-module `CLAUDE.md`, `.claude/rules/`, and build
 config). Make that discovery part of the pre-brief and pass it downstream.
 
+## One shared context across every stage
+
+Each specialist runs in its own isolated context window — they do **not** share your chat
+history. So *you* are responsible for keeping every stage on the **same context**. Three things
+carry it, and you must apply all three consistently:
+
+1. **The per-feature audit log** (`artifacts/feature/<ticket>/`) is the single source of truth.
+   When you spawn ANY stage, pass the paths to **every upstream artifact it needs** — at minimum
+   the stories (`00-stories.md`), the pre-brief (`02-prebrief.md`), and the design
+   (`02-design.md`); plus `04-implementation.md` for reviewers/test/build. Never let a stage
+   re-derive context that an earlier stage already established — point it at the artifact.
+2. **Shared project memory** (`memory: project`) — every agent uses the same project memory, so
+   conventions learned once are visible to all. Don't keep stage-private state that later stages
+   can't see.
+3. **The same discovered conventions** — the stack, build/test/lint commands, the `.harness.json`
+   gates, and standards recorded in the pre-brief are passed to every stage, so design, code,
+   review, and build all judge the work against the *same* rules.
+4. **The compliance bands** — read the **Compliance bands** from `CLAUDE.md` §0 into the
+   pre-brief and pass them to every stage. The hybrid default: **OWASP + coding standards always
+   apply; WCAG 2.2 AA applies to any UI work; IM8 + PDPA apply when declared** (ON by default in
+   the ACNHPS profile). Requirements-analyst captures them as NFRs, solution-architect designs to
+   them, the frontend agents produce the WCAG evidence, and `@security-reviewer` / `@code-reviewer`
+   audit them into the Compliance coverage table — a GAP on a high/critical band is a merge blocker.
+
+If two stages would otherwise see different versions of the truth (e.g. a story changed after
+design), reconcile it in the audit log first, then continue — the authoritative spec governs.
+
+## Autonomy posture — run with as few human stops as is safe
+
+Default to **flow**, not to asking. Only **two** things stop the pipeline for a human:
+
+1. A genuinely **BLOCKING question** — ambiguity that changes the outcome and cannot be safely
+   assumed (record the answer, then resume).
+2. An **IRREVERSIBLE action** — production deploy, a destructive / data-losing migration, anything
+   touching money or live data. Pause for explicit approval at that line only.
+
+Everything else **proceeds automatically**: self-resolve non-blocking questions with a logged
+assumption; route a RED gate back to the owning specialist and re-verify within the 3-cycle cap;
+skip-with-reason any inapplicable stage. Do **not** stop to ask permission for ordinary, reversible
+steps (writing code, a migration file, tests, a local build).
+
+**Smooth flow:**
+- **Resume, never restart** — begin at the first unchecked item in `progress.md`.
+- **Report once** — narrate the result at the end (DONE / blocked-on-question / escalated), not a
+  prompt at every stage.
+- **One context** — pass the same artifacts + pre-brief to every stage (see above), so no stage
+  re-derives what an earlier one settled.
+
+**The dial:** widen autonomy as the project's gates get stronger (real tests, the harness, the
+mutation gate, SAST). With weak gates, keep more human checkpoints — autonomy is only ever as safe
+as the verification beneath it.
+
 ## Pipeline
 
 Drive features through this sequence, spawning one specialist per step:
@@ -55,7 +107,9 @@ Drive features through this sequence, spawning one specialist per step:
    - Pass the pre-brief path in the prompt when spawning `@solution-architect`.
 3. **Design** — `@solution-architect` (pass `02-prebrief.md` path in prompt) → you persist
    `02-design.md` + `docs/decisions/ADR-NNNN-<slug>.md`
-4. **UI flow** — `@frontend-designer` (only if the feature has UI) → you persist `03-ui-flow.md`
+4. **UI flow + prototype** — `@frontend-designer` (only if the feature has UI) → you persist
+   `03-ui-flow.md` **and `prototype.html`** (a low-fi clickable wireframe). Surface the prototype
+   for human sign-off before implementation — this is a natural design boundary.
 5. **Implement** — `@backend-developer` and/or `@frontend-developer` → they write `04-implementation.md`
 6. **Schema review** — `@db-migration-engineer` (if a schema migration was written) → `05-review.md`
 7. **Review** — `@code-reviewer` then `@security-reviewer` → `05-review.md`
@@ -101,9 +155,11 @@ and logged in the Decided Questions section.
 Steps 5–10 are **not** a one-shot line. Treat implement → review → test → build → verify as a loop
 that converges on "green AND every AC demonstrably met":
 
-1. **Run the gates** for the touched module (lint/types/tests/build — discover the commands, never
-   invent them) **and VERIFY the real flow** — run the app/endpoint and exercise the actual
-   behaviour, capturing evidence (output, logs, a screenshot).
+1. **Run the gates** — have `@devops-engineer` run the project's real build/test/lint commands
+   (discovered, never invented); the exit code is the RED/GREEN signal. *(Optional: the bundled
+   `scripts/harness.py` wraps those into one command via `.harness.json` — convenient but not
+   required, and it needs Python.)* Then **VERIFY the real flow** — run the app/endpoint and
+   exercise the actual behaviour, capturing evidence (output, logs, a screenshot).
 2. **On any failure, route the SPECIFIC failure back to the owning specialist** and re-run only
    what's affected — failing test / broken behaviour → `@backend-developer` / `@frontend-developer`;
    a standards/lint finding → the developer per the `@code-reviewer` note; a migration problem →
@@ -249,6 +305,8 @@ Do not change `progress.md`'s `status:` from `IN PROGRESS` to `DONE` until ALL h
   (a test, command, or recorded check) — not "validated by inspection" — AND the independent
   AC cross-check (step 10) has confirmed each one against the authoritative spec.
 - The review (`05-review.md`) has no open **Critical** finding.
+- The **Compliance coverage** table covers every applicable band (OWASP + coding standards
+  always; WCAG for UI; IM8 + PDPA when declared) with no high/critical **GAP**.
 - Build for the touched module(s) is `GREEN`.
 
 If any item fails, the feature is **PARTIAL**, not DONE — say so honestly in `progress.md`

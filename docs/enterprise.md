@@ -46,7 +46,7 @@ The pieces above were validated by running each agent's instructions; the follow
 1. An **in-harness run** with the actually-installed plugin agents (not instruction-replays).
 2. One **complex, multi-file feature with a DB migration** driven end-to-end (exercises
    db-migration-engineer, the frontend pair, and orchestrator resume).
-3. Wider trials across stacks beyond the Python sandbox + the AISLE Spring/React workspace.
+3. Wider trials across stacks beyond the Python sandbox + the ACNHPS Spring/React workspace.
 
 Treat the implement→review→test→build half as **pilot-ready with a human gate**, not
 unattended-autonomous, until 1–3 are complete.

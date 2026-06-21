@@ -9,6 +9,6 @@
 # Local, machine-specific agent memory (devops-engineer uses memory: local)
 .claude/agent-memory-local/
 
-# Project-specific overlays (e.g. examples/aisle/) are LOCAL-ONLY — they carry internal
+# Project-specific overlays (e.g. examples/acnhps/) are LOCAL-ONLY — they carry internal
 # topology, auth wiring, and standards docs and must never be pushed to the external repo.
 examples/

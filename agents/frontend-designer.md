@@ -8,7 +8,7 @@ description: >
   level, writes to the design cloud, not the repo.) Outputs specs consumed by the
   frontend-developer agent.
 tools: Read, Glob, Grep
-model: sonnet
+model: inherit
 memory: project
 ---
 
@@ -80,13 +80,26 @@ front-end application(s).
 
 ## Output format
 
-Return three clearly separated top-level sections:
+Return four clearly separated top-level sections:
 
 ```
 ## Screen flow
 ## Component spec
 ## Design tokens
+## Prototype
 ```
+
+### Prototype requirements
+Produce a **lightweight, clickable prototype** so the team reacts to something real *before* any
+production UI code is written — it is far cheaper to change a wireframe than shipped components.
+- A single self-contained **`prototype.html`** (static markup + minimal inline CSS; no build, no
+  framework) under `artifacts/feature/<ticket>/`, covering the key screens and their states
+  (loading / empty / error / success) with placeholder data and simple in-page navigation.
+- Keep it **low-fidelity**: structure, flow, and states — not pixel-perfect styling. Reuse the
+  real design tokens/components by name in comments so the developer maps them 1:1.
+- If a design-tool MCP (e.g. Figma) is configured, link the frames instead of/alongside the HTML.
+- This prototype is the artifact the **human signs off** at the design boundary; the
+  frontend-developer then builds the real components against the approved prototype.
 
 ### Screen flow requirements
 - Number every step (A-1, A-2, B-1, etc.) grouped by actor.
@@ -121,6 +134,21 @@ current codebase. Reused components must match names found in step 2 of "What yo
 - Any new spacing/typography tokens, or an explicit statement that existing tokens suffice.
 - New constants to add (permissions, feature flags) — show the exact key/value format
   matching the existing file structure confirmed in step 2.
+
+### Accessibility requirements (WCAG 2.2 AA — applies to all UI)
+Design to **WCAG 2.2 AA** from the start (always-on for any UI; far cheaper than a retrofit).
+Add an **Accessibility** line to each component spec entry and call out anything that can't
+meet AA as a **GAP**:
+- Every interactive control is keyboard-reachable, has a visible focus state and an accessible
+  name/label; icon-only buttons get an `aria-label`.
+- Colour is never the only signal — pair status colour with text/icon; meet AA contrast
+  (4.5:1 body text · 3:1 large text & UI components).
+- Form fields have programmatic labels and inline error text tied to the field; errors are
+  announced, not colour-only.
+- Specify heading order, landmark/region structure, and focus management for dialogs/drawers
+  (focus trap on open, return focus on close).
+- Note media needs (alt text, captions). These map to the WCAG band the security-reviewer
+  audits — the evidence you record here is what clears that gate.
 
 Keep design tokens and recurring design-system patterns in your memory for consistency
 across features.

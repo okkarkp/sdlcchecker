@@ -19,19 +19,32 @@ not in this repo.
 
 ## Quickstart
 
+Works the same in the **Claude Code CLI, the desktop app, and the IDE extensions** (VS Code /
+JetBrains) — the plugin and its commands are identical across all of them.
+
+**Easiest (team, one click):** commit [`settings/install.settings.json`](settings/install.settings.json)
+as your project's `.claude/settings.json`. Anyone who opens the repo — CLI **or desktop app** —
+gets a single *"Trust this folder + install?"* prompt — confirm once and the marketplace is
+added + the plugin enabled. **Desktop GUI (manual):** type `/plugin` → **Marketplaces** tab →
+add `okkarkp/sdlcchecker` → **Discover** tab → install `delivery-team` → `/reload-plugins`.
+*(The Plugins “Directory” search only browses already-added sources — it can't add a custom repo.)*
+
 ```bash
-# 1. Install once (or vendor into .claude/ — see getting-started)
-/plugin marketplace add <path-or-owner/repo>
-/plugin install delivery-team@<marketplace>
+# Manual install (CLI or desktop) — if you're not using install.settings.json
+/plugin marketplace add okkarkp/sdlcchecker
+/plugin install delivery-team@acnhps-agents
+/reload-plugins
 
-# 2. Write one story file (copy templates/STORY-TEMPLATE.md)
-#    docs/stories/PROJ-1-my-feature.md
-
-# 3. Deliver it end-to-end — one command
-/deliver docs/stories/PROJ-1-my-feature.md
+# Then: write one story (copy templates/STORY-TEMPLATE.md), and deliver it end-to-end
+/delivery-team:deliver docs/stories/PROJ-1-my-feature.md
 ```
 
-`/deliver` runs clarify → design → implement → review → test → build → **verify-and-iterate loop**
+> **Namespacing.** Plugin commands are invoked as `/<plugin>:<command>`, so it's
+> `/delivery-team:deliver` and `/delivery-team:self-review` — **not** bare `/deliver`. If you
+> just installed, run `/reload-plugins`, then `/help` (or `/plugin`) to see the exact names.
+> (In GitHub Copilot the prompt file is invoked as `/deliver` — namespacing is Claude-side only.)
+
+`/delivery-team:deliver` runs clarify → design → implement → review → test → deploy → **verify-and-iterate loop**
 → AC cross-check, logging everything to `artifacts/feature/<ticket>/`. It **stops to ask** if a
 requirement is ambiguous, and won't call a feature "done" until every acceptance criterion is
 demonstrably met. New here? → **[docs/getting-started.md](docs/getting-started.md)**.
@@ -155,8 +168,13 @@ from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded her
 #   or, from a local clone:  /plugin marketplace add /path/to/sdlcchecker
 
 # 2. Install the plugin from it
-/plugin install delivery-team@aisle-agents
+/plugin install delivery-team@acnhps-agents
 ```
+
+**No Python (or anything) to install.** The plugin is markdown — the orchestrator, the 11 agents,
+and the 2 commands. Installing copies those files; nothing is compiled or run as a service. The
+`scripts/` (harness, validator, mutation gate) are **optional power-ups** — see `scripts/README.md`;
+the pipeline runs without them (verification just runs your project's own test/build command).
 
 Once installed, start a feature by routing the requirement through the orchestrator:
 

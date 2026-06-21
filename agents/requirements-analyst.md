@@ -10,7 +10,7 @@ description: >
   and escalates blocking ones. Has NO write tools — returns the deliverable as
   its final message for the orchestrator to persist. Does not design or code.
 tools: Read, Grep, Glob
-model: sonnet
+model: inherit
 memory: project
 ---
 

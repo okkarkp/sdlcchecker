@@ -9,7 +9,7 @@ description: >
   project's CLAUDE.md and coding/api standards. Discovers and runs the project's own
   build/test commands; scopes builds to the touched module.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: sonnet
+model: inherit
 memory: project
 ---
 
