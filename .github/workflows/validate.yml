@@ -23,7 +23,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install pyyaml pytest
 
       - name: Validate plugin structure
         run: python3 scripts/validate_plugin.py
@@ -31,3 +31,6 @@ jobs:
       - name: Validate JSON manifests parse
         run: |
           python3 -c "import json,sys; json.load(open('.claude-plugin/plugin.json')); json.load(open('.claude-plugin/marketplace.json')); print('manifests OK')"
+
+      - name: Run test suite (gates, contract & drift guards)
+        run: python3 -m pytest scripts/ -q
