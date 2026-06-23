@@ -54,6 +54,8 @@ demonstrably met. New here? → **[docs/getting-started.md](docs/getting-started
 | Guide | What it covers |
 |---|---|
 | **[docs/getting-started.md](docs/getting-started.md)** | **Start here.** Mental model · install (2 ways) · day-to-day use · authoring user stories |
+| **[docs/for-business-analysts.md](docs/for-business-analysts.md)** | **For BAs (no coding).** Step-by-step: feed a requirement, read the deliverable, answer blocking questions, hand off to design |
+| [INSTALL.md](INSTALL.md) | New-user deployment — three install paths (team one-click · `/plugin` · vendoring) |
 | [docs/architecture.md](docs/architecture.md) | Design rationale · the pipeline · hook-free write-scope enforcement |
 | [docs/enterprise.md](docs/enterprise.md) | Enterprise hardening — what's *enforced* vs. *conventional*, test evidence, what's still owed |
 | [templates/CLAUDE.md](templates/CLAUDE.md) | Fill-in-the-blanks project guideline (the full Analyze→Validate methodology) |
