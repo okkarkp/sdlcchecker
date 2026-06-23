@@ -280,7 +280,7 @@ What makes a gate `RED`, and the bounded remediation loop for each:
 |---|---|---|
 | Blocking-question gate | any unresolved BLOCKING question | hard stop — wait for the user (already specified) |
 | Schema review | db-migration-engineer returns a **Critical** finding | re-spawn `@backend-developer` with the findings; re-run the gate |
-| Code review | code-reviewer returns a **Critical**, or a linter/coverage gate fails | re-spawn the owning developer with the findings; re-run |
+| Code review | code-reviewer returns a **CRITICAL** or **HIGH** (an unreachable/unmet requirement), or a linter/coverage gate fails | re-spawn the owning developer with the findings; re-run |
 | Security review | a new **high/critical** vuln or any **Critical** finding | re-spawn the owning developer; re-run the security gate |
 | Test | any test fails, or a required layer can't run for a fixable reason | re-spawn the developer to fix code or the test-engineer to fix the test; re-run |
 | Build | the touched-module build fails, or a required config key/dependency is missing | re-spawn `@devops-engineer` (or the developer for a code fix); re-rebuild |
@@ -304,7 +304,8 @@ Do not change `progress.md`'s `status:` from `IN PROGRESS` to `DONE` until ALL h
 - Every acceptance criterion in `00-stories.md` maps to covering evidence in `06-test.md`
   (a test, command, or recorded check) — not "validated by inspection" — AND the independent
   AC cross-check (step 10) has confirmed each one against the authoritative spec.
-- The review (`05-review.md`) has no open **Critical** finding.
+- The review (`05-review.md`) has no open **CRITICAL** or **HIGH** finding (a HIGH = a
+  requirement that isn't reachable by a real user).
 - The **Compliance coverage** table covers every applicable band (OWASP + coding standards
   always; WCAG for UI; IM8 + PDPA when declared) with no high/critical **GAP**.
 - Build for the touched module(s) is `GREEN`.
