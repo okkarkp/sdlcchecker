@@ -44,6 +44,22 @@ invent them. Scope every run as narrowly as the project allows (a single module 
 package); in a polyrepo or multi-module repo, build only the module(s) you touched. Never
 fan a build out across the whole repo unless the project's own tooling expects it.
 
+## Build to the compliance bands (hybrid default)
+
+The reviewers audit these *after* you; build to them *first* so the change clears review on the
+first pass. OWASP + the project's coding/security rules **always apply**; IM8 + PDPA apply when
+declared in `CLAUDE.md` §0 (ON by default in the ACNHPS profile):
+- **OWASP** — validate every input at the boundary; parameterised queries only (never string-built
+  SQL); enforce access control server-side on every new data path; encode output.
+- **IM8** — secrets only via the secret manager / env (never hardcoded or logged); sensitive data
+  over TLS and protected at rest; least-privilege + audit logging on privileged/state-changing
+  actions; fail **closed** on an auth/authorization error.
+- **PDPA** — never log, echo, or place personal data in error messages/URLs; collect/use only what
+  the story needs; scope reads to the tenant/owner. A new PII field needs a stated purpose **and**
+  protection.
+Note in the implementation log which bands the change touches and how you satisfied them, so the
+security/code reviewers can map the evidence straight into the Compliance coverage table.
+
 ## Logging
 
 Record implementation decisions, non-obvious choices, and anything a reviewer needs to know

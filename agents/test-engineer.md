@@ -33,6 +33,13 @@ Write per-AC assertions from `00-stories.md` / `02-design.md`, not merely from w
 already does — a test that only asserts current behaviour validates nothing. Cover the
 unhappy paths (invalid input, auth failure, timeout, empty/large datasets, concurrency).
 
+**Cover the compliance bands' failure modes too** (the bands declared in `CLAUDE.md` §0): assert
+the security-relevant negatives the reviewers will check for — e.g. invalid/garbage input is
+rejected without throwing past the boundary (OWASP), an unauthorized caller is refused (IM8
+fail-closed), and a secret/PII value is never returned or persisted in plaintext (IM8/PDPA — assert
+the stored/returned shape directly). A passing happy-path suite that never exercises these is not
+done coverage.
+
 ## Stale-doc discipline
 
 If the project's testing-guide tells you to run a test target that does not exist (a renamed
