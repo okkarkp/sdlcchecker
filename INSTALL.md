@@ -49,8 +49,15 @@ Or via the UI: `/plugin` → **Marketplaces** tab → add `okkarkp/sdlcchecker` 
 
 ## C — Vendoring (universal fallback, zero install)
 
-Works **everywhere** — cloud, web, managed-policy, older builds. Copy the agents + commands
-straight into the project:
+Works **everywhere** — cloud, web, managed-policy, older builds. Use the helper script (it
+copies agents + commands + templates and is re-runnable to stay in sync):
+
+```bash
+scripts/vendor.sh /path/to/your-project        # vendor into your-project/.claude/
+scripts/vendor.sh --check /path/to/your-project # report drift only (exit 1 if out of sync)
+```
+
+Or copy by hand:
 
 ```bash
 mkdir -p .claude
