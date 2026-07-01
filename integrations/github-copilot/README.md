@@ -25,7 +25,22 @@ independent AC cross-check are all preserved — only the concurrency is lost. F
 single-role pass, switch to that chat mode directly (e.g. the **security-reviewer** mode for an
 adversarial probe).
 
-## Install
+## Install — one command (recommended for teams)
+
+```bash
+integrations/github-copilot/install.sh /path/to/your-repo
+```
+
+This copies `.github/{copilot-instructions.md, prompts/, chatmodes/}` into the repo **and** writes
+`.vscode/settings.json` with the two settings Copilot needs (`chat.promptFiles` +
+`github.copilot.chat.codeGeneration.useInstructionFiles`). It merges into an existing
+`.vscode/settings.json` rather than clobbering it, and never touches `.github/workflows/`. Commit
+the result — then any teammate who opens the repo in VS Code just does **Developer: Reload Window**
+and the 11 personas + `/deliver` are live, with no per-user Settings clicking.
+
+Check an existing setup: `integrations/github-copilot/install.sh --check /path/to/your-repo`.
+
+## Install — manual
 
 Copy the `.github/` tree from this folder into the **root of your target repository**:
 
