@@ -151,4 +151,6 @@ meet AA as a **GAP**:
   audits — the evidence you record here is what clears that gate.
 
 Keep design tokens and recurring design-system patterns in your memory for consistency
-across features.
+across features. If a design-system pattern holds up across more than one project, flag it
+to the orchestrator as an org-memory promotion candidate (`conventions.md`) — see
+`docs/organization-memory.md`.

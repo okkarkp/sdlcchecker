@@ -27,8 +27,8 @@ config). Make that discovery part of the pre-brief and pass it downstream.
 ## One shared context across every stage
 
 Each specialist runs in its own isolated context window — they do **not** share your chat
-history. So *you* are responsible for keeping every stage on the **same context**. Three things
-carry it, and you must apply all three consistently:
+history. So *you* are responsible for keeping every stage on the **same context**. Four things
+carry it, and you must apply all four consistently:
 
 1. **The per-feature audit log** (`artifacts/feature/<ticket>/`) is the single source of truth.
    When you spawn ANY stage, pass the paths to **every upstream artifact it needs** — at minimum
@@ -37,7 +37,11 @@ carry it, and you must apply all three consistently:
    re-derive context that an earlier stage already established — point it at the artifact.
 2. **Shared project memory** (`memory: project`) — every agent uses the same project memory, so
    conventions learned once are visible to all. Don't keep stage-private state that later stages
-   can't see.
+   can't see. If the project vendors a read-only `.claude/org-memory/` (see
+   [`docs/organization-memory.md`](../docs/organization-memory.md)), fold its `MEMORY.md` and
+   relevant topic files into the pre-brief too — it's the same kind of "discovered convention,"
+   just sourced across the org instead of from this one repo. Never write to it directly; see
+   step 11 below.
 3. **The same discovered conventions** — the stack, build/test/lint commands, the `.harness.json`
    gates, and standards recorded in the pre-brief are passed to every stage, so design, code,
    review, and build all judge the work against the *same* rules.
@@ -96,6 +100,13 @@ Drive features through this sequence, spawning one specialist per step:
      per-module `CLAUDE.md`, and `.claude/rules/`. Note the language/framework, the
      build/test/lint commands, the schema-migration tool (if any), and the test
      stack. The specialists rely on this — record it explicitly in the pre-brief.
+   - **Check for organization memory:** if `.claude/org-memory/MEMORY.md` exists (a vendored,
+     read-only copy of the org-wide memory repo — see
+     [`docs/organization-memory.md`](../docs/organization-memory.md)), read it and any topic
+     file relevant to this feature (`conventions.md`, `architecture-precedents.md`,
+     `security-findings.md`, `review-anti-patterns.md`). Note anything applicable in the
+     pre-brief and pass it downstream like any other discovered convention. Absent is normal —
+     treat it as "no org memory vendored," never an error.
    - For each area the feature touches: read a representative existing file (entity,
      service, controller, component) so the design mirrors real patterns.
    - Identify any discrepancies between the requirements document and actual code
@@ -127,6 +138,16 @@ Drive features through this sequence, spawning one specialist per step:
     against the authoritative spec, and to actively try to break the "done" claim. The
     feature is NOT done until this pass confirms every AC. Persist its verdict in
     `06-test.md` (or a `## AC cross-check` section of `05-review.md`).
+11. **Org-memory promotion candidates (orchestrator-owned, at wrap-up)** — review this
+    feature's log for anything that generalizes past this one project: a convention that
+    recurred, an ADR precedent worth reusing, a security/review finding that turned out to be
+    a systemic class rather than a one-off. If nothing qualifies, skip silently — most
+    features won't produce one. If something does, add it to `progress.md`'s
+    **Org-memory promotion candidates** section, generalized (no project-specific
+    names/data), with the source ticket. This is a proposal only: you have no write access to
+    the org-memory repo (`.claude/org-memory/` is a read-only vendored copy) — a human reviews
+    the candidate and, if it holds up, PRs it into the org-memory repo themselves. See
+    [`docs/organization-memory.md`](../docs/organization-memory.md).
 
 > **Done gate — gate-green ≠ requirement-complete (P3).** Lint/types/tests/build/scan all
 > passing is necessary but NOT sufficient. A feature is "done" only when step 10 confirms
@@ -342,7 +363,10 @@ After EACH agent completes its step:
       git add "docs/decisions/ADR-<n>-<slug>.md"   # only the ADR(s) written this run
     Substitute the real <ticket> (the folder you created) and the exact ADR filename(s)
     you persisted. Never stage `.claude/agent-memory/` (it churns on every invocation; it
-    is committed separately as a deliberate "knowledge update").
+    is committed separately as a deliberate "knowledge update"). Never stage or write to
+    `.claude/org-memory/` at all — it is a read-only vendored copy of a separate repo (see
+    [`docs/organization-memory.md`](../docs/organization-memory.md)); propose changes to it
+    only as promotion candidates in `progress.md`, never as a direct write.
   - Do not auto-commit; leave the staged checkpoint for the user to review/commit.
 
 **Concurrent features:** ticket-scoped staging prevents staging pollution but it is

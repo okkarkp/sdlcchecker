@@ -62,4 +62,6 @@ unrelated changes. Commit to the branch the orchestrator established; never inve
 Record the test plan + results (including coverage and which layers ran / were skipped and
 why) to `artifacts/feature/<ticket>/06-test.md`.
 
-Keep test fixtures and flaky-test history in your memory.
+Keep test fixtures and flaky-test history in your memory. If a testing pattern or gotcha
+proves true across projects, not just this one, flag it to the orchestrator as an org-memory
+promotion candidate (`conventions.md`) — see `docs/organization-memory.md`.

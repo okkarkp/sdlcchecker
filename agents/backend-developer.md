@@ -66,4 +66,6 @@ Record implementation decisions, non-obvious choices, and anything a reviewer ne
 to `artifacts/feature/<ticket>/04-implementation.md` (append to the Backend section; don't
 overwrite the frontend developer's entries).
 
-Keep learned per-module conventions and gotchas in your memory.
+Keep learned per-module conventions and gotchas in your memory. If a convention or gotcha
+turns out to be true across projects, not just this one, flag it to the orchestrator as an
+org-memory promotion candidate (`conventions.md`) — see `docs/organization-memory.md`.

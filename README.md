@@ -58,6 +58,7 @@ demonstrably met. New here? → **[docs/getting-started.md](docs/getting-started
 | [INSTALL.md](INSTALL.md) | New-user deployment — three install paths (team one-click · `/plugin` · vendoring) |
 | [docs/architecture.md](docs/architecture.md) | Design rationale · the pipeline · hook-free write-scope enforcement |
 | [docs/enterprise.md](docs/enterprise.md) | Enterprise hardening — what's *enforced* vs. *conventional*, test evidence, what's still owed |
+| [docs/organization-memory.md](docs/organization-memory.md) | The three-tier memory model — session · project (`memory: project`) · **organization** (vendored, human-curated) — and how a learning gets promoted |
 | [templates/CLAUDE.md](templates/CLAUDE.md) | Fill-in-the-blanks project guideline (the full Analyze→Validate methodology) |
 | [templates/STORY-TEMPLATE.md](templates/STORY-TEMPLATE.md) | The user-story input format the agents consume |
 | [settings/](settings/) | Permission starters — orchestrator allow + enforced reviewer deny |
@@ -189,7 +190,13 @@ Once installed, start a feature by routing the requirement through the orchestra
 - **The orchestrator is the entry point.** Agents are never auto-triggered — invoke
   `@orchestrator` (or an individual specialist by `@name` for a one-off).
 - **Per-feature audit log.** The orchestrator copies `templates/feature/` to
-  `artifacts/feature/<ticket>/` and maintains `progress.md` + `00`–`06` there.
+  `artifacts/feature/<ticket>/` and maintains `progress.md` + `00`–`06` there. This is the
+  **project-level implementation log** — durable per-feature detail, always in that project's repo.
+- **Three-tier memory.** Session context (this conversation) → project memory (`memory:
+  project`, shared across features in this repo) → **organization memory** (a separate,
+  vendored, human-curated repo shared across every project — see
+  [docs/organization-memory.md](docs/organization-memory.md)). The orchestrator proposes
+  promotion candidates at wrap-up; nothing reaches org memory without a human-reviewed PR.
 - **Resume.** `@orchestrator resume <ticket>` greps for the `IN PROGRESS` marker, reloads
   `progress.md`, and continues from the first unchecked item.
 - **Per-project tuning.** Drop a `CLAUDE.md` and (optionally) path-scoped `.claude/rules/`
@@ -293,6 +300,8 @@ templates/feature/ the audit-log scaffold (progress.md + 00–06) + ADR-TEMPLATE
 rules/             generic path-scoped rule starters to copy into a project
 standards/         starter coding-standards / security-rules (OWASP) / api-standards docs
 settings/          ready-to-merge permission starters (orchestrator allow + reviewer deny)
+templates/org-memory/ starter scaffold to seed a separate, org-wide memory repo (vendored in, not loaded from here)
 docs/architecture.md  design rationale (the briefing)
 docs/enterprise.md    enterprise hardening: enforced-vs-conventional, evidence, what's owed
+docs/organization-memory.md  three-tier memory model: session / project / organization
 ```

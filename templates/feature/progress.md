@@ -23,6 +23,7 @@
 - [ ] Build (touched module) — devops-engineer
 - [ ] Verify-and-iterate loop — gates green + real flow exercised with evidence (converge, max 3 cycles)
 - [ ] AC cross-check (done gate) — independent reviewer confirms each AC vs the authoritative spec
+- [ ] Org-memory promotion candidates reviewed (orchestrator) — see below; SKIPPED if none qualify
 
 ## Gate ledger
 
@@ -52,4 +53,20 @@
 <!-- dated notes, one per step/attempt: YYYY-MM-DD <agent> — <what happened / gate outcome> -->
 <!-- Verify loop: iter k — <what failed> → <who fixed> → <result> -->
 <!-- AC cross-check: <reviewer> confirmed N/N ACs against the authoritative spec -->
+
+## Org-memory promotion candidates
+
+> Not a gate — most features produce none. Orchestrator-owned; see
+> `docs/organization-memory.md` in this plugin's repo. A human reviews these and, if they hold
+> up, PRs them into the org-memory repo — the orchestrator never writes there directly.
+
+<!--
+### <short title>
+- **Class:** convention | architecture-precedent | security-finding | review-anti-pattern
+- **Why it generalizes:** <what makes this true beyond this project>
+
+<the learning, generalized — no project-specific names/data>
+-->
+
+_(none — leave this line if the feature produced no promotion candidates)_
 

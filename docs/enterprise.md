@@ -32,6 +32,21 @@ These are stack-agnostic and are embedded in the relevant agent definitions (not
 | 1 — hard | requirements-analyst, solution-architect, frontend-designer | **Enforced** by the `tools:` allow-list (no write/shell tools). Survives plugin packaging. |
 | 2 — soft → hard | code-reviewer, security-reviewer, db-migration-engineer | Convention by default; **enforce** it by running reviewers in a session that loads [`settings/settings.reviewer.json`](../settings/) (deny source writes). |
 
+## Organization memory — what is hard vs. soft
+
+[`docs/organization-memory.md`](organization-memory.md) adds a tier Claude Code doesn't ship
+natively. Be honest about what guards it:
+- **Conventional, not enforced:** no hook or permission rule stops an agent from writing into
+  a vendored `.claude/org-memory/` checkout — the orchestrator's instructions say never to,
+  and it only ever *proposes* candidates in `progress.md`. Treat that the same as the Tier-2
+  soft-read-only guarantee above: real, but instruction-level.
+- **The actual safeguard is the human PR gate** on the separate org-memory repo itself —
+  nothing merges there without review, so a bad proposal is caught before it fans out to
+  every project, not by anything this plugin enforces at runtime.
+- **Vendoring mechanics are explicitly out of scope** for this plugin (no submodule/sync
+  script is shipped) — the plugin stays "no infrastructure of its own," consistent with the
+  rest of this README.
+
 ## Evidence (how it was tested)
 - **Static validation:** 11 agents, valid frontmatter, valid tools, Tier-1 read-only proven, 0 problems.
 - **Live advisory run** (requirements-analyst on a real story): grounded in real code, escalated
@@ -47,6 +62,11 @@ The pieces above were validated by running each agent's instructions; the follow
 2. One **complex, multi-file feature with a DB migration** driven end-to-end (exercises
    db-migration-engineer, the frontend pair, and orchestrator resume).
 3. Wider trials across stacks beyond the Python sandbox + the ACNHPS Spring/React workspace.
+4. **Organization memory has not been trialed at all** — no org has yet stood up the
+   [`templates/org-memory/`](../templates/org-memory/) scaffold as a real repo, vendored it
+   into a project, or run a promotion candidate through an actual human-reviewed PR. Treat
+   [`organization-memory.md`](organization-memory.md) as a design, not a proven workflow, until
+   one org has run it end-to-end.
 
 Treat the implement→review→test→build half as **pilot-ready with a human gate**, not
 unattended-autonomous, until 1–3 are complete.

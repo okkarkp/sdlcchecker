@@ -85,6 +85,16 @@ and continues from the first unchecked item — rationale and assumptions are al
 For genuinely parallel features, run each ticket in its own git worktree/branch so concurrent
 runs can't race on a shared index.
 
+## Memory (three tiers)
+
+The audit log above is one of three durable-knowledge tiers, deliberately kept distinct:
+session context (this conversation only) → project memory (Claude Code's native `memory:
+project`, `.claude/agent-memory/<agent>/`, one repo) → **organization memory** (a separate,
+vendored, human-curated repo shared across every project — not a Claude Code feature, built
+the same way `rules/` and `standards/` are: a starter you vendor in). The orchestrator reads
+org memory during the pre-brief and proposes promotion candidates at wrap-up; it never writes
+to it directly. Full design in [`organization-memory.md`](organization-memory.md).
+
 ## Maturity
 
 The advisory trio (requirements-analyst, solution-architect, frontend-designer) and the
@@ -103,6 +113,8 @@ hand-offs and the template/permission wiring need adjusting.
 | Feature-log scaffold | [`templates/feature/`](../templates/feature/) |
 | ADR template | [`templates/ADR-TEMPLATE.md`](../templates/ADR-TEMPLATE.md) |
 | Generic rule starters | [`rules/`](../rules/) |
+| Org-memory scaffold (vendor into a separate repo) | [`templates/org-memory/`](../templates/org-memory/) |
+| Three-tier memory model | [`organization-memory.md`](organization-memory.md) |
 | Plugin + marketplace manifest | [`.claude-plugin/`](../.claude-plugin/) |
 
 ## Docs the agents expect in a consuming project (discovered via CLAUDE.md)

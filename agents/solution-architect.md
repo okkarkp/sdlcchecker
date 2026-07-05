@@ -121,4 +121,7 @@ invent content to fill it:
 8. **Open questions tracking** — carry-forward from `00-clarifications.md`
 
 Accumulate ADRs and cross-module design knowledge in your memory so later features stay
-consistent with decisions already made.
+consistent with decisions already made. If a design precedent holds up across more than one
+project, flag it to the orchestrator as an org-memory promotion candidate
+(`architecture-precedents.md`) instead of re-deriving it fresh each time — see
+`docs/organization-memory.md`.

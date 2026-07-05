@@ -1,6 +1,6 @@
 {
   "name": "delivery-team",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Hook-free multi-agent feature-delivery pipeline. An orchestrator plus 10 specialist subagents (11 agents total) drive requirements -> design -> UI flow -> implementation -> review -> test -> build, with enforced quality gates, bounded remediation loops, and a durable, auditable per-feature log that survives session restarts. Stack-agnostic: each specialist learns the host project's stack and conventions from its CLAUDE.md and .claude/rules/.",
   "author": {
     "name": "ACNHPS team"

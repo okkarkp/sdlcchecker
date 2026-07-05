@@ -77,4 +77,6 @@ Your memory is `project` — the **same shared context** the rest of the pipelin
 build/verify view stays consistent with what the other stages saw. Record durable,
 project-level build facts here (the discovered build/test commands, the `.harness.json` gates,
 container/CI specifics). Keep genuinely host-specific quirks (local paths, a developer's
-toolchain version) out of shared memory — note them in the build report instead.
+toolchain version) out of shared memory — note them in the build report instead. If a
+build/CI convention proves true across projects, flag it to the orchestrator as an
+org-memory promotion candidate (`conventions.md`) — see `docs/organization-memory.md`.

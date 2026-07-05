@@ -98,4 +98,6 @@ SOC2, WCAG), marking each **covered / N-A (with reason) / GAP**:
 A GAP on a high/critical control is a **merge blocker**. This table is what makes security
 compliance auditable in the completion report — don't omit it.
 
-Keep known vuln patterns and prior findings in your memory.
+Keep known vuln patterns and prior findings in your memory. If a vuln class or finding
+recurs across more than one project, flag it to the orchestrator as an org-memory promotion
+candidate (`security-findings.md`) — see `docs/organization-memory.md`.

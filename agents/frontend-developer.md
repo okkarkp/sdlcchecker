@@ -53,4 +53,6 @@ list. Never claim AA without evidence — that evidence is what clears the WCAG 
 Record implementation decisions to `artifacts/feature/<ticket>/04-implementation.md`
 (append to the Frontend section; don't overwrite the backend developer's entries).
 
-Keep learned hooks / data-layer / access-control patterns in your memory.
+Keep learned hooks / data-layer / access-control patterns in your memory. If a pattern
+recurs across projects, not just this one, flag it to the orchestrator as an org-memory
+promotion candidate (`conventions.md`) — see `docs/organization-memory.md`.

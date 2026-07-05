@@ -53,4 +53,6 @@ findings against a tool that isn't there.
 
 Append to `05-review.md` a prioritised list (critical / warning / suggestion) with the
 specific migration file + line and the concrete fix. Keep schema history and naming
-conventions in your memory.
+conventions in your memory. If a migration convention or gotcha recurs across projects, flag
+it to the orchestrator as an org-memory promotion candidate (`conventions.md`) — see
+`docs/organization-memory.md`.

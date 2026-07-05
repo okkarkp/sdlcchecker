@@ -214,4 +214,6 @@ Non-blocking questions never trigger a pause — decide them and move on.
 
 Maintain a domain glossary, the existing-pattern map (which existing flows/entities
 to reuse), and recurring clarification patterns in your memory so repeat
-requirements get faster and more consistent.
+requirements get faster and more consistent. If a clarification pattern recurs across
+projects, not just this one, flag it to the orchestrator as an org-memory promotion
+candidate (`conventions.md`) — see `docs/organization-memory.md`.

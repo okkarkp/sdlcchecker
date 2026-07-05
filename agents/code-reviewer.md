@@ -147,3 +147,7 @@ can currently cause wrong behavior or hide a requirement → CRITICAL/HIGH by bl
 one with no current exploit (defanged by surrounding code) → MEDIUM/LOW, noted as latent.
 
 Keep recurring findings and team anti-patterns in your memory so reviews sharpen over time.
+If a finding recurs across more than one project (not just this one), flag it to the
+orchestrator as an org-memory promotion candidate (`security-findings.md` or
+`review-anti-patterns.md`) rather than keeping it project-local only — see
+`docs/organization-memory.md`.

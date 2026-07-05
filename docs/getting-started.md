@@ -139,3 +139,13 @@ source-of-truth register (one folder, or one exported file) beats scattered copi
   where they conflict the detailed spec wins and the analyst flags the stale AC.
 - Let the analyst's **handover self-check** be your linter — if it keeps flagging the same gaps
   (missing actor, vague status, no out-of-scope), tighten the template fields for your team.
+
+## 8. Memory — project vs. organization
+
+Every agent remembers within **this project** by default (`memory: project`,
+`.claude/agent-memory/<agent>/`, committed to this repo). If you run this plugin across many
+projects and want conventions/precedents/findings that recur to be shared org-wide instead of
+re-learned per project, see [docs/organization-memory.md](organization-memory.md) — it's a
+separate, vendored, human-curated repo (starter scaffold in
+[`../templates/org-memory/`](../templates/org-memory/)), not a Claude Code feature. Nothing
+about it is required to use the plugin day to day.

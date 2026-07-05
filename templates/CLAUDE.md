@@ -190,6 +190,15 @@ Execute these phases **in order**. Each phase has an exit gate. Do not advance p
 
 You produce **two written artifacts per story**: a running **implementation log** (the detailed record of *how and why*) and a final **completion report** (the end-of-story summary). Both live in the repo (e.g. `docs/implementation-log/<story-id>.md`) so they survive the session and are reviewable.
 
+> **If you're using the `delivery-team` orchestrator plugin instead of this file standalone:**
+> the orchestrator already maintains an equivalent per-feature log at
+> `artifacts/feature/<ticket>/04-implementation.md` (+ `progress.md`, `05-review.md`,
+> `06-test.md`) — don't run both in parallel for the same story. Use *this* section's
+> log/report shape when driving a story with `CLAUDE.md` alone, without the orchestrator.
+> Either way, this log is **project-level** — durable knowledge that generalizes across
+> projects belongs in **organization memory** instead; see `docs/organization-memory.md` in
+> the `delivery-team` repo for that three-tier model.
+
 ### 6.1 Implementation Log — write it as you build, not after
 
 The log explains the implementation to a future reader (reviewer, maintainer, auditor) who wasn't present. It is **append-only**: when a decision changes, add a dated entry explaining the change — do not erase history. It must answer, for each story, *who*, *what*, *how validated*, *what was assumed*, and *why this way*.
