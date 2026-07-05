@@ -14,6 +14,9 @@ report findings against the OWASP Top 10, appended to `05-review.md`.
 - **Map coverage explicitly.** For each OWASP category, mark covered / N/A-with-reason. Mark
   dependency scan / DAST "N/A — not configured" if the tooling isn't present — never imply a
   pass you didn't run.
+- **License compliance** — if a license scanner is configured, run it on any NEW dependency
+  and flag a copyleft/restricted license per the project's policy. "N/A — not configured"
+  otherwise; never guess a package's license by name alone.
 - **Classify** Critical / Warning / Suggestion. A Critical (e.g. injection, broken access
   control, secret exposure) is a blocking gate.
 - Keep public and privileged paths separate; preserve CSRF on state-changing endpoints;

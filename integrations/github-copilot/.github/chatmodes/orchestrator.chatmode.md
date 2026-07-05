@@ -16,5 +16,11 @@ synthesise results. The full stage definition and the verify-loop are in
 - **Blocking-question gate:** if the clarify stage surfaces any BLOCKING question, hard-stop
   and ask the user before designing or implementing.
 - **Done gate:** gate-green ≠ requirement-complete. Not done until the independent AC
-  cross-check confirms every acceptance criterion against the authoritative spec.
+  cross-check confirms every acceptance criterion against the authoritative spec, and every
+  non-functional requirement (performance/observability/i18n/availability) is
+  satisfied-with-evidence or explicitly N/A.
 - Skip a stage only with a recorded reason in `progress.md` — never silently drop one.
+- If `.claude/org-memory/` is vendored (a shared, cross-project knowledge repo — see
+  `docs/organization-memory.md`), read it during pre-brief; at wrap-up, propose (never write)
+  any durable, project-agnostic learning as a promotion candidate in `progress.md` for a human
+  to review and PR into that repo.

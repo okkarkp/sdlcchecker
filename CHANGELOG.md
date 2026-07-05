@@ -3,6 +3,38 @@
 All notable changes to the `delivery-team` plugin are recorded here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.1] — 2026-07-05
+
+Ports the 0.3.0/0.4.0 additions (organization memory, non-functional requirements,
+observability design, performance testing, license compliance, rollback drilling) into the
+**GitHub Copilot integration** so both platforms carry the same guarantees — this repo ships
+two front ends (the Claude plugin's `agents/` and the Copilot port's
+`integrations/github-copilot/`) over the same pipeline concepts, and they'd silently drift
+apart otherwise.
+
+### Added
+- `integrations/github-copilot/.github/prompts/deliver.prompt.md` — the master pipeline prompt
+  now captures NFRs at clarify, reads `.claude/org-memory/` at pre-brief, designs an
+  observability note, runs a performance check and license scan where applicable, drills
+  HIGH-RISK rollbacks, and proposes org-memory promotion candidates as step 11.
+- All 11 `.chatmode.md` personas gained the same condensed guidance as their Claude
+  `agents/*.md` counterpart: NFR capture (requirements-analyst), observability design
+  (solution-architect), performance testing (test-engineer), license compliance
+  (security-reviewer), observability wiring + rollback drill + release record
+  (devops-engineer), HIGH-RISK flagging (db-migration-engineer), i18n/locale
+  (frontend-designer, frontend-developer), and org-memory read/propose (orchestrator).
+- `copilot-instructions.md` gained two new house-rule sections (non-functional requirements &
+  operational readiness; organization memory) since they apply to every request, not just one
+  persona.
+- `integrations/github-copilot/README.md`'s fidelity table records both additions as **Full**
+  parity — nothing about the org-memory vendoring pattern or the NFR/observability/license/
+  rollback checks is Claude-specific.
+
+### Verified
+- `python3 -m pytest scripts/ -q` (38 tests, including the Copilot drift guards — every agent
+  still has a matching chatmode, frontmatter/tools stay valid, compliance bands still present)
+  and `python3 scripts/validate_plugin.py` both pass clean after these edits.
+
 ## [0.4.0] — 2026-07-05
 
 Closes coverage gaps identified in a full read-through of all 11 agents: non-functional

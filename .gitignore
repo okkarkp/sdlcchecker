@@ -6,6 +6,10 @@
 *.swp
 *~
 
+# Python bytecode from running scripts/test_*.py locally
+__pycache__/
+*.pyc
+
 # Local, machine-specific agent memory (devops-engineer uses memory: local)
 .claude/agent-memory-local/
 

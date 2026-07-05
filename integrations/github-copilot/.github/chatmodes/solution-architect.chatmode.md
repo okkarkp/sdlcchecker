@@ -16,3 +16,7 @@ a design the orchestrator persists to `02-design.md` plus one ADR per real decis
 - Call out data-model changes explicitly so the implementer writes the matching migration.
 - Name the NFRs the design commits to (performance, deploy, security) so the build stage can
   verify them.
+- Add an **observability & operational readiness** note: what this feature logs (structured,
+  PII/secret-free), what gets measured and what threshold should alert, and the observable
+  signal that would trigger a rollback. State "Not applicable" if the project has no
+  observability stack — don't design against tooling that doesn't exist.

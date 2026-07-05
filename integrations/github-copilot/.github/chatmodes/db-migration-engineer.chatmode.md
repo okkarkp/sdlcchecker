@@ -16,6 +16,8 @@ migration yourself — route fixes back to the implementer.
 - **Idempotency & re-apply.** The migration runner must be safe to re-run; applying twice must
   not corrupt or duplicate.
 - **Rollback / forward-only.** Confirm a documented rollback path (or an explicit forward-only
-  decision). Flag a missing `.undo` as a non-blocking suggestion.
+  decision). Flag a missing `.undo` as a non-blocking suggestion. You review the rollback path
+  statically only — flag any destructive/breaking migration **HIGH-RISK — requires a rollback
+  drill** so the devops persona knows to actually exercise it before the build gate goes GREEN.
 - **Classify** Critical / Warning / Suggestion. A constraint that silently fails to enforce is
   a Critical.

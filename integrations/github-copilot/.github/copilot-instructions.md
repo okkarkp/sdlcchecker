@@ -47,6 +47,21 @@ Enforce the **Compliance bands** declared in the project's `CLAUDE.md` §0. The 
 The security-review persona records every applicable band in a **Compliance coverage** table
 (covered / N-A-with-reason / GAP); a high/critical GAP blocks the change.
 
+## Non-functional requirements & operational readiness
+Every feature captures a non-functional requirements table (performance / observability /
+i18n-locale / availability) at the clarify stage — each row `STATED` / `ASSUMED-DEFAULT` /
+`N/A`, never blank — and the design stage adds an observability plan (logging, alerting, the
+rollback trigger) against it. A HIGH-RISK migration/change (flagged by the schema or security
+review) gets its rollback actually drilled in a scratch environment before build reports
+GREEN, not just reviewed on paper.
+
+## Organization memory (optional, cross-project)
+If the repo vendors a read-only `.claude/org-memory/` (a separate, curated repo of learnings
+shared across projects — see `docs/organization-memory.md` in the delivery-team repo), read
+`MEMORY.md` there during the pre-brief like any other discovered convention. Never write to
+it directly — propose durable, project-agnostic learnings as promotion candidates in
+`progress.md` for a human to review and PR into that repo instead.
+
 ## Honesty (non-negotiable)
 - **Evidence over assertion** — never claim something works without a passing test or a
   reproducible check. Report status honestly: built / partial / deferred — never present a

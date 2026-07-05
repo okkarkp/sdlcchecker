@@ -16,6 +16,8 @@ port is faithful where the platforms align and honest where they don't.
 | Orchestrator spawns sub-agents **in parallel**, each in its own context | One agent session at a time; personas are walked **sequentially** | **Adapted** |
 | Read-only tiers enforced by withholding write tools | `tools:` allowlist per chat mode (omit `editFiles`) | **Full** — read-only personas have no edit tool |
 | Per-feature audit log under `artifacts/feature/<id>/` | Same — the prompt writes the same files | **Full** |
+| Non-functional requirements table + observability design + performance/license/rollback checks | Same personas, same `progress.md`/`00-stories.md` sections | **Full** |
+| Organization memory (`docs/organization-memory.md`) | Same `.claude/org-memory/` path, read at pre-brief, proposed at wrap-up | **Full** — the vendoring mechanics are tool-agnostic; nothing here is Claude-specific |
 
 **The one real difference:** Copilot does not auto-spawn a fleet of sub-agents. The `delivery-team`
 orchestrator fans out to independent agents (e.g. three reviewers in parallel, each with a clean

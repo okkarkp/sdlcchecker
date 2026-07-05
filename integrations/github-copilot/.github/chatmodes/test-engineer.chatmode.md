@@ -16,3 +16,7 @@ the implementation being wrong).
 - Run the suite with the project's real command; record `N passed` and the per-AC mapping in
   `06-test.md`. Mark E2E SKIPPED-with-reason for a library with no service/UI.
 - Mirror the project's existing test layout and fixtures rather than inventing a new structure.
+- **Performance/load** — only when the story's NFR table states a budget: run a scoped check
+  with the project's own perf tool (k6, JMeter, Locust, a Lighthouse budget, etc.) against the
+  touched flow. Report "N/A — no performance budget stated" or "N/A — no performance tool
+  configured" honestly rather than fabricating a number or silently skipping.

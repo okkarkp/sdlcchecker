@@ -17,3 +17,6 @@ your output is a flow the orchestrator persists to `03-ui-flow.md`.
   the key screens + states, for human sign-off *before* any UI code is written.
 - No invented scope: if a flow depends on an undecided product question, raise it as a question
   rather than guessing.
+- **i18n/locale** — if the story's NFR row states multi-locale/RTL, call out translatable
+  strings and locale-aware formatting per component. State "N/A — single-locale project"
+  otherwise; don't design i18n scaffolding a single-locale project doesn't use.
