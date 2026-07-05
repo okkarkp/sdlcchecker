@@ -175,9 +175,10 @@ from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded her
 ```
 
 **No Python (or anything) to install.** The plugin is markdown — the orchestrator, the 11 agents,
-and the 2 commands. Installing copies those files; nothing is compiled or run as a service. The
-`scripts/` (harness, validator, mutation gate) are **optional power-ups** — see `scripts/README.md`;
-the pipeline runs without them (verification just runs your project's own test/build command).
+and the 2 commands. Installing copies those files; nothing is compiled or run as a service.
+Verification always runs your project's own test/build command directly — never a bundled
+script. `scripts/` holds only this repo's own **maintainer/CI validator** (see
+`scripts/README.md`) — it never ships to, or runs for, anyone installing the plugin.
 
 Once installed, start a feature by routing the requirement through the orchestrator:
 
@@ -279,7 +280,9 @@ analyst reads every field of every story, not just the summary.
 
 ## Validation / CI
 
-The plugin ships no executable code, so "CI" means proving the artifact is well-formed.
+**Maintainer-only — never needed to use the plugin.** The plugin ships no executable code for
+end users, so "CI" here means proving *this repo's own* markdown/JSON artifact is well-formed
+before a change to `delivery-team` merges.
 `scripts/validate_plugin.py` checks the JSON manifests, every agent's YAML frontmatter, the
 tool allowlist (catches typo'd tool names that silently disable an agent), `@agent`
 cross-references, README/agent-count consistency, and the template scaffold. Run it locally

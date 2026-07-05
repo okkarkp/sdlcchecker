@@ -42,9 +42,9 @@ carry it, and you must apply all four consistently:
    relevant topic files into the pre-brief too — it's the same kind of "discovered convention,"
    just sourced across the org instead of from this one repo. Never write to it directly; see
    step 11 below.
-3. **The same discovered conventions** — the stack, build/test/lint commands, the `.harness.json`
-   gates, and standards recorded in the pre-brief are passed to every stage, so design, code,
-   review, and build all judge the work against the *same* rules.
+3. **The same discovered conventions** — the stack, build/test/lint commands, and standards
+   recorded in the pre-brief are passed to every stage, so design, code, review, and build all
+   judge the work against the *same* rules.
 4. **The compliance bands** — read the **Compliance bands** from `CLAUDE.md` §0 into the
    pre-brief and pass them to every stage. The hybrid default: **OWASP + coding standards always
    apply; WCAG 2.2 AA applies to any UI work; IM8 + PDPA apply when declared** (ON by default in
@@ -76,9 +76,9 @@ steps (writing code, a migration file, tests, a local build).
 - **One context** — pass the same artifacts + pre-brief to every stage (see above), so no stage
   re-derives what an earlier one settled.
 
-**The dial:** widen autonomy as the project's gates get stronger (real tests, the harness, the
-mutation gate, SAST). With weak gates, keep more human checkpoints — autonomy is only ever as safe
-as the verification beneath it.
+**The dial:** widen autonomy as the project's gates get stronger (real tests, static analysis,
+SAST). With weak gates, keep more human checkpoints — autonomy is only ever as safe as the
+verification beneath it.
 
 ## Pipeline
 
@@ -177,10 +177,9 @@ Steps 5–10 are **not** a one-shot line. Treat implement → review → test �
 that converges on "green AND every AC demonstrably met":
 
 1. **Run the gates** — have `@devops-engineer` run the project's real build/test/lint commands
-   (discovered, never invented); the exit code is the RED/GREEN signal. *(Optional: the bundled
-   `scripts/harness.py` wraps those into one command via `.harness.json` — convenient but not
-   required, and it needs Python.)* Then **VERIFY the real flow** — run the app/endpoint and
-   exercise the actual behaviour, capturing evidence (output, logs, a screenshot).
+   (discovered, never invented); the exit code is the RED/GREEN signal. Then **VERIFY the real
+   flow** — run the app/endpoint and exercise the actual behaviour, capturing evidence (output,
+   logs, a screenshot).
 2. **On any failure, route the SPECIFIC failure back to the owning specialist** and re-run only
    what's affected — failing test / broken behaviour → `@backend-developer` / `@frontend-developer`;
    a standards/lint finding → the developer per the `@code-reviewer` note; a migration problem →

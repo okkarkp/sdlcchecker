@@ -74,10 +74,9 @@ under `artifacts/feature/<ticket>/`.
    budget or tool exists.
 9. **Build + VERIFY** *(persona: devops-engineer)* — run the project's real build/test/lint
    commands (discovered, never invented: `make verify` / `dotnet test` / `npm run check` / …);
-   the exit code is the RED/GREEN signal. *(Optional: the bundled `scripts/harness.py` wraps them
-   into one command via `.harness.json` — convenient, needs Python, not required.)* Then run the
-   app/endpoint and exercise the real flow, capturing evidence. A build that compiles but drops a
-   required config key, or is missing observability wiring the design named, is a failed build.
+   the exit code is the RED/GREEN signal. Then run the app/endpoint and exercise the real flow,
+   capturing evidence. A build that compiles but drops a required config key, or is missing
+   observability wiring the design named, is a failed build.
    For a HIGH-RISK migration/change, **drill the rollback** in a scratch environment before
    reporting GREEN — or record explicitly why it couldn't be drilled.
 10. **AC cross-check (mandatory done gate)** — do an INDEPENDENT adversarial pass (a reviewer

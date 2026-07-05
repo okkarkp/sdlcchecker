@@ -32,5 +32,5 @@ jobs:
         run: |
           python3 -c "import json,sys; json.load(open('.claude-plugin/plugin.json')); json.load(open('.claude-plugin/marketplace.json')); print('manifests OK')"
 
-      - name: Run test suite (gates, contract & drift guards)
+      - name: Run test suite (validator + Copilot-parity drift guards)
         run: python3 -m pytest scripts/ -q

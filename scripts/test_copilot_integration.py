@@ -1,13 +1,10 @@
-"""Drift guards for the GitHub Copilot port and bundled-script duplication.
+"""Drift guards for the GitHub Copilot port.
 
 These keep the Copilot integration honest against the canonical plugin:
-- every agent must have a 1:1 chat-mode persona (a rename mustn't orphan one),
-- every chat mode must declare valid Copilot frontmatter, and
-- the scripts vendored into the integration must stay byte-identical to the
-  canonical ones (they are deliberate copies, not forks).
+- every agent must have a 1:1 chat-mode persona (a rename mustn't orphan one), and
+- every chat mode must declare valid Copilot frontmatter.
 """
 
-import filecmp
 import os
 import re
 import glob
@@ -82,12 +79,7 @@ def test_copilot_instructions_cover_compliance_bands():
     assert not missing, f"copilot-instructions.md missing compliance bands: {missing}"
 
 
-def test_bundled_scripts_are_in_sync_with_canonical():
-    """Vendored copies are deliberate duplicates — they must not silently fork."""
-    for script in ("harness.py", "mutation_gate.py"):
-        canonical = os.path.join(_ROOT, "scripts", script)
-        vendored = os.path.join(_COPILOT, "scripts", script)
-        assert os.path.exists(vendored), f"vendored {script} missing"
-        assert filecmp.cmp(canonical, vendored, shallow=False), (
-            f"{script} has drifted from canonical scripts/{script} — re-copy it"
-        )
+def test_no_bundled_python_scripts_in_copilot_integration():
+    """The Copilot port ships no runtime Python — chatmodes/prompts only."""
+    leftover = glob.glob(os.path.join(_COPILOT, "**", "*.py"), recursive=True)
+    assert not leftover, f"unexpected Python file(s) in the Copilot integration: {leftover}"

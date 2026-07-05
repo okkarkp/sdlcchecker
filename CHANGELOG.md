@@ -3,6 +3,37 @@
 All notable changes to the `delivery-team` plugin are recorded here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] — 2026-07-05
+
+Removes every optional, end-user-facing Python script. The pipeline never told anyone to
+install Python — the scripts were opt-in convenience wrappers — but their presence in the repo
+was confusing for non-technical users deciding whether they needed one. Only this repo's own
+maintainer/CI validator remains, which never ships to or runs for anyone installing the plugin.
+
+### Removed
+- `scripts/{harness,mutation_gate,ac_contract,property_fuzz,secret_scan}.py` and their
+  `test_*.py` files — the optional build-harness, mutation gate, AC-contract checker,
+  property/fuzz tester, and secret scanner. The devops-engineer agent's "Optional — one
+  uniform command" / "Optional — verify the tests themselves" paths are gone; verification is
+  now always the project's own build/test/lint command, full stop.
+- Vendored copies in `integrations/github-copilot/scripts/` and both `harness.example.json`
+  files (root `templates/` and the Copilot integration).
+- `scripts/test_copilot_integration.py`'s bundled-script byte-parity check, replaced with a
+  standing guard: `test_no_bundled_python_scripts_in_copilot_integration` now asserts the
+  Copilot integration ships **zero** `.py` files, so this can't silently regress.
+
+### Kept (unaffected — these never touch an end user)
+- `scripts/validate_plugin.py` + `test_validate_plugin.py` + `test_copilot_integration.py` —
+  this repo's own structural validator and its test suite, run only by
+  `.github/workflows/validate.yml` when `delivery-team` itself is changed. Rewrote
+  `scripts/README.md` to make that maintainer-only scope unambiguous.
+
+### Verified
+- `python3 scripts/validate_plugin.py` and `python3 -m pytest scripts/ -q` (12 tests, down from
+  38) both pass clean.
+- `grep` confirms zero remaining references to any removed script across every `.md`/`.json`/
+  `.yml` file in the repo.
+
 ## [0.4.1] — 2026-07-05
 
 Ports the 0.3.0/0.4.0 additions (organization memory, non-functional requirements,

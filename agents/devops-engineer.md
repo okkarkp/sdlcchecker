@@ -43,22 +43,15 @@ specifics — do not quietly ship a build that ignores the design.
 
 ## Verify the change (run the project's real gates)
 
-**Default — no extra tooling.** Verify by running the project's own quality gates — the
-build/test/lint commands you discovered from `CLAUDE.md`/CI (never invented): e.g. `make verify`,
-`dotnet test`, `npm run check`, `mvn test`, `pytest -q`. Run them, attach the output; the exit
-code is the RED/GREEN signal the verify-loop reads. This needs nothing beyond the project's own
-toolchain — **no Python, no bundled script.**
+Verify by running the project's own quality gates — the build/test/lint commands you
+discovered from `CLAUDE.md`/CI (never invented): e.g. `make verify`, `dotnet test`,
+`npm run check`, `mvn test`, `pytest -q`. Run them, attach the output; the exit code is the
+RED/GREEN signal the verify-loop reads. This needs nothing beyond the project's own
+toolchain — **no bundled script of any kind.** Never edit a gate to force a pass.
 
-**Optional — one uniform command across stacks.** If you want a single entry point, the bundled
-`scripts/harness.py` reads a `.harness.json` and returns one RED/GREEN. It is **delegate-first**:
-wrap the project's existing verify command as one gate (`{"name":"verify","cmd":"make verify"}`),
-so it runs the team's *real* CI, not a parallel copy. It needs Python and is **not required** —
-the pipeline verifies fine without it. Use `--only <gate>` to re-run just the affected gate during
-the loop. Never edit a gate to force a pass.
-
-**Optional — verify the tests themselves** with a mutation gate (`scripts/mutation_gate.py`,
-`required:false`): it edits the code and confirms a test fails, catching the "green suite that
-checks nothing" trap. Prefer a language-native tool (mutmut / Stryker / Pitest) at scale.
+If the project wants test-strength verification beyond the suite passing, that's a
+language-native tool the project itself adopts (mutmut / Stryker / Pitest) — not something
+this plugin bundles.
 
 ## What you do
 
@@ -101,7 +94,7 @@ not a full CAB process, and this plugin doesn't attempt to model one.
 
 Your memory is `project` — the **same shared context** the rest of the pipeline uses, so the
 build/verify view stays consistent with what the other stages saw. Record durable,
-project-level build facts here (the discovered build/test commands, the `.harness.json` gates,
+project-level build facts here (the discovered build/test commands, quality gates,
 container/CI specifics). Keep genuinely host-specific quirks (local paths, a developer's
 toolchain version) out of shared memory — note them in the build report instead. If a
 build/CI convention proves true across projects, flag it to the orchestrator as an
