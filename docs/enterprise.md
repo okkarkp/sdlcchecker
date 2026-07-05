@@ -67,6 +67,13 @@ The pieces above were validated by running each agent's instructions; the follow
    into a project, or run a promotion candidate through an actual human-reviewed PR. Treat
    [`organization-memory.md`](organization-memory.md) as a design, not a proven workflow, until
    one org has run it end-to-end.
+5. **The operational-readiness additions are unexercised.** The NFR capture section
+   (`requirements-analyst` §7), the observability design section (`solution-architect` §9),
+   the performance-test layer (`test-engineer`), the license-compliance check
+   (`security-reviewer`), and the rollback drill (`devops-engineer`) are new instructions, not
+   yet run against a real feature. In particular, the rollback drill assumes a disposable
+   environment exists to safely run a down-migration in — if a project has none, that step
+   degrades to "recorded as not-drillable," which is honest but not a tested guarantee.
 
 Treat the implement→review→test→build half as **pilot-ready with a human gate**, not
 unattended-autonomous, until 1–3 are complete.

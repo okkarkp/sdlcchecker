@@ -20,7 +20,8 @@ cross-module change, new module, or integration.
      orchestrator's codebase findings (including the discovered stack and conventions) and
      overrides any requirements-document references that conflict with the actual code.
    - `00-stories.md` (the BA deliverable — user stories, traceability, role map,
-     state/status machine, platform & data prerequisites, out-of-scope)
+     state/status machine, platform & data prerequisites, **non-functional requirements**,
+     out-of-scope)
    - `00-clarifications.md` (open + decided questions) and `01-assumptions.md`
    - The project's architecture/principles docs and any relevant module `CLAUDE.md`
      (the pre-brief tells you where these are).
@@ -93,7 +94,7 @@ Return clearly separated sections so the orchestrator can split them:
 ## Feature design (02-design.md)
 ```
 
-The feature design note must include **all eight sections**. If a section does not apply
+The feature design note must include **all nine sections**. If a section does not apply
 to this feature (e.g. no workflow for a UI-only change, no new schema for a config tweak),
 write the heading followed by a single line `Not applicable` — do not omit the heading or
 invent content to fill it:
@@ -119,6 +120,18 @@ invent content to fill it:
    delivers them (dev team via migration vs an external team)
 7. **V1 scope boundary** — explicit in-scope / deferred lists
 8. **Open questions tracking** — carry-forward from `00-clarifications.md`
+9. **Observability & operational readiness** — design to the NFRs in `00-stories.md` §7, not
+   just the functional ACs:
+   - **Logging** — what this feature logs at each layer, at what level, and confirmation it
+     is structured and PII/secret-free (ties to the PDPA/IM8 bands).
+   - **Metrics & alerting** — what gets measured (latency, error rate, queue depth, whatever
+     the NFR performance/availability rows call for) and what threshold should page/alert;
+     name the project's existing metrics/alerting mechanism — don't invent a new one.
+   - **Rollback trigger** — the observable signal that would tell an operator this change
+     needs to be rolled back, referenced from the ADR's rollback/consequences note.
+   - If the project has no metrics/alerting infrastructure at all, say so explicitly
+     (`Not applicable — no observability stack in this project`) rather than designing
+     against tooling that doesn't exist.
 
 Accumulate ADRs and cross-module design knowledge in your memory so later features stay
 consistent with decisions already made. If a design precedent holds up across more than one

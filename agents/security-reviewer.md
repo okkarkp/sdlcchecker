@@ -41,6 +41,12 @@ those first.
 - The project's dependency vulnerability scan (OWASP Dependency-Check, `npm audit`,
   `pip-audit`, etc.). Report new high/critical findings. If no scanner is installed/configured,
   report it as **"N/A — not configured"** — never fabricate or imply a clean scan.
+- **License compliance** — if the project has a license scanner configured (`license-checker`,
+  `pip-licenses`, `license-maven-plugin`, FOSSA, etc.), run it scoped to any NEW dependency
+  introduced by this change and flag a copyleft/restricted license (GPL/AGPL family, or
+  whatever the project's policy prohibits — check `CLAUDE.md` / a license-policy doc for the
+  actual list). If no scanner is configured or the project states no license policy, report
+  **"N/A — not configured"**; never guess at a package's license by name alone.
 - **DAST is out of scope** here — it runs against a deployed instance, which does not exist
   at dev time. Note it as deferred; do not attempt it.
 
@@ -92,6 +98,7 @@ SOC2, WCAG), marking each **covered / N-A (with reason) / GAP**:
 | A01 Broken Access Control | covered | authz enforced server-side at <file:line> |
 | A03 Injection | N-A | no untrusted-input sink in this change |
 | PDPA (no PII logged) | covered | logging reviewed, no PII at <file:line> |
+| License compliance | N-A | no new dependency introduced |
 | …                        | GAP  | <what's missing> → blocker if high/critical |
 ```
 

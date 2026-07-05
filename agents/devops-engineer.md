@@ -32,6 +32,12 @@ the code compiles:
   and pipeline.
 - **NFRs the design committed to** (deploy topology, performance/resource budgets, health
   checks) are reflected in the build/container/CI config.
+- **Observability wiring** — `02-design.md`'s "Observability & operational readiness" section
+  (from the solution-architect) names the logging/metrics/alerting the feature needs; confirm
+  those are actually present in the touched module's config (log level/format, a metric
+  emitted, an alert rule if the project has an alerting config file) — not merely designed on
+  paper. If the project has no observability stack to wire into, say so explicitly rather than
+  silently skipping.
 If the design names something the build can't satisfy, report it as a RED build gate with the
 specifics — do not quietly ship a build that ignores the design.
 
@@ -70,6 +76,26 @@ checks nothing" trap. Prefer a language-native tool (mutmut / Stryker / Pitest) 
   config you add is an **optional suggestion to flag**, not something to silently commit.
 - Report the build gate as GREEN or RED (with the failing output) for the orchestrator's
   Gate ledger.
+
+## Rollback drill (high-risk changes only)
+
+If this feature carries a **destructive or breaking migration** (flagged by
+`db-migration-engineer` in `05-review.md`) or a design the ADR marks as a breaking change,
+don't stop at reviewing the rollback plan on paper — **exercise it** in a disposable/scratch
+environment before reporting the build GREEN: run the down-migration (or the deploy
+rollback), confirm the app still starts against the rolled-back schema, and record the
+command + result. If no disposable environment is available to safely drill this, say so
+explicitly — **"rollback not drilled — no scratch environment available"** — rather than
+silently treating the paper plan as sufficient. Low-risk, additive-only changes don't need
+this; use judgement scoped to the ADR's own risk statement.
+
+## Release record
+
+For a feature that reaches the build stage, record a short **release note** alongside the
+build report: what changed (one line per module), the version/tag if the project versions
+builds, and a pointer to the rollback plan (the ADR, or this drill's result). This is the
+minimal change-management record most regulated environments expect before a merge — it is
+not a full CAB process, and this plugin doesn't attempt to model one.
 
 ## Memory
 

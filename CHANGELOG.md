@@ -3,6 +3,44 @@
 All notable changes to the `delivery-team` plugin are recorded here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] — 2026-07-05
+
+Closes coverage gaps identified in a full read-through of all 11 agents: non-functional
+requirements had no capture point, and performance, observability, license compliance,
+rollback drills, and i18n/l10n were never explicitly owned by any stage. All fixes are made
+to the **existing 11-agent roster** — no new specialist added.
+
+### Added
+- **`requirements-analyst`** gains a new deliverable section, **§7 Non-Functional
+  Requirements** (performance / observability / i18n-locale / availability), persisted to a
+  new `## 7. Non-Functional Requirements` section in `00-stories.md`. Every row must be
+  `STATED` / `ASSUMED-DEFAULT` / `N/A` — never blank. Renumbers the deliverable to 11 sections
+  (was 10); orchestrator's persist/validate instructions and handover self-check updated to
+  match.
+- **`solution-architect`** gains a 9th required design-note section, **"Observability &
+  operational readiness"** (logging, metrics/alerting, rollback trigger) — designed against
+  the new NFR table instead of being implicit/easy to skip.
+- **`test-engineer`** gains a 4th test layer, **Performance / load**, run only when the NFR
+  table states a budget, scoped to the touched flow, using the project's own perf tool — "N/A"
+  honestly when no budget or tool exists.
+- **`security-reviewer`** gains a **license-compliance** check alongside the existing CVE scan
+  (flagging copyleft/restricted licenses on new dependencies), with a Compliance-coverage row.
+- **`devops-engineer`** gains **observability-wiring verification** (confirms the design's
+  logging/metrics/alerts are actually present, not just designed), a **rollback drill** for
+  migrations/changes `db-migration-engineer` flags HIGH-RISK (actually exercises the down-path
+  in a scratch environment, or records why it couldn't), and a **release record** (what
+  changed, version, rollback pointer) — a minimal change-management artifact.
+- **`db-migration-engineer`** now explicitly flags destructive/breaking migrations
+  **HIGH-RISK — requires a rollback drill**, handing off the actual drill to
+  `devops-engineer` rather than leaving rollback rigor only reviewed on paper.
+- **`frontend-designer`** / **`frontend-developer`** gain **internationalization/locale**
+  guidance tied to the new NFR row — translatable strings and locale-aware formatting when
+  multi-locale/RTL is stated, explicit "N/A — single-locale" otherwise.
+- **Definition-of-Done** (orchestrator + `progress.md` template) now requires every NFR row to
+  be satisfied-with-evidence or explicitly N/A, and a HIGH-RISK build's rollback drill to have
+  run (or be recorded as not-drillable).
+- Fixed a pre-existing miscount in `orchestrator.md` ("Three things carry it" listing four).
+
 ## [0.3.0] — 2026-07-05
 
 Three-tier memory model: durable, auditable knowledge at project scope **and** organization

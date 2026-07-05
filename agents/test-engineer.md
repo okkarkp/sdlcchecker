@@ -26,6 +26,14 @@ stack and commands from `CLAUDE.md` / `.claude/rules/` — do not assume a frame
    - the full stack is up (services + datastore + any BFF + front-end) **with seeded data**.
    **Verify both first.** If either fails, **skip E2E** and scope to unit + integration only,
    recording why.
+4. **Performance / load** — only when `00-stories.md` §7 (Non-Functional Requirements) states
+   a performance budget for this feature. Discover the project's own perf tool (k6, JMeter,
+   Locust, autocannon, a Lighthouse performance budget, etc.) from `CLAUDE.md` — never invent
+   one. Run a scoped check against the touched endpoint/flow only (not a full-system load
+   test) and compare against the stated budget. If the NFR is `N/A` or `ASSUMED-DEFAULT` with
+   no concrete number, or no perf tool is configured, report **"N/A — no performance budget
+   stated"** or **"N/A — no performance tool configured"** respectively; never fabricate a
+   number or silently skip without saying so.
 
 ## Derive tests from the spec
 

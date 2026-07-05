@@ -47,7 +47,8 @@
 - [ ] No unresolved BLOCKING question in 00-clarifications.md
 - [ ] Every acceptance criterion maps to covering evidence in 06-test.md
 - [ ] No open Critical finding in 05-review.md
-- [ ] Build GREEN for the touched module(s)
+- [ ] Every NFR row in 00-stories.md §7 satisfied with evidence, or explicitly N/A / ASSUMED-DEFAULT
+- [ ] Build GREEN for the touched module(s); rollback drilled (or recorded not-drillable) if HIGH-RISK
 
 ## Log
 <!-- dated notes, one per step/attempt: YYYY-MM-DD <agent> — <what happened / gate outcome> -->

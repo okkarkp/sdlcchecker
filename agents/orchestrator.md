@@ -253,7 +253,7 @@ the document's top-level heading.
 - requirements-analyst → split the single returned document by section:
   - Feature Overview, Requirements Traceability, Roles & Permissions, User Stories
     (Story Index + anchored stories), State/Status Machine, Platform & Data
-    Prerequisites, and Out of Scope → `00-stories.md`
+    Prerequisites, Non-Functional Requirements, and Out of Scope → `00-stories.md`
   - Open Questions + Decided Questions → `00-clarifications.md`
   - Assumptions register → `01-assumptions.md`
   Write each section verbatim into its target file — do not paraphrase, and preserve
@@ -275,11 +275,13 @@ Tier-2 reviewers (code/security/db-migration) write their own `05-review.md` —
 
 **Validate before you persist (never commit a malformed artifact).** Before writing an
 advisory agent's output, check it is complete against that agent's contract:
-- requirements-analyst → all 10 deliverable sections present (Overview, Traceability, Roles,
-  User Stories, State Machine, Prerequisites, Assumptions, Decided, Open Questions, Out of
-  Scope), every story anchored and linked to ≥1 source AC, no `TBD`/empty AC. (The pause
-  protocol returning blocking questions only is a valid exception — handle it at the gate.)
-- solution-architect → at least one `## ADR-NNNN:` block AND all eight design-note sections
+- requirements-analyst → all 11 deliverable sections present (Overview, Traceability, Roles,
+  User Stories, State Machine, Prerequisites, Non-Functional Requirements, Assumptions,
+  Decided, Open Questions, Out of Scope), every story anchored and linked to ≥1 source AC,
+  no `TBD`/empty AC, and no blank row in the NFR table (each row is `STATED` /
+  `ASSUMED-DEFAULT` / `N/A` with a reason — never empty). (The pause protocol returning
+  blocking questions only is a valid exception — handle it at the gate.)
+- solution-architect → at least one `## ADR-NNNN:` block AND all nine design-note sections
   present (each either filled or explicitly `Not applicable`).
 - frontend-designer → `## Screen flow`, `## Component spec`, `## Design tokens` all present.
 
@@ -303,8 +305,8 @@ What makes a gate `RED`, and the bounded remediation loop for each:
 | Schema review | db-migration-engineer returns a **Critical** finding | re-spawn `@backend-developer` with the findings; re-run the gate |
 | Code review | code-reviewer returns a **CRITICAL** or **HIGH** (an unreachable/unmet requirement), or a linter/coverage gate fails | re-spawn the owning developer with the findings; re-run |
 | Security review | a new **high/critical** vuln or any **Critical** finding | re-spawn the owning developer; re-run the security gate |
-| Test | any test fails, or a required layer can't run for a fixable reason | re-spawn the developer to fix code or the test-engineer to fix the test; re-run |
-| Build | the touched-module build fails, or a required config key/dependency is missing | re-spawn `@devops-engineer` (or the developer for a code fix); re-rebuild |
+| Test | any test fails, a required layer can't run for a fixable reason, or a stated performance budget is missed | re-spawn the developer to fix code or the test-engineer to fix the test; re-run |
+| Build | the touched-module build fails, a required config key/dependency is missing, or observability wiring named in the design is absent | re-spawn `@devops-engineer` (or the developer for a code fix); re-rebuild |
 
 **Bounded loop.** Re-spawn at most **twice** per gate (3 attempts total). On each retry, pass
 the *specific* findings/output, not "try again". If a gate is still `RED` after the loop is
@@ -329,7 +331,11 @@ Do not change `progress.md`'s `status:` from `IN PROGRESS` to `DONE` until ALL h
   requirement that isn't reachable by a real user).
 - The **Compliance coverage** table covers every applicable band (OWASP + coding standards
   always; WCAG for UI; IM8 + PDPA when declared) with no high/critical **GAP**.
-- Build for the touched module(s) is `GREEN`.
+- Every row in `00-stories.md` §7 (Non-Functional Requirements) is either satisfied with
+  evidence (a performance-test result, a wired alert, an i18n implementation) or explicitly
+  `N/A`/`ASSUMED-DEFAULT` with a stated reason — none silently ignored downstream.
+- Build for the touched module(s) is `GREEN`. For a HIGH-RISK migration/breaking change, the
+  rollback drill has run (or is explicitly recorded as not-drillable, with a reason).
 
 If any item fails, the feature is **PARTIAL**, not DONE — say so honestly in `progress.md`
 and list exactly what remains. A green-looking log that hides a `RED` gate or an untested AC

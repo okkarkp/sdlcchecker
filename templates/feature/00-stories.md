@@ -2,8 +2,8 @@
 
 > Author: requirements-analyst (returned output, persisted by orchestrator).
 > BA deliverable: traceability, roles, anchored user stories, state machine,
-> prerequisites, out-of-scope. Open/Decided questions live in 00-clarifications.md;
-> the assumptions register lives in 01-assumptions.md.
+> prerequisites, non-functional requirements, out-of-scope. Open/Decided questions
+> live in 00-clarifications.md; the assumptions register lives in 01-assumptions.md.
 
 ## 1. Feature Overview
 
@@ -58,7 +58,16 @@
 - **Platform prerequisites:** shared-infra changes as their own prerequisite story (e.g. XX-US-00).
 - **Data prerequisites:** seed data / config / new role records / templates — named, with owner.
 
-## 7. Out of Scope
+## 7. Non-Functional Requirements
+
+| Category | Requirement | Source | Status |
+|---|---|---|---|
+| Performance | … | … | STATED / ASSUMED-DEFAULT / N/A |
+| Observability | … | … | STATED / ASSUMED-DEFAULT / N/A |
+| Internationalization / locale | … | … | STATED / ASSUMED-DEFAULT / N/A |
+| Availability / reliability | … | … | STATED / ASSUMED-DEFAULT / N/A |
+
+## 8. Out of Scope
 
 - Deferred: …
 - Possibly mis-categorised (flag, don't drop): …

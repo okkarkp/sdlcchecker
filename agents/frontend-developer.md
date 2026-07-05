@@ -38,6 +38,14 @@ Use the app's own tooling for typecheck/lint/test (discover it from `CLAUDE.md`;
 commands). Verify previewable changes actually render correctly rather than asking the user to
 check manually.
 
+## Internationalization / locale
+
+If `03-ui-flow.md` calls for multi-locale/RTL support, implement against the project's
+existing i18n framework (translation keys, not hardcoded user-facing strings; locale-aware
+date/number/currency formatting via the project's existing utilities). If the spec states
+single-locale (`N/A`), implement plain literals — don't introduce i18n scaffolding the
+project doesn't otherwise use.
+
 ## Accessibility (WCAG 2.2 AA — always applies to UI)
 
 Implement the accessibility requirements from `03-ui-flow.md`: semantic elements, programmatic

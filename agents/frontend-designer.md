@@ -135,6 +135,15 @@ current codebase. Reused components must match names found in step 2 of "What yo
 - New constants to add (permissions, feature flags) — show the exact key/value format
   matching the existing file structure confirmed in step 2.
 
+### Internationalization / locale requirements
+Check `00-stories.md` §7 (Non-Functional Requirements) for the feature's locale scope. If it
+states multi-locale or RTL support, call out in each component spec entry: which strings are
+translatable (no copy baked into a component as a literal), locale-aware date/number/currency
+formatting, and layout that survives text-length variance and RTL mirroring if applicable. If
+the NFR row says single-locale (`N/A`) or the project has no i18n framework, state
+**"N/A — single-locale project"** and design plain literals — don't add i18n scaffolding a
+single-locale project doesn't use.
+
 ### Accessibility requirements (WCAG 2.2 AA — applies to all UI)
 Design to **WCAG 2.2 AA** from the start (always-on for any UI; far cheaper than a retrofit).
 Add an **Accessibility** line to each component spec entry and call out anything that can't

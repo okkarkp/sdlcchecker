@@ -133,16 +133,16 @@ from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded her
 | Agent | Stage | Responsibility | Tools |
 |---|---|---|---|
 | **orchestrator** | all | Breaks the requirement into tasks, spawns specialists, owns the feature log, runs resume/checkpoint logic | Agent, Read, Edit, Write, Bash, Grep, Glob, WebSearch |
-| **requirements-analyst** | clarify | Clarification questions + explicit assumptions register before any design | **read-only** (Read, Grep, Glob) |
-| **solution-architect** | design | Architectural decisions, ADRs, cross-module design | **read-only** (Read, Grep, Glob, WebSearch) |
+| **requirements-analyst** | clarify | Clarification questions, explicit assumptions register, and a non-functional-requirements table (performance/observability/i18n/availability) before any design | **read-only** (Read, Grep, Glob) |
+| **solution-architect** | design | Architectural decisions, ADRs, cross-module design, and an observability/operational-readiness plan | **read-only** (Read, Grep, Glob, WebSearch) |
 | **frontend-designer** | design | UI-flow, screen specs, design tokens | **read-only** (Read, Glob, Grep) |
 | **backend-developer** | implement | Server-side code; authors an entity **and** its schema migration together | Read, Edit, Write, Bash, Grep, Glob |
 | **frontend-developer** | implement | Client-side code and any BFF/middleware | Read, Edit, Write, Bash, Grep, Glob |
-| **db-migration-engineer** | review | Schema-review gate over the migrations the backend authored | Read, Grep, Glob, Bash, Write |
+| **db-migration-engineer** | review | Schema-review gate over the migrations the backend authored; flags destructive changes HIGH-RISK for the devops rollback drill | Read, Grep, Glob, Bash, Write |
 | **code-reviewer** | review | Coding-standards review + runs the project's real linters/scanners | Read, Grep, Glob, Bash, Write |
-| **security-reviewer** | review | OWASP Top 10, auth, secrets + dependency scan | Read, Grep, Glob, Bash, Write |
-| **test-engineer** | test | Unit + integration tests; E2E when the stack is up | Read, Edit, Write, Bash, Grep, Glob |
-| **devops-engineer** | build | Build, container, CI/CD for the touched module(s) | Bash, Read, Edit, Write |
+| **security-reviewer** | review | OWASP Top 10, auth, secrets, dependency + license-compliance scan | Read, Grep, Glob, Bash, Write |
+| **test-engineer** | test | Unit + integration tests; E2E when the stack is up; performance/load tests when an NFR budget is stated | Read, Edit, Write, Bash, Grep, Glob |
+| **devops-engineer** | build | Build, container, CI/CD for the touched module(s); observability wiring, rollback drills, and a release record | Bash, Read, Edit, Write |
 
 ## Write-scope tiering (hook-free)
 

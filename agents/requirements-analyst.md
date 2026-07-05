@@ -136,23 +136,42 @@ do not pretend a named enum already exists.
   seed data, config entries, new role records, template files — as NAMED deliverables
   with an owner. These are easy to miss and block go-live.
 
-### 7. Assumptions
+### 7. Non-Functional Requirements
+A table, one row per NFR category — this is what lets the solution-architect design to a
+budget, the test-engineer write a real performance test, and the devops-engineer wire real
+alerts, instead of each of them guessing or silently skipping:
+
+| Category | Requirement | Source | Status |
+|---|---|---|---|
+| Performance | e.g. p95 &lt; 300ms at N req/s, or a stated dataset size the UI must stay responsive at | spec ref, or "not specified" | STATED / ASSUMED-DEFAULT / N/A |
+| Observability | what must be logged/audited, alerting expectations for failures on this path | spec ref, or "not specified" | STATED / ASSUMED-DEFAULT / N/A |
+| Internationalization / locale | single-locale or multi-locale; RTL needed? | spec ref, or the project's stated locale scope | STATED / ASSUMED-DEFAULT / N/A |
+| Availability / reliability | uptime target, degraded-mode behaviour, if stated | spec ref, or "not specified" | STATED / ASSUMED-DEFAULT / N/A |
+
+Never leave a row blank. If the spec doesn't state a category, don't invent a number —
+record `ASSUMED-DEFAULT` with the project's existing baseline (check `CLAUDE.md` §0 /
+existing NFR docs first) or `N/A` with a one-line reason (e.g. "single-locale project per
+CLAUDE.md — i18n not applicable"). An NFR marked `ASSUMED-DEFAULT` also gets an entry in
+§8 Assumptions so it's confirmable later. This table, not prose buried in the overview, is
+what downstream agents design/test/build against.
+
+### 8. Assumptions
 Numbered and anchored (`<a id="ASSUMPTION-N"></a>`). Each assumption states what
 you'd proceed on and which question it covers. Tag provenance (see §Provenance).
 Mark anything that needs domain/policy sign-off as `(ASSUMED — requires <owner>
 validation before go-live)`.
 
-### 8. Decided Questions
+### 9. Decided Questions
 Questions you resolved (non-blocking, or answered by the user). Keep the original
 Q-ID for traceability. Each entry: the question, the **decision**, the **rationale**,
 the **options considered**, and a **provenance tag** (see §Provenance). This section
 is SEPARATE from open questions so a reviewer can see what was settled and by whom.
 
-### 9. Open Questions
+### 10. Open Questions
 Only genuinely unresolved questions. Each anchored, each tagged BLOCKING or
 NON-BLOCKING. If empty, say so explicitly.
 
-### 10. Out of Scope
+### 11. Out of Scope
 List (a) requirements explicitly deferred, (b) requirements that look
 mis-categorised (flag, don't silently drop), and (c) things the feature
 deliberately does NOT handle. This is your main defence against scope creep.
@@ -187,6 +206,7 @@ Before returning, verify and FIX (or explicitly flag) each of these:
 - Every cross-cutting/shared change has an owning prerequisite story.
 - Every required seed/config/role/template is listed as a data prerequisite.
 - Every non-blocking question is decided (with options); every blocking one is escalated.
+- Every NFR category in §7 has a row — none blank, none silently skipped.
 
 ## Pause protocol (gate before design)
 
