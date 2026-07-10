@@ -3,6 +3,19 @@
 All notable changes to the `delivery-team` plugin are recorded here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.1] — 2026-07-10
+
+Hardens the agent-by-agent path against missing inputs.
+
+### Added
+- **Input precondition guard on every specialist agent** (and its Copilot chat mode). Before it
+  runs, each agent confirms it has the input the stage needs; if given only a ticket it resolves
+  the input by convention from `artifacts/feature/<ticket>/`, and if the input is missing or
+  ambiguous it stops and asks rather than producing output from empty context. Mirrors the guard
+  the `requirements-analyst` already had, so a direct single-agent call can no longer lose context
+  and return an invalid result. (`/deliver` was never affected — the orchestrator feeds each stage
+  its inputs.)
+
 ## [0.6.0] — 2026-07-10
 
 Adds a client-deliverables step. The pipeline's artefacts stay `.md` (the context spine every
