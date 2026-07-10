@@ -4,8 +4,8 @@ description: >
   Render a feature's markdown spine into client-ready deliverables (Excel, Word, PDF) under
   artifacts/feature/<ticket>/deliverables/. Read-only over the spine — it maps structured .md
   sections to the target format and fills a client template if one is present. Never edits the
-  source .md. Auto-detects the conversion tier: polished (pandoc + openpyxl) when those tools
-  are installed, or import-ready (CSV + self-contained HTML) when they are not, so it works on
+  source .md. Auto-detects the conversion tier: polished (pandoc + openpyxl) when the tools are
+  installed, or import-ready (CSV + self-contained HTML) when they are not, so it works on
   locked / air-gapped machines with no internet.
 tools: Read, Write, Bash, Grep, Glob
 model: inherit
@@ -29,24 +29,22 @@ From `artifacts/feature/<ticket>/`, read whichever are present: `00-stories.md`,
 `02-design.md` (+ any `ADR-*.md` / decisions), `03-ui-flow.md`, `06-test.md`, `05-review.md`,
 `progress.md`. Note which are missing — they are skipped, not fabricated.
 
-## 2. Detect the tier and convert
+## 2. Detect the tier
 
-This plugin ships **no conversion scripts** — you run the conversion yourself with whatever is
-on the machine:
+- **Tier A — polished** (preferred): `pandoc` is on PATH → md → `.docx` / `.pdf`; a Python 3
+  with `openpyxl` is available → tables → `.xlsx`; a diagram renderer is available → embed the
+  architecture diagram as PNG.
+- **Tier B — import-ready** (fallback, needs nothing): write `.csv` for anything tabular
+  (opens directly in Excel) and self-contained `.html` for documents (open in Word → Save As
+  `.docx`/`.pdf`). Also mention the platform-native path if relevant (e.g. ServiceNow / Jira
+  export to Excel/PDF). Generate a short `deliverables/HOW-TO-PUBLISH.md` with the exact
+  manual steps.
 
-- **Tier A — polished** (preferred): if `pandoc` is on PATH, render documents md → `.docx` /
-  `.pdf` (pass a client reference doc for branding, see step 4); if Python 3 with `openpyxl`
-  is available, build tables → `.xlsx`; embed the architecture diagram as PNG when a renderer
-  is present.
-- **Tier B — import-ready** (fallback, needs nothing): write `.csv` for anything tabular (it
-  opens directly in Excel) and self-contained `.html` for documents (open in Word → Save As
-  `.docx` / `.pdf`). Also mention the platform-native path if relevant (e.g. ServiceNow / Jira
-  export to Excel / PDF). Write a short `deliverables/HOW-TO-PUBLISH.md` with the exact manual
-  steps.
-
-Detect with `command -v pandoc`, `python3 -c "import openpyxl"`. Choose per-artefact — you may
-produce a polished `.xlsx` and a fallback `.html` in the same run. Always tell the user which
-tier each deliverable used.
+If your installed suite ships helper scripts under `scripts/publish/`, prefer them for the
+mechanical conversions; otherwise run the equivalent pandoc / openpyxl inline, or write the
+CSV / HTML directly. Detect with `command -v pandoc`, `python3 -c "import openpyxl"`. Pick
+per-artefact — you may produce a polished `.xlsx` and a fallback `.html` in the same run.
+Always tell the user which tier each deliverable used.
 
 ## 3. Map spine → deliverable
 
@@ -70,7 +68,7 @@ tier each deliverable used.
   document** so Word/PDF inherit the client's fonts, headers, footers and cover page.
 - If `templates/client/workbook-template.xlsx` exists, fill its named sheets/columns rather
   than creating a bare workbook.
-- If neither exists, use pandoc's / openpyxl's own clean defaults.
+- If neither exists, use the clean default in `templates/deliverables/`.
 
 ## 5. Report
 

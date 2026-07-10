@@ -4,8 +4,9 @@
 keeps deliverables neat and readable without any client branding.
 
 **No binary default assets are needed here.** The `deliverables-packager` renders output with
-whatever is on the machine — pandoc's own clean defaults for Word/PDF, openpyxl's for Excel,
-and plain CSV/HTML when neither is installed (the offline path).
+whatever is on the machine — pandoc's clean defaults for Word/PDF, openpyxl's for Excel, and
+plain CSV/HTML when neither is installed (the offline path). If your suite ships helper scripts
+under `scripts/publish/`, they are used for the mechanical conversions.
 
 To brand the output, don't add anything here — drop the client's `report-template.docx` /
 `workbook-template.xlsx` into `../client/` (see that folder's README). If you want a house

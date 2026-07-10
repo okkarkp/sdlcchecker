@@ -22,17 +22,17 @@ From `artifacts/feature/<ticket>/`, read whichever are present: `00-stories.md`,
 `02-design.md` (+ ADRs), `03-ui-flow.md`, `06-test.md`, `05-review.md`, `progress.md`. Note
 missing ones — skipped, not fabricated.
 
-## 2. Detect the tier and convert
-No conversion scripts ship with this plugin — run the conversion yourself with what's on the
-machine:
-- **Tier A — polished:** `pandoc` on PATH → md → `.docx`/`.pdf` (reference doc for branding);
-  Python 3 + `openpyxl` → tables → `.xlsx`; diagram renderer → embed architecture PNG.
+## 2. Detect the tier
+- **Tier A — polished:** `pandoc` on PATH → md → `.docx`/`.pdf`; Python 3 + `openpyxl` →
+  tables → `.xlsx`; diagram renderer → embed architecture PNG.
 - **Tier B — import-ready (needs nothing):** `.csv` for tables (opens in Excel), self-contained
   `.html` for docs (Word → Save As `.docx`/`.pdf`). Note the platform-native path (ServiceNow /
   Jira export) where relevant, and write a short `deliverables/HOW-TO-PUBLISH.md`.
 
-Detect with `command -v pandoc`, `python3 -c "import openpyxl"`. Choose per-artefact; always
-tell the user which tier each deliverable used.
+If your suite ships helper scripts under `scripts/publish/`, prefer them; otherwise run the
+equivalent pandoc / openpyxl inline, or write CSV / HTML directly. Detect with `command -v
+pandoc`, `python3 -c "import openpyxl"`. Choose per-artefact; always tell the user which tier
+each deliverable used.
 
 ## 3. Map spine → deliverable
 - `00-stories.md` → **User story register** (Excel/CSV): Epic, ID, Story, Acceptance criteria,
@@ -42,13 +42,12 @@ tell the user which tier each deliverable used.
 - `03-ui-flow.md` → **UI flow spec** (Word/PDF).
 - `06-test.md` → **Test cases** (Excel/CSV): TC, Story, Scenario, Type, Expected, Result.
 - cross-links → **Traceability matrix** (Excel/CSV): requirement → story → design → code → test.
-- `05-review.md` + the project's security / accessibility / privacy baselines → **Compliance
-  evidence pack** (Word/PDF).
+- `05-review.md` + the project's security / accessibility / privacy baselines → **Compliance evidence pack** (Word/PDF).
 
 ## 4. Client template
 If `templates/client/report-template.docx` / `workbook-template.xlsx` exist, inherit them
-(reference doc for Word/PDF; fill named sheets for Excel). Otherwise use pandoc's / openpyxl's
-clean defaults.
+(reference doc for Word/PDF; fill named sheets for Excel). Otherwise use
+`templates/deliverables/` defaults.
 
 ## 5. Report
 List every file written under `deliverables/`, the tier per file, and the one manual step for
