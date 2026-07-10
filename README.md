@@ -12,7 +12,7 @@ project's `CLAUDE.md` and `.claude/rules/`. To tune it for a specific project, a
 [`rules/`](rules/) for starters). Project-specific overlays live in the consuming project,
 not in this repo.
 
-> **Maturity.** Of the 11 agents, the *advisory* trio (requirements-analyst,
+> **Maturity.** Of the 11 delivery agents, the *advisory* trio (requirements-analyst,
 > solution-architect, frontend-designer) plus the orchestrator-as-router have been exercised
 > in practice; the *implementation/review/test/build* half has not been run end-to-end yet.
 > Treat that half as untested until you've trialled it. See [`docs/architecture.md`](docs/architecture.md).
@@ -128,7 +128,11 @@ specialists to spawn (or `@`-mention one for a one-off). The stack-specific deta
 specialist uses (build tool, migration framework, test stack, lint/SAST tooling) are discovered
 from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded here.
 
-## The roster (11 agents)
+## The roster (12 agents)
+
+> The first 11 are the delivery pipeline (orchestrator + 10 specialists). The
+> **deliverables-packager** is a separate, read-only publishing utility, run via `/publish`
+> after delivery — not part of the six-stage flow.
 
 | Agent | Stage | Responsibility | Tools |
 |---|---|---|---|
@@ -143,6 +147,7 @@ from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded her
 | **security-reviewer** | review | OWASP Top 10, auth, secrets, dependency + license-compliance scan | Read, Grep, Glob, Bash, Write |
 | **test-engineer** | test | Unit + integration tests; E2E when the stack is up; performance/load tests when an NFR budget is stated | Read, Edit, Write, Bash, Grep, Glob |
 | **devops-engineer** | build | Build, container, CI/CD for the touched module(s); observability wiring, rollback drills, and a release record | Bash, Read, Edit, Write |
+| **deliverables-packager** | publish | Renders the `.md` spine into client-ready Excel/Word/PDF under `deliverables/` (via `/publish`); fills a client template if present. Read-only over the spine — never edits it | Read, Write, Bash, Grep, Glob (writes `deliverables/` only) |
 
 ## Write-scope tiering (hook-free)
 
@@ -174,7 +179,7 @@ from the consuming project's `CLAUDE.md` and `.claude/rules/`, not hardcoded her
 /plugin install delivery-team@acnhps-agents
 ```
 
-**No Python (or anything) to install.** The plugin is markdown — the orchestrator, the 11 agents,
+**No Python (or anything) to install.** The plugin is markdown — the orchestrator, the agents,
 and the 2 commands. Installing copies those files; nothing is compiled or run as a service.
 Verification always runs your project's own test/build command directly — never a bundled
 script. `scripts/` holds only this repo's own **maintainer/CI validator** (see

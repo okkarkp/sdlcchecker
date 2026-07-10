@@ -3,6 +3,27 @@
 All notable changes to the `delivery-team` plugin are recorded here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.0] — 2026-07-10
+
+Adds a client-deliverables step. The pipeline's artefacts stay `.md` (the context spine every
+stage reads and writes), but clients need Excel / Word / PDF — so a new read-only step renders
+the spine into those formats without ever editing it.
+
+### Added
+- **`deliverables-packager` agent** (read-only) + **`/publish <ticket>` command** — render the
+  `.md` spine under `artifacts/feature/<ticket>/` into client formats in `deliverables/`:
+  user stories → Excel, design/architecture/UI-flow/compliance → Word/PDF, tests and
+  traceability → Excel. Maps only what the `.md` contains; never invents content.
+- **Tiered, offline-safe conversion:** polished output where `pandoc` / `openpyxl` are present,
+  import-ready CSV + self-contained HTML (Word → *Save As*) where they are not. No internet,
+  nothing to install — consistent with 0.5.0's no-shipped-scripts stance (the agent runs the
+  conversion inline; no Python scripts are added to the plugin).
+- **Client-template convention:** `templates/client/` (drop in `report-template.docx` /
+  `workbook-template.xlsx` for branding) and a `templates/deliverables/` default, each with a
+  README.
+- GitHub Copilot: matching `deliverables-packager` chat mode and `/publish` prompt.
+- `/deliver` now points to `/publish` for client deliverables.
+
 ## [0.5.0] — 2026-07-05
 
 Removes every optional, end-user-facing Python script. The pipeline never told anyone to

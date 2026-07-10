@@ -110,3 +110,8 @@ State where it stopped — a gate, DONE, or escalated — and point to
 is satisfied-with-evidence or explicitly N/A, a HIGH-RISK rollback has been drilled (or
 recorded as not-drillable), AND the AC cross-check confirms every acceptance criterion. Report
 built / partial / blocked truthfully.
+
+## Client deliverables
+The pipeline writes the `.md` spine (the source of truth). To hand something to the client —
+user stories in Excel, the design/architecture spec in Word/PDF — run the `/publish` prompt
+afterwards. It renders the `.md` into Office/PDF and never edits the source.

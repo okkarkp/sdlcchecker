@@ -29,3 +29,7 @@ Do this:
 
 Honesty rule: a feature is done only when the gates are green AND the AC cross-check confirms every
 acceptance criterion against the authoritative spec. Report built / partial / blocked truthfully.
+
+Client deliverables: the pipeline writes the `.md` spine (the source of truth). To hand something
+to the client — user stories in Excel, the design/architecture spec in Word/PDF — run
+`/publish <ticket>` afterwards. It renders the `.md` into Office/PDF and never edits the source.
