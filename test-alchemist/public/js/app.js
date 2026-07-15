@@ -2334,6 +2334,12 @@ function loadSettings() {
       const el = document.getElementById(elId);
       if (el && saved[key]) el.value = saved[key];
     });
+    // Ensure each model dropdown shows a valid selection — a blank model select is
+    // confusing (the header shows a model but Settings looked empty).
+    ['settModelClaude', 'settModelOpenai', 'settModelGemini', 'settModelCopilot'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.selectedIndex < 0) el.selectedIndex = 0;
+    });
     // Restore active provider card + fields
     selectProvider(saved.activeProvider || 'copilot');
     updateProviderBadge();

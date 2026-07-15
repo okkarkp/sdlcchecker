@@ -51,6 +51,7 @@
       <span class="header-pill proj" id="projectStatusPill"><span class="dot"></span><span id="projectStatusLabel">Project · —</span></span>
       <span class="header-pill xray" id="xrayStatusPill" style="display:none"><span class="dot"></span>Xray · connected</span>
       <span class="hdr-ai" title="Active AI provider and model — changes apply immediately">
+        <span class="hdr-ai-label" style="font-size:10px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;letter-spacing:.5px">AI</span>
         <select id="hdrProvider" class="hdr-select" onchange="onHeaderProviderChange(this.value)" aria-label="AI provider">
           <option value="claude">🟣 Claude</option>
           <option value="openai">🟢 ChatGPT</option>
@@ -1637,6 +1638,10 @@
 
     <!-- AI Provider settings -->
     <div id="settings-ai">
+
+      <div class="screen-hint" style="margin-bottom:16px">
+        Choose the AI that powers generation, and its model. <b>No key?</b> Pick <b>Claude</b> and leave the key blank to use the local Claude CLI, or <b>Copilot</b> to use the VS&nbsp;Code bridge — both keyless. <b>Custom</b> connects Azure OpenAI, an internal gateway, or a local model. Changes apply immediately and mirror the header switcher.
+      </div>
 
       <!-- Provider selector cards -->
       <div class="form-group">
