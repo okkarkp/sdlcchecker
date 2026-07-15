@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/styles.css?v=62" />
+  <link rel="stylesheet" href="/css/styles.css?v=64" />
   <link rel="stylesheet" href="/css/perfforge.css?v=1" />
   <!-- Prism syntax highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
@@ -216,6 +216,7 @@
 
     <!-- STEP 2: Collect Inputs ─────────────────────────────────────────── -->
     <div class="step-panel" id="step2">
+      <div class="screen-hint">Name this run, point it at the app under test, then add your requirements — <b>upload files</b> or <b>fill a tab</b> below. When you're done, continue to <b>Scenarios</b>.</div>
       <div class="card">
         <div class="card-header">
           <div class="card-title">📥 Step 2 — Collect Requirements &amp; Inputs</div>
@@ -383,6 +384,7 @@
 
     <!-- STEP 3: Test Scenarios ─────────────────────────────────────────── -->
     <div class="step-panel" id="step3">
+      <div class="screen-hint">Review the AI-generated <b>scenarios</b>. Edit or remove any, then <b>generate test cases</b> from them.</div>
 
       <!-- ── 3-column workspace matching mockup ──────────────────────── -->
       <div class="maincard">
@@ -432,6 +434,7 @@
 
     <!-- STEP 4: Test Cases ─────────────────────────────────────────────── -->
     <div class="step-panel" id="step4">
+      <div class="screen-hint">Review the detailed <b>test cases</b> — refine steps and test data. Then <b>publish to Jira</b> or <b>build Playwright</b> scripts.</div>
 
       <!-- ── 3-column workspace matching mockup ──────────────────────── -->
       <div class="maincard">
@@ -484,6 +487,7 @@
 
     <!-- STEP 5: Jira Publisher ──────────────────────────────────────────────── -->
     <div class="step-panel" id="step5">
+      <div class="screen-hint">Publish your selected <b>test cases</b> to <b>Jira / Xray</b>. Check the connection in ⚙ Settings if it isn't linked.</div>
 
       <!-- ── TC selection summary banner ───────────────────────────────────── -->
       <div id="jiraTcSummary" class="jira-tc-summary" style="margin-bottom:14px">
@@ -647,6 +651,7 @@
 
     <!-- STEP 6: Playwright Scripts ─────────────────────────────────────────── -->
     <div class="step-panel" id="step6">
+      <div class="screen-hint">Generate <b>Playwright</b> automation from your test cases, then run or record scripts against the app.</div>
 
       <!-- ── Unified Playwright Automation ───────────────────────────────────── -->
       <div class="card pw-lib-card" style="margin-bottom:16px">
@@ -772,6 +777,7 @@
 
     <!-- STEP 7: Pipeline & Scheduler ───────────────────────────────────── -->
     <div class="step-panel" id="step7">
+      <div class="screen-hint">Trigger a <b>CI pipeline</b> to run your tests, or <b>schedule</b> recurring runs. PerfForge below runs standalone performance tests.</div>
 
       <!-- ── Pipeline ──────────────────────────────────────────────────── -->
       <div class="card" style="margin-bottom:16px">

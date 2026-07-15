@@ -333,19 +333,10 @@ body::after {
 }
 
 /* ── Nav Rail Sidebar (74px icon-only) ──────────────────────────── */
+/* Left icon rail removed — the top progress strip (.flow) is the single, labelled
+   navigation, so there's one clear "where am I" instead of two competing menus. */
 .stepper {
-  width: 74px;
-  flex-shrink: 0;
-  background: rgba(20,18,16,.6);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 14px 0;
-  gap: 4px;
-  overflow-y: auto;
-  overflow-x: visible;
-  z-index: 100;
+  display: none;
 }
 
 /* "WORKFLOW" label hidden — tooltip shows on hover instead */
@@ -460,6 +451,17 @@ body::after {
 /* Step panel transitions */
 .step-panel { display: none; }
 .step-panel.active { display: block; animation: stepFadeIn .32s ease; }
+
+/* Per-screen guidance line — tells the user what this screen is for and what to do,
+   so the app is usable without prior orientation. */
+.screen-hint {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 2px 0 18px;
+  max-width: 760px;
+}
+.screen-hint b { color: var(--text); font-weight: 500; }
 @keyframes stepFadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: none; }
@@ -470,11 +472,14 @@ body::after {
   background: linear-gradient(180deg, rgba(25,22,15,.65), rgba(15,14,11,.6));
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 16px;
+  padding: 26px 28px;
+  margin-bottom: 22px;
   box-shadow: var(--shadow);
   transition: border-color .2s, box-shadow .2s;
 }
+/* More breathing room between form controls for a calmer, scannable layout */
+.card .form-group { margin-bottom: 20px; }
+.card .form-group:last-child { margin-bottom: 0; }
 .card:hover {
   border-color: rgba(226,173,76,.28);
   box-shadow: var(--shadow), 0 0 24px rgba(226,173,76,.06);
