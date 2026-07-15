@@ -29,7 +29,49 @@ const State = {
 
 // ── API helpers (supports S3-hosted frontend pointing at a remote backend) ──────
 const API_BASE = (window.API_BASE || '').replace(/\/$/, '');
-const apiFetch = (path, opts) => fetch(API_BASE + path, opts);
+async function apiFetch(path, opts) {
+  const res = await fetch(API_BASE + path, opts);
+  if (res.status === 401) {
+    try { const j = await res.clone().json(); if (j && j.authRequired) showLoginOverlay(); } catch {}
+  }
+  return res;
+}
+
+// ── Authentication (local accounts; no-op when auth is disabled server-side) ────
+async function guardAuth() {
+  try {
+    const me = await fetch(API_BASE + '/api/auth/me').then(r => r.json());
+    if (me.authEnabled && !me.authenticated) { showLoginOverlay(); return false; }
+    if (me.authEnabled && me.user) showAuthedUser(me.user);
+    return true;
+  } catch { return true; }   // never hard-block if the check itself fails
+}
+function showLoginOverlay() { const el = document.getElementById('loginOverlay'); if (el) el.style.display = 'flex'; }
+function hideLoginOverlay() { const el = document.getElementById('loginOverlay'); if (el) el.style.display = 'none'; }
+function showAuthedUser(user) {
+  const box = document.getElementById('authUserBox');
+  if (box) { box.style.display = ''; document.getElementById('authUserName').textContent = user.username; }
+}
+async function submitLogin(e) {
+  if (e) e.preventDefault();
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  try {
+    const res = await fetch(API_BASE + '/api/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) { hideLoginOverlay(); location.reload(); }
+    else errEl.textContent = data.error || 'Login failed';
+  } catch (err) { errEl.textContent = err.message; }
+}
+async function logout() {
+  try { await fetch(API_BASE + '/api/auth/logout', { method: 'POST' }); } catch {}
+  location.reload();
+}
 
 // ── WebSocket ──────────────────────────────────────────────────────────────────
 let ws;
@@ -781,6 +823,7 @@ async function regenerateScenarios() {
     State.scenarios = res.scenarios || [];
     State.selectedScenarioIds.clear();
     renderScenarios();
+    showWarnings(res.warnings, 'scenarioWarnings');
     await selectScenGeneration(genId);
     toast(`Regenerated ${State.scenarios.length} scenarios for this generation`, 'success');
   } catch (e) { toast(e.message, 'error'); }
@@ -3795,6 +3838,7 @@ async function wfRun() {
         State.selectedScenarioIds.clear();
         if (r.generationId) State.currentGenerationId = r.generationId;
         renderScenarios();        // ← Step 3 populates NOW
+        showWarnings(r.warnings, 'scenarioWarnings');
         markStepDone(3);
         xlog(1, r.scenarios.length + ' scenarios ✓', 'success');
         xlog(3, r.scenarios.length + ' scenarios ready', 'success');
@@ -5921,21 +5965,27 @@ function handlePwLibWs(msg) {
 function _esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ── Init ───────────────────────────────────────────────────────────────────────
-connectWS();
-loadSettings();
-populateJiraFields();
-loadDefaultsFromServer();
-updateProviderBadge();
-_updateXrayPill();
-renderWorkflowPipeline();  // draw pipeline immediately (idle state)
-refreshAgents();           // then update with live agent statuses
-loadSchedules();
-loadRefLibraryStatus();
-restoreSession();
-initExecPanes();
-initHistory();   // load generation history panels
-pwLibLoad();     // load standalone script library (global, all sessions)
-loadAppMap();    // restore previously imported app map
+// Gate the app behind auth (when enabled) before firing the data-loading calls,
+// so we don't spray 401s. If a login is required, the overlay is shown and boot stops.
+async function boot() {
+  if (!(await guardAuth())) return;
+  connectWS();
+  loadSettings();
+  populateJiraFields();
+  loadDefaultsFromServer();
+  updateProviderBadge();
+  _updateXrayPill();
+  renderWorkflowPipeline();  // draw pipeline immediately (idle state)
+  refreshAgents();           // then update with live agent statuses
+  loadSchedules();
+  loadRefLibraryStatus();
+  restoreSession();
+  initExecPanes();
+  initHistory();   // load generation history panels
+  pwLibLoad();     // load standalone script library (global, all sessions)
+  loadAppMap();    // restore previously imported app map
+}
+boot();
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  HISTORY  ·  PER-ITEM CHAT  ·  KNOWLEDGE LOOP

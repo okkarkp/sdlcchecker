@@ -50,14 +50,20 @@ docker compose up -d --build
 
 ### ⚠ Read before exposing it
 
-Test Alchemist has **no user login** — the only access control is an IP allowlist,
-and it defaults to *open*. A shared instance therefore needs guardrails, or anyone who
-can reach the URL can spend your AI tokens and use the configured Jira/GitLab
-credentials. Do **not** put it on the public internet as-is.
+A shared instance needs guardrails, or anyone who can reach the URL can spend your AI
+tokens and use the configured Jira/GitLab credentials.
 
-1. **Restrict access.** Set `ALLOWED_IPS` in `.env` to your office/VPN egress IPs, or
-   place the host behind a VPN / internal load balancer / SSO proxy. Never bind it to a
-   public address without one of these.
+1. **Require login.** Enable authentication (local accounts) by setting an admin in
+   `.env` — an admin is seeded on first boot:
+   ```bash
+   AUTH_ADMIN_USER=admin
+   AUTH_ADMIN_PASSWORD=<a strong password>
+   AUTH_SESSION_SECRET=<random 32+ char string>   # stable across restarts/hosts
+   ```
+   Sessions use HttpOnly + SameSite=Strict signed cookies (CSRF-safe); passwords are
+   scrypt-hashed in `data/users.json` (git-ignored). Also set `ALLOWED_IPS` and/or put
+   the host behind a VPN for defence in depth. Still, do not bind it to the public
+   internet without at least auth enabled.
 2. **Persist the database.** The `./data` volume in
    [docker-compose.yml](docker-compose.yml) keeps SQLite across restarts. On ephemeral
    platforms (Elastic Beanstalk, ECS/Fargate) attach durable storage (EFS) — otherwise

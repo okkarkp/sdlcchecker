@@ -164,6 +164,15 @@ Rules:
     const data = await callAI(prompt, 8192, aiOpts);
     const { valid: scenarios, warnings } = hGuard.validateScenarios(data.scenarios);
 
+    // Grounding nudge — generation is far more accurate when grounded in a crawled
+    // Digital Twin (real routes/elements/APIs). Warn (don't block) when there is none.
+    try {
+      const twinPages = db.db.prepare("SELECT COUNT(*) AS n FROM twin_pages WHERE deleted_at IS NULL").get()?.n || 0;
+      if (!twinPages) {
+        warnings.push('No Digital Twin crawled — scenarios are ungrounded. Crawl the target app (Reference Library → Digital Twin) for higher accuracy.');
+      }
+    } catch (_) {}
+
     // Persist to session
     if (clientId !== 'anon') {
       sessionStore.saveSession(clientId, { scenarios, applicationName });

@@ -26,6 +26,10 @@ data/perfforge/
 data/reference-library.json
 data/schedules.json
 
+# Auth: local account store (password hashes) + session signing secret — NEVER commit
+data/users.json
+data/.auth-secret
+
 # Stray server / tool logs
 *.log
 *.err

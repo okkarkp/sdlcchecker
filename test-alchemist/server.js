@@ -37,8 +37,16 @@ const perfforgeRoutes    = require('./routes/perfforge');
 const twinRoutes         = require('./routes/twin');
 const autoRef          = require('./lib/auto-reference');
 const sessionStore     = require('./lib/session-store');
+const authRoutes       = require('./routes/auth');
+const auth             = require('./lib/auth');
 // Initialise SQLite DB (runs CREATE TABLE IF NOT EXISTS on first require)
 require('./lib/db');
+
+// Seed an admin from AUTH_ADMIN_* env (idempotent) and report auth status.
+auth.seedAdmin();
+console.log(auth.isAuthEnabled()
+  ? '🔐 Authentication: ENABLED (local accounts)'
+  : '🔓 Authentication: OPEN (set AUTH_ADMIN_USER/PASSWORD or AUTH_ENABLED=true to require login)');
 
 const app    = express();
 const server = http.createServer(app);
@@ -105,6 +113,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 const clients = new Map();
 
 wss.on('connection', (ws, req) => {
+  // When auth is enabled, require a valid session cookie on the upgrade request.
+  if (auth.isAuthEnabled() && !auth.currentUser(req)) {
+    try { ws.close(4401, 'Authentication required'); } catch {}
+    return;
+  }
   // clientId arrives as a query-string param: ws://host?clientId=xxx
   let clientId = 'anon';
   try {
@@ -143,6 +156,10 @@ global.broadcastTo = (clientId, data) => {
   const payload = JSON.stringify(data);
   sockets.forEach(ws => { if (ws.readyState === WebSocket.OPEN) ws.send(payload); });
 };
+
+// ── Auth: public endpoints, then gate everything else under /api ────────────────
+app.use('/api/auth', authRoutes);        // login / logout / me — never gated
+app.use('/api', auth.requireAuth);       // all other /api/* require a session (when auth enabled)
 
 // ── API Routes ─────────────────────────────────────────────────────────────────
 app.use('/api/ai',         aiRoutes);

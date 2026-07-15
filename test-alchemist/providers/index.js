@@ -438,7 +438,7 @@ async function callCustom(prompt, maxTokens, opts) {
 }
 
 // ── Public interface ───────────────────────────────────────────────────────────
-async function callAI(prompt, maxTokens = 8192, opts = {}) {
+function _dispatch(prompt, maxTokens, opts) {
   const provider = opts.provider || detectProvider(opts.model) || 'copilot';
   switch (provider) {
     case 'openai':  return callOpenAI(prompt, maxTokens, opts);
@@ -447,6 +447,33 @@ async function callAI(prompt, maxTokens = 8192, opts = {}) {
     case 'custom':  return callCustom(prompt, maxTokens, opts);
     default:        return callClaude(prompt, maxTokens, opts);
   }
+}
+
+// Transient = worth retrying (rate limits, gateway hiccups, network blips).
+// Auth/validation/parse errors are NOT transient and fail fast.
+function _isTransient(err) {
+  const status = err?.status || err?.response?.status;
+  if (status && [408, 429, 500, 502, 503, 504].includes(status)) return true;
+  if (['ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED', 'EAI_AGAIN', 'EPIPE'].includes(err?.code)) return true;
+  return /\b(429|502|503|504)\b|rate.?limit|timeout|temporarily|overloaded|econnreset|socket hang up/i
+    .test(String(err?.message || ''));
+}
+
+async function callAI(prompt, maxTokens = 8192, opts = {}) {
+  const maxAttempts = Math.max(1, Number(process.env.AI_MAX_RETRIES || 3));
+  let lastErr;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await _dispatch(prompt, maxTokens, opts);
+    } catch (err) {
+      lastErr = err;
+      if (attempt >= maxAttempts || !_isTransient(err)) throw err;
+      const delay = 600 * Math.pow(3, attempt - 1);   // 600ms, 1.8s, …
+      _emit(opts, `⟳ transient error — retry ${attempt}/${maxAttempts - 1} in ${delay}ms (${String(err.message || '').slice(0, 80)})`, 'ai');
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  throw lastErr;
 }
 
 /**
