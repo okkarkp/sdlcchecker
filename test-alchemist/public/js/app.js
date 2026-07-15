@@ -4321,6 +4321,13 @@ async function loadDefaultsFromServer(force = false) {
     applyToSettingsModal();
     populateJiraFields(force);
 
+    // De-dupe: prefill the input form's app fields from the project profile so the
+    // user isn't retyping what's already configured (they can still override).
+    const appNameEl = document.getElementById('appName');
+    const baseUrlEl = document.getElementById('baseUrl');
+    if (appNameEl && defaults.appName    && (force || !appNameEl.value)) appNameEl.value = defaults.appName;
+    if (baseUrlEl && defaults.appBaseUrl && (force || !baseUrlEl.value)) baseUrlEl.value = defaults.appBaseUrl;
+
     // Sync repo path to Step 6 agent input
     const agentPathEl = document.getElementById('agentRepoPath');
     if (agentPathEl && State.settings.autoRepoPath && !agentPathEl.value) {

@@ -228,6 +228,7 @@ body::after {
   text-decoration: none;
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
 }
 
 /* Sigil / logo icon */
@@ -248,6 +249,7 @@ body::after {
   font-size: 20px;
   letter-spacing: .2px;
   line-height: 1;
+  white-space: nowrap;
   color: var(--text);
 }
 .brand-name em {
@@ -293,6 +295,14 @@ body::after {
 .header-pill.xray .dot { background: var(--mercury); box-shadow: 0 0 6px var(--mercury); }
 .header-pill.live { color: var(--green); }
 .header-pill.live .dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+/* Responsive header — reclaim space so controls don't clip on narrower viewports */
+@media (max-width: 1180px) {
+  .brand-tagline { display: none; }
+  .header { padding: 0 12px; }
+  .header-right { gap: 6px; }
+  .hdr-select { max-width: 150px; }
+}
 
 /* WS indicator (keep existing IDs) */
 .ws-indicator {

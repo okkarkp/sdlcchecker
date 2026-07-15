@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/styles.css?v=61" />
+  <link rel="stylesheet" href="/css/styles.css?v=62" />
   <link rel="stylesheet" href="/css/perfforge.css?v=1" />
   <!-- Prism syntax highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
@@ -70,16 +70,18 @@
         <button class="btn btn-outline btn-sm" onclick="logout()" title="Sign out">Sign out</button>
       </span>
       <button class="btn btn-outline btn-sm" onclick="clearSession()" title="Start a new session">+ New</button>
-      <button class="btn btn-outline btn-sm" onclick="openSettings()">⚙</button>
-      <button class="btn btn-outline btn-sm" id="execPaneToggle" title="Toggle Execution Pane">⚡ Execution</button>
-      <button class="rl-header-btn" onclick="openRefLibDrawer()" id="refLibHeaderBtn" title="Open Reference Library">
-        📚 Reference Library
-        <span class="rl-header-badge" id="refLibHeaderBadge" style="display:none">0</span>
-      </button>
-      <div class="log-toggle-btn">
-        <button class="btn btn-outline btn-sm" id="logDrawerToggleBtn" onclick="toggleLogDrawer()" title="Toggle Activity Log">📋 Logs</button>
-        <span class="log-toggle-badge" id="logToggleBadge"></span>
-      </div>
+      <button class="btn btn-outline btn-sm" onclick="openSettings()" title="Settings" aria-label="Settings">⚙</button>
+      <!-- Utility tools grouped + icon-only (tooltips on hover) so the header stays calm -->
+      <span class="header-tools" style="display:inline-flex;align-items:center;gap:4px;padding-left:8px;margin-left:2px;border-left:1px solid var(--border)">
+        <button class="btn btn-outline btn-sm" id="execPaneToggle" title="Execution pane" aria-label="Toggle execution pane">⚡</button>
+        <button class="rl-header-btn" onclick="openRefLibDrawer()" id="refLibHeaderBtn" title="Reference Library" aria-label="Open Reference Library">
+          📚<span class="rl-header-badge" id="refLibHeaderBadge" style="display:none">0</span>
+        </button>
+        <div class="log-toggle-btn">
+          <button class="btn btn-outline btn-sm" id="logDrawerToggleBtn" onclick="toggleLogDrawer()" title="Activity log" aria-label="Toggle activity log">📋</button>
+          <span class="log-toggle-badge" id="logToggleBadge"></span>
+        </div>
+      </span>
     </div>
   </header>
 
@@ -165,6 +167,16 @@
         </div>
       </div>
 
+      <!-- Two ways to run — spell it out so the entry points aren't confusing -->
+      <div class="wf-modes" style="display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 14px">
+        <div style="flex:1;min-width:240px;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text-muted)">
+          <strong style="color:var(--text)">⚡ Automatic</strong> — add requirements (below, or in Collect Inputs), then press <strong style="color:var(--text)">▶ Run All Agents</strong>. Runs the whole pipeline end-to-end.
+        </div>
+        <div style="flex:1;min-width:240px;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text-muted)">
+          <strong style="color:var(--text)">🧭 Step-by-step</strong> — press <strong style="color:var(--text)">Start workflow</strong> to move through each stage yourself and review as you go.
+        </div>
+      </div>
+
       <!-- Pipeline track (built by JS) -->
       <div class="track" id="wfTrack"></div>
 
@@ -197,8 +209,8 @@
       <input type="checkbox" id="orchTriggerPipeline"    style="display:none"/>
 
       <div class="step-actions">
-        <div></div>
-        <button class="btn btn-primary" onclick="goToStep(2)">📥 Start Workflow →</button>
+        <div style="font-size:12px;color:var(--text-muted)">🧭 Step-by-step mode</div>
+        <button class="btn btn-primary" onclick="goToStep(2)">Start workflow → Collect Inputs</button>
       </div>
     </div>
 
@@ -206,51 +218,55 @@
     <div class="step-panel" id="step2">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">📥 Step 1 — Collect Requirements & Inputs</div>
+          <div class="card-title">📥 Step 2 — Collect Requirements &amp; Inputs</div>
         </div>
 
-        <div class="grid-2">
-          <!-- Left: File Upload -->
-          <div>
-            <div class="form-group">
-              <label class="form-label">Upload Files</label>
-              <div class="upload-zone" id="uploadZone">
-                <input type="file" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.docx,.doc,.pptx,.txt,.md,.csv" />
-                <div class="upload-icon">📂</div>
-                <div class="upload-text">
-                  <strong>Click to upload</strong> or drag & drop
-                </div>
-                <div class="upload-types">PDF · Excel · Word · PowerPoint · CSV · Markdown · Text</div>
-              </div>
-              <div class="file-list" id="fileList"></div>
-            </div>
-          </div>
+        <!-- ① Name this run (required) — flows top-down: identify → describe → provide -->
+        <div class="form-group">
+          <label class="form-label">
+            Generation Name
+            <span style="color:var(--danger);margin-left:2px">*</span>
+            <span style="color:var(--text-muted);font-weight:400;font-size:10px;margin-left:6px">Required — shown in history</span>
+          </label>
+          <input class="form-control" id="generationName" placeholder="e.g. BUM021 Transfer of Shares — Sprint 4"
+            style="border-color:rgba(226,173,76,.3);"
+            oninput="this.style.borderColor=this.value.trim()?'rgba(226,173,76,.3)':'rgba(239,68,68,.5)'" />
+        </div>
 
-          <!-- Right: Text Inputs -->
-          <div>
-            <div class="form-group">
-              <label class="form-label">
-                Generation Name
-                <span style="color:var(--danger);margin-left:2px">*</span>
-                <span style="color:var(--text-muted);font-weight:400;font-size:10px;margin-left:6px">Required — shown in history</span>
-              </label>
-              <input class="form-control" id="generationName" placeholder="e.g. BUM021 Transfer of Shares — Sprint 4"
-                style="border-color:rgba(226,173,76,.3);"
-                oninput="this.style.borderColor=this.value.trim()?'rgba(226,173,76,.3)':'rgba(239,68,68,.5)'" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Application Name</label>
-              <input class="form-control" id="appName" placeholder="e.g. Acme Portal" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Base URL</label>
-              <input class="form-control" id="baseUrl" placeholder="https://your-app.com" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Application Context / Overview</label>
-              <textarea class="form-control" id="appContext" placeholder="Brief description of the application, its modules, and key flows…" rows="3"></textarea>
-            </div>
+        <!-- ② Application details (auto-filled from your project profile — override if needed) -->
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Application Name
+              <span style="color:var(--text-muted);font-weight:400;font-size:10px;margin-left:6px">from project · override ok</span>
+            </label>
+            <input class="form-control" id="appName" placeholder="e.g. Acme Portal" />
           </div>
+          <div class="form-group">
+            <label class="form-label">Base URL
+              <span style="color:var(--text-muted);font-weight:400;font-size:10px;margin-left:6px">from project · override ok</span>
+            </label>
+            <input class="form-control" id="baseUrl" placeholder="https://your-app.com" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Application Context / Overview <span style="color:var(--text-muted);font-weight:400;font-size:10px;margin-left:6px">optional</span></label>
+          <textarea class="form-control" id="appContext" placeholder="Brief description of the application, its modules, and key flows…" rows="3"></textarea>
+        </div>
+
+        <!-- ③ Provide the requirements: upload files and/or fill a tab below -->
+        <div class="form-group">
+          <label class="form-label">Requirement Sources
+            <span style="color:var(--text-muted);font-weight:400;font-size:10px;margin-left:6px">upload files and / or fill a tab below</span>
+          </label>
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.docx,.doc,.pptx,.txt,.md,.csv" />
+            <div class="upload-icon">📂</div>
+            <div class="upload-text">
+              <strong>Click to upload</strong> or drag & drop
+            </div>
+            <div class="upload-types">PDF · Excel · Word · PowerPoint · CSV · Markdown · Text</div>
+          </div>
+          <div class="file-list" id="fileList"></div>
         </div>
 
         <div class="tabs">
