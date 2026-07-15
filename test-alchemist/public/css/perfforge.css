@@ -1,0 +1,46 @@
+/* PerfForge — styled with Test Alchemist's design tokens (gold / mercury / violet). */
+#stepPerf .pf-grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+#stepPerf .pf-stat {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px;
+}
+#stepPerf .pf-stat .k { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-muted); }
+#stepPerf .pf-stat .v { font-size: 26px; font-weight: 700; margin-top: 4px; color: var(--gold-bright); }
+#stepPerf .pf-stat .v.good { color: var(--green); }
+#stepPerf .pf-stat .v.bad  { color: var(--danger); }
+#stepPerf .pf-stat .u { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+
+#stepPerf canvas { width: 100%; display: block; border-radius: var(--radius); }
+#stepPerf .pf-codes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+#stepPerf .pf-code {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 4px 10px;
+  border-radius: 8px; background: var(--bg-input); border: 1px solid var(--line-soft); color: var(--text-muted);
+}
+#stepPerf .pf-code.s2 { color: var(--mercury); border-color: rgba(111,214,201,.3); }
+#stepPerf .pf-code.s4, #stepPerf .pf-code.s5, #stepPerf .pf-code.s0 { color: var(--danger); border-color: rgba(224,120,107,.3); }
+
+#stepPerf .pf-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+#stepPerf .pf-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+#stepPerf .pf-log {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6;
+  max-height: 220px; overflow: auto; color: var(--text-muted);
+}
+#stepPerf .pf-badge {
+  display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 12px;
+}
+#stepPerf .pf-badge.pass { background: rgba(127,207,143,.14); color: var(--green); }
+#stepPerf .pf-badge.fail { background: rgba(224,120,107,.14); color: var(--danger); }
+#stepPerf .pf-issue { padding: 7px 0; border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+#stepPerf .pf-sev { font-size: 10px; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; margin-right: 8px; }
+#stepPerf .pf-sev.high { background: rgba(224,120,107,.14); color: var(--danger); }
+#stepPerf .pf-sev.medium { background: rgba(226,173,76,.14); color: var(--gold); }
+#stepPerf .pf-sev.low { background: var(--bg-input); color: var(--text-muted); }
+#stepPerf .pf-hidden { display: none; }
+#stepPerf table.pf-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+#stepPerf table.pf-table th { text-align: left; padding: 7px 8px; color: var(--text-muted);
+  font-size: 10px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+#stepPerf table.pf-table td { padding: 7px 8px; border-bottom: 1px solid var(--line-soft); color: var(--text); }
+#stepPerf .pf-diag { white-space: pre-wrap; font-size: 13px; line-height: 1.6; color: var(--text);
+  margin-top: 12px; padding: 12px; background: var(--bg-input); border-radius: var(--radius);
+  border: 1px solid var(--line-soft); }

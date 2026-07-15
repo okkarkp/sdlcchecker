@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Alchemist</title>
+  <!-- Google Fonts — Fraunces · Bricolage Grotesque · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css?v=60" />
+  <link rel="stylesheet" href="/css/perfforge.css?v=1" />
+  <!-- Prism syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="header">
+    <a class="header-brand" href="#">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f4c869" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+          <path d="M10 2h4M9 2v5.5L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L15 7.5V2"/>
+          <path d="M7 14h10"/>
+          <circle cx="10.5" cy="17" r="1"/><circle cx="14" cy="16" r="1.3"/>
+        </svg>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <span class="brand-name">Test <em>Alchemist</em></span>
+        <span class="brand-tagline">The intelligent test workbench</span>
+      </div>
+    </a>
+    <div class="header-right">
+      <!-- Project & Xray status pills -->
+      <span class="header-pill proj" id="projectStatusPill"><span class="dot"></span><span id="projectStatusLabel">Project · —</span></span>
+      <span class="header-pill xray" id="xrayStatusPill" style="display:none"><span class="dot"></span>Xray · connected</span>
+      <span id="activeProviderBadge">🟣 Claude</span>
+      <span class="ws-indicator">
+        <span class="ws-dot" id="wsDot"></span>
+        <span id="wsLabel">Connecting…</span>
+      </span>
+      <button class="btn btn-outline btn-sm" onclick="clearSession()" title="Start a new session">+ New</button>
+      <button class="btn btn-outline btn-sm" onclick="openSettings()">⚙</button>
+      <button class="btn btn-outline btn-sm" id="execPaneToggle" title="Toggle Execution Pane">⚡ Execution</button>
+      <button class="rl-header-btn" onclick="openRefLibDrawer()" id="refLibHeaderBtn" title="Open Reference Library">
+        📚 Reference Library
+        <span class="rl-header-badge" id="refLibHeaderBadge" style="display:none">0</span>
+      </button>
+      <div class="log-toggle-btn">
+        <button class="btn btn-outline btn-sm" id="logDrawerToggleBtn" onclick="toggleLogDrawer()" title="Toggle Activity Log">📋 Logs</button>
+        <span class="log-toggle-badge" id="logToggleBadge"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Session Restore Banner ─────────────────────────────────────────────── -->
+  <div id="sessionBanner" class="session-banner" style="display:none">
+    <span>🔄</span>
+    <span id="sessionBannerText"></span>
+    <button class="btn btn-sm btn-outline" onclick="clearSession()" style="margin-left:auto;flex-shrink:0">✕ Clear &amp; Start Fresh</button>
+  </div>
+
+  <!-- ── 7-Step Workflow Progress Strip ──────────────────────────────────── -->
+  <div class="flow" id="flow">
+    <div class="fstep live" data-s="0" onclick="goToStep(1)"><div class="num">1</div><div class="lbl">Agents</div></div><div class="fconn"></div>
+    <div class="fstep"      data-s="1" onclick="goToStep(2)"><div class="num">2</div><div class="lbl">Collect Inputs</div></div><div class="fconn"></div>
+    <div class="fstep"      data-s="2" onclick="goToStep(3)"><div class="num">3</div><div class="lbl">Scenarios</div></div><div class="fconn"></div>
+    <div class="fstep"      data-s="3" onclick="goToStep(4)"><div class="num">4</div><div class="lbl">Test Cases</div></div><div class="fconn"></div>
+    <div class="fstep"      data-s="4" onclick="goToStep(5)"><div class="num">5</div><div class="lbl">Jira Publisher</div></div><div class="fconn"></div>
+    <div class="fstep"      data-s="5" onclick="goToStep(6)"><div class="num">6</div><div class="lbl">Playwright</div></div><div class="fconn"></div>
+    <div class="fstep"      data-s="6" onclick="goToStep(7)"><div class="num">7</div><div class="lbl">Pipeline &amp; Scheduler</div></div>
+  </div>
+
+  <!-- ── Content Layout: sidebar + main ──────────────────────────────────── -->
+  <div class="content-layout">
+
+  <!-- ── Icon Nav Rail ────────────────────────────────────────────────────── -->
+  <nav class="stepper" id="stepper">
+    <div class="step-item active" data-step="1" onclick="goToStep(1)">
+      <div class="step-num">🤖</div>
+      <div class="step-label">Agents</div>
+    </div>
+    <div class="step-item" data-step="2" onclick="goToStep(2)">
+      <div class="step-num">📥</div>
+      <div class="step-label">Collect Inputs</div>
+    </div>
+    <div class="step-item" data-step="3" onclick="goToStep(3)">
+      <div class="step-num">🎯</div>
+      <div class="step-label">Scenarios</div>
+    </div>
+    <div class="step-item" data-step="4" onclick="goToStep(4)">
+      <div class="step-num">📋</div>
+      <div class="step-label">Test Cases</div>
+    </div>
+    <div class="step-item optional" data-step="5" onclick="goToStep(5)">
+      <div class="step-num">🏷️</div>
+      <div class="step-label">Jira Publisher <span class="step-opt-badge">opt</span></div>
+    </div>
+    <div class="step-item optional" data-step="6" onclick="goToStep(6)">
+      <div class="step-num">🎭</div>
+      <div class="step-label">Playwright <span class="step-opt-badge">opt</span></div>
+    </div>
+    <div class="step-item optional" data-step="7" onclick="goToStep(7)">
+      <div class="step-num">🚀</div>
+      <div class="step-label">Pipeline &amp; Scheduler <span class="step-opt-badge">opt</span></div>
+    </div>
+    <div class="step-item optional" id="navPerf" onclick="pfOpen()">
+      <div class="step-num">⚡</div>
+      <div class="step-label">PerfForge <span class="step-opt-badge">opt</span></div>
+    </div>
+  </nav>
+
+  <!-- ── Main ────────────────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- STEP 1: Agent Workflow ──────────────────────────────────────────── -->
+    <div class="step-panel active" id="step1">
+
+      <!-- Top bar -->
+      <div class="wf-topbar">
+        <div>
+          <div class="wf-title">Test <em>Alchemist</em> · Autonomous Agents</div>
+          <div class="wf-subtitle">4 agents — first 3 required · Jira optional · Playwright &amp; Pipeline are standalone</div>
+        </div>
+        <div class="spacer" style="flex:1"></div>
+        <div class="wf-controls">
+          <!-- Per-agent optional toggles -->
+          <div class="wf-toggle" id="toggleJira" onclick="wfToggleAgent('orchCreateJira', this)" title="Enable Jira / Xray upload">
+            <div class="sw"></div>
+            <span>🏷️ Jira</span>
+          </div>
+          <button class="btn btn-outline btn-sm" id="wfResetBtn" onclick="wfReset()">Reset</button>
+          <button class="btn btn-danger btn-sm" id="stopBtn" onclick="wfStop()" style="display:none">⏹ Stop</button>
+          <button class="btn btn-primary" id="runBtn" onclick="wfRun()">▶ Run All Agents</button>
+        </div>
+      </div>
+
+      <!-- Pipeline track (built by JS) -->
+      <div class="track" id="wfTrack"></div>
+
+      <!-- Footer status bar -->
+      <div class="wf-pf" id="wfPf">
+        <span class="pd"></span>
+        <span id="wfPfTxt">Idle — press Run All Agents, or click Go on the first node.</span>
+      </div>
+
+      <!-- Quick requirements (shown when no inputs exist) -->
+      <div class="card" style="margin-top:18px" id="orchQuickCard">
+        <div class="card-header" style="margin-bottom:10px">
+          <div class="card-title" style="font-size:13px">📝 Requirements
+            <span style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:6px">— paste here to run without going through Step 2</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="loadDemoRequirements('quick')" title="Load a short demo requirement to generate scenarios and test cases fast">📂 Load Demo</button>
+        </div>
+        <textarea id="orchQuickInput" class="form-control" rows="3"
+          placeholder="Describe what to test — e.g. 'As a registered user I can update my account profile and save the changes…'"
+          style="font-size:13px;line-height:1.55;resize:vertical"></textarea>
+      </div>
+
+      <!-- Pipeline status (shows errors only; exec pane handles live progress) -->
+      <div id="orchLog" class="orch-log" style="display:none;margin-top:10px;border-radius:8px;padding:10px 14px;background:rgba(224,120,107,.08);border:1px solid rgba(224,120,107,.25);color:#e0786b;font-family:'JetBrains Mono',monospace;font-size:12px;white-space:pre-wrap;"></div>
+
+      <!-- Hidden checkbox for Jira agent toggle -->
+      <input type="checkbox" id="orchCreateJira" style="display:none"/>
+      <!-- Playwright & Pipeline are standalone — NOT part of Run All Agents -->
+      <input type="checkbox" id="orchGeneratePlaywright" style="display:none"/>
+      <input type="checkbox" id="orchTriggerPipeline"    style="display:none"/>
+
+      <div class="step-actions">
+        <div></div>
+        <button class="btn btn-primary" onclick="goToStep(2)">📥 Start Workflow →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Collect Inputs ─────────────────────────────────────────── -->
+    <div class="step-panel" id="step2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📥 Step 1 — Collect Requirements & Inputs</div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Left: File Upload -->
+          <div>
+            <div class="form-group">
+              <label class="form-label">Upload Files</label>
+              <div class="upload-zone" id="uploadZone">
+                <input type="file" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.docx,.doc,.pptx,.txt,.md,.csv" />
+                <div class="upload-icon">📂</div>
+                <div class="upload-text">
+                  <strong>Click to upload</strong> or drag & drop
+                </div>
+                <div class="upload-types">PDF · Excel · Word · PowerPoint · CSV · Markdown · Text</div>
+              </div>
+              <div class="file-list" id="fileList"></div>
+            </div>
+          </div>
+
+          <!-- Right: Text Inputs -->
+          <div>
+            <div class="form-group">
+              <label class="form-label">
+                Generation Name
+                <span style="color:var(--danger);margin-left:2px">*</span>
+                <span style="color:var(--text-muted);font-weight:400;font-size:10px;margin-left:6px">Required — shown in history</span>
+              </label>
+              <input class="form-control" id="generationName" placeholder="e.g. BUM021 Transfer of Shares — Sprint 4"
+                style="border-color:rgba(226,173,76,.3);"
+                oninput="this.style.borderColor=this.value.trim()?'rgba(226,173,76,.3)':'rgba(239,68,68,.5)'" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Application Name</label>
+              <input class="form-control" id="appName" placeholder="e.g. Acme Portal" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Base URL</label>
+              <input class="form-control" id="baseUrl" placeholder="https://your-app.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Application Context / Overview</label>
+              <textarea class="form-control" id="appContext" placeholder="Brief description of the application, its modules, and key flows…" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="switchInputTab('userStory', this)">User Stories</div>
+          <div class="tab" onclick="switchInputTab('requirements', this)">Requirements</div>
+          <div class="tab" onclick="switchInputTab('rules', this)">Business Rules</div>
+          <div class="tab" onclick="switchInputTab('figma', this)">Figma / FSD URL</div>
+          <div class="tab" onclick="switchInputTab('confluence', this)">Confluence</div>
+          <div class="tab" onclick="switchInputTab('codebase', this)">Codebase</div>
+        </div>
+
+        <div id="tab-userStory">
+          <textarea class="form-control" id="userStory" rows="6"
+            placeholder="As a [user], I want to [action] so that [benefit]&#10;&#10;Acceptance Criteria:&#10;- Given … When … Then …"></textarea>
+        </div>
+        <div id="tab-requirements" style="display:none">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:6px">
+            <button class="btn btn-outline btn-sm" onclick="loadDemoRequirements('req')" title="Loads a short sample requirement — generates 3 test cases fast">📂 Load Demo Requirement</button>
+          </div>
+          <textarea class="form-control" id="requirements" rows="6"
+            placeholder="Paste functional requirements, BRD, or specification text here…"></textarea>
+        </div>
+        <div id="tab-rules" style="display:none">
+          <textarea class="form-control" id="rules" rows="6"
+            placeholder="Paste business rules, validation rules, or constraints here…"></textarea>
+        </div>
+        <div id="tab-figma" style="display:none">
+          <input class="form-control" id="figmaUrl" placeholder="https://www.figma.com/file/…" />
+          <p style="color:var(--text-muted);font-size:12px;margin-top:6px">Provide the Figma file URL. A Figma access token must be configured in Settings.</p>
+
+          <!-- Application Map: Upload UI designs -->
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-weight:600;font-size:13px">🗺️ Application Map <small style="color:var(--text-muted);font-weight:400">(optional)</small></span>
+              <span id="appMapStatus" style="font-size:12px;color:var(--text-muted)"></span>
+            </div>
+            <label class="form-label" style="font-size:12px">Upload UI designs (Screenshots, PDF, or Figma JSON)</label>
+            <div style="display:flex;gap:6px">
+              <input type="file" id="figmaFileInput" accept=".json,.png,.jpg,.jpeg,.pdf" multiple style="flex:1" />
+              <button class="btn btn-primary btn-sm" onclick="uploadFigmaExport()" style="height:34px">📐 Import</button>
+            </div>
+            <p style="color:var(--text-muted);font-size:11px;margin-top:4px">
+              Upload screenshots (.png/.jpg), PDF wireframes, or Figma JSON export. AI will analyze and create flows.
+            </p>
+            <!-- App Map Results -->
+            <div id="appMapResults" style="display:none;margin-top:12px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <span id="appMapTitle" style="font-weight:600;font-size:13px"></span>
+                <button class="btn btn-outline btn-sm" style="color:#e0786b;border-color:rgba(224,120,107,.4)" onclick="clearAppMap()">🗑 Remove</button>
+              </div>
+              <div id="appMapSummary" style="font-size:12px;color:var(--text-muted);margin-bottom:8px"></div>
+              <div id="appMapPages" style="max-height:200px;overflow-y:auto;font-size:12px;border:1px solid var(--border);border-radius:8px;padding:8px"></div>
+            </div>
+          </div>
+        </div>
+        <div id="tab-confluence" style="display:none">
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <div style="flex:1">
+              <input class="form-control" id="confluencePageUrl" placeholder="https://your-domain.atlassian.net/wiki/spaces/SPACE/pages/12345/Title" />
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="fetchConfluencePage()" id="confluenceFetchBtn">📥 Fetch</button>
+          </div>
+          <p style="color:var(--text-muted);font-size:11px;margin-top:6px">Paste a Confluence FRD/requirements page URL. The full functional flow will be used for scenario & test case generation.</p>
+          <div id="confluenceFetchStatus" style="display:none;margin-top:8px;font-size:12px;color:var(--text-muted)">⏳ Fetching page…</div>
+          <div id="confluenceContent" style="display:none;margin-top:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span id="confluencePageTitle" style="font-weight:600;font-size:13px"></span>
+              <button class="btn btn-outline btn-sm" onclick="clearConfluenceContent()">✕ Clear</button>
+            </div>
+            <textarea class="form-control" id="confluenceText" rows="6" readonly style="background:var(--bg-main);font-size:12px"></textarea>
+          </div>
+        </div>
+        <div id="tab-codebase" style="display:none">
+          <div class="form-group" style="margin-bottom:8px">
+            <label class="form-label" style="font-size:12px">GitLab Repo URL <span style="color:var(--text-muted);font-weight:400">(transaction/microservice)</span></label>
+            <input class="form-control" id="codebaseRepoUrl" placeholder="https://gitlab.com/org/project or Project ID (e.g. 12345)" />
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <div style="flex:1">
+              <label class="form-label" style="font-size:12px">Module / Feature / Path</label>
+              <input class="form-control" id="codebaseModule" placeholder="e.g. transfer-shares, src/components/Login, api/payment…" />
+            </div>
+            <div style="width:100px">
+              <label class="form-label" style="font-size:12px">Branch</label>
+              <input class="form-control" id="codebaseBranch" placeholder="main" value="main" />
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="fetchCodebaseContext()" id="codebaseFetchBtn" style="height:38px">🔍 Fetch</button>
+          </div>
+          <p style="color:var(--text-muted);font-size:11px;margin-top:6px">
+            Enter the GitLab repo for this transaction and a module/path to search. Uses GitLab token from ⚙ Settings.
+          </p>
+          <div id="codebaseFetchStatus" style="display:none;margin-top:8px;font-size:12px;color:var(--text-muted)"></div>
+          <div id="codebaseResults" style="display:none;margin-top:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span id="codebaseResultTitle" style="font-weight:600;font-size:13px"></span>
+              <button class="btn btn-outline btn-sm" onclick="clearCodebaseContext()">✕ Clear</button>
+            </div>
+            <div id="codebaseFileList" style="max-height:120px;overflow-y:auto;margin-bottom:8px;font-size:12px"></div>
+            <textarea class="form-control" id="codebaseContext" rows="6" readonly style="background:var(--bg-main);font-size:11px;font-family:monospace"></textarea>
+          </div>
+        </div>
+
+
+
+        <div class="step-actions">
+          <button class="btn btn-outline" onclick="goToStep(1)">← Agents</button>
+          <button class="btn btn-primary" onclick="parseInputsAndGenerateScenarios()">
+            ✨ Parse Inputs &amp; Generate Scenarios →
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- STEP 3: Test Scenarios ─────────────────────────────────────────── -->
+    <div class="step-panel" id="step3">
+
+      <!-- ── 3-column workspace matching mockup ──────────────────────── -->
+      <div class="maincard">
+        <div class="mc-head">
+          <div class="mc-title">🎯 Step 3 — Review Scenarios</div>
+          <!-- scenarioCount kept hidden for JS compat -->
+          <span id="scenarioCount" style="display:none"></span>
+          <div class="mc-actions">
+            <span class="act" onclick="addNewScenario()">＋ Add</span>
+            <span class="act" onclick="document.getElementById('importScenariosInput').click()">📂 Import</span>
+            <span class="act" onclick="downloadScenarioTemplate()" title="Download CSV template">⬇ Template</span>
+            <span class="act" onclick="verifyScenarioCoverage()">🔍 Verify Coverage</span>
+            <span class="act" onclick="exportScenariosCSV()">⭳ Export CSV</span>
+            <span class="act reg" onclick="regenerateScenarios()">⟳ Regenerate</span>
+          </div>
+        </div>
+        <div class="ws">
+          <!-- Col 1: Generation history -->
+          <div class="col">
+            <div class="col-h"><span>Generation history</span><span id="scenHistCount">0</span></div>
+            <div id="scenHistList"><div style="color:#615a4b;font-size:11px;padding:8px 0">No history yet.</div></div>
+          </div>
+          <!-- Col 2: Scenario cards for selected generation -->
+          <div class="col" id="scenHistDetail">
+            <div style="color:#615a4b;font-size:11px;padding:8px 0">Select a generation on the left to review its scenarios.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden elements kept for JS compat -->
+      <div style="display:none">
+        <div id="scenarioGrid"></div>
+        <div id="scenarioWarnings"></div>
+        <div id="coverageReport2"></div>
+        <input type="file" id="importScenariosInput" accept=".csv,.xlsx,.xls" onchange="importScenariosFile(event)" />
+        <select id="scenarioFilter"></select><select id="scenarioPriority"></select><select id="scenarioModule"></select>
+        <span id="scSelectionCount"></span><input type="checkbox" id="selectAllScsCb" />
+      </div>
+
+      <div class="step-actions" style="margin-top:12px">
+        <button class="btn btn-outline" onclick="goToStep(2)">← Back</button>
+        <button class="btn btn-primary" id="btnGenerateTestCases" onclick="generateTestCases()">
+          📋 Generate Test Cases →
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Test Cases ─────────────────────────────────────────────── -->
+    <div class="step-panel" id="step4">
+
+      <!-- ── 3-column workspace matching mockup ──────────────────────── -->
+      <div class="maincard">
+        <div class="mc-head">
+          <div class="mc-title">🗎 Step 4 — Review Test Cases</div>
+          <span id="tcCount" style="display:none"></span>
+          <div class="mc-actions">
+            <span class="act" onclick="addNewTestCase()">＋ Add</span>
+            <span class="act" onclick="document.getElementById('importTcInput').click()">📂 Import</span>
+            <input type="file" id="importTcInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="importTestCasesFile(event)" />
+            <span class="act" onclick="downloadTcTemplate()" title="Download CSV template">⬇ Template</span>
+            <span class="act" onclick="exportTcCsv()">⭳ Export CSV</span>
+            <span class="act reg" onclick="regenerateTestCases()">⟳ Regenerate</span>
+          </div>
+        </div>
+        <div class="ws">
+          <!-- Col 1: Requirement history -->
+          <div class="col">
+            <div class="col-h"><span>Requirement history</span><span id="tcHistCount">0</span></div>
+            <div id="tcHistList"><div style="color:#615a4b;font-size:11px;padding:8px 0">No history yet.</div></div>
+          </div>
+          <!-- Col 2: TC cards for selected generation -->
+          <div class="col" id="tcHistDetail">
+            <div style="color:#615a4b;font-size:11px;padding:8px 0">Select a generation to see its test cases.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden elements kept for JS compat -->
+      <div style="display:none">
+        <div id="tcWarnings"></div>
+        <div id="coverageReport3"></div>
+        <div id="tcTableBody"></div>
+        <div id="tcStats"><span id="statTotal"></span><span id="statCritical"></span><span id="statHigh"></span><span id="statMedLow"></span></div>
+        <span id="tcSelectionCount"></span><span id="tcCount2"></span>
+        <input type="checkbox" id="selectAllTcsCb" />
+        <input type="file" id="importTcInputHidden" accept=".csv,.xlsx,.xls" onchange="importTestCasesFile(event)" />
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-outline" onclick="goToStep(3)">← Back</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;color:var(--text-muted)">optional steps:</span>
+          <button class="btn btn-outline" onclick="goToStep(5)" title="Upload to Jira">🏷️ Jira</button>
+          <button class="btn btn-outline" onclick="goToStep(6)" title="Skip to Playwright">⏭ Playwright</button>
+        </div>
+        <button class="btn btn-primary" onclick="goToStep(5)">🏷️ Jira Publisher →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Jira Publisher ──────────────────────────────────────────────── -->
+    <div class="step-panel" id="step5">
+
+      <!-- ── TC selection summary banner ───────────────────────────────────── -->
+      <div id="jiraTcSummary" class="jira-tc-summary" style="margin-bottom:14px">
+        <span class="jira-tc-summary-icon">📋</span>
+        <div style="flex:1;min-width:0">
+          <div id="jiraTcSummaryText" style="font-size:13px;font-weight:600;color:#ece6d6;word-break:break-word">Loading…</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+            <span>Selections made in Step 4 carry forward.</span>
+            <span class="lnk" onclick="goToStep(4)" style="font-size:11.5px;flex-shrink:0">← Go back to change selection</span>
+            <button class="btn btn-outline btn-sm" onclick="_refreshJiraTcSummary()" style="flex-shrink:0;padding:3px 10px;font-size:11px">↺ Refresh</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Jira Integration ──────────────────────────────────────────────── -->
+      <div class="card" style="margin-top:0">
+        <div class="card-header">
+          <div class="card-title">🔖 Jira Integration</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="loadDefaultsFromServer(true)" title="Reload Jira config from .env file">↺ Load from .env</button>
+            <button class="btn btn-outline btn-sm" onclick="testJiraConnection()" id="btnTestJira">🔌 Test Connection</button>
+            <button class="btn btn-outline btn-sm" onclick="toggleJiraConfig()">⚙ Config ▾</button>
+          </div>
+        </div>
+        <div id="jiraConnStatus" style="display:none;font-size:12px;padding:8px 12px;border-radius:var(--radius);margin-bottom:12px"></div>
+
+        <!-- Jira Config (collapsible) -->
+        <div id="jiraConfigPanel" style="display:none;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            <div class="form-group">
+              <label class="form-label">Jira Base URL</label>
+              <input class="form-control" id="jiraUrl" placeholder="https://yourorg.atlassian.net" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-control" id="jiraEmail" placeholder="your.email@company.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">API Token</label>
+              <div style="display:flex;gap:6px;align-items:center">
+                <input class="form-control" id="jiraToken" type="password" placeholder="Atlassian API token" style="flex:1" />
+                <button type="button" class="btn btn-outline btn-sm" style="padding:6px 10px;flex-shrink:0"
+                  onclick="const f=document.getElementById('jiraToken');const show=f.type==='password';f.type=show?'text':'password';this.textContent=show?'🙈':'👁'">👁</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project Key</label>
+              <input class="form-control" id="jiraProjectKey" placeholder="QA" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Test Issue Type</label>
+              <select class="form-control" id="jiraTestType">
+                <option value="Test Xray">Test Xray (Xray)</option>
+                <option value="Task">Task</option>
+                <option value="Story">Story</option>
+                <option value="Automation">Automation</option>
+                <option value="Test Execution">Test Execution (Xray)</option>
+                <option value="Test Plan Xray">Test Plan Xray (Xray)</option>
+              </select>
+            </div>
+            <!-- Xray Cloud API credentials (required for test steps + repo folder) -->
+            <div style="grid-column:1/-1;padding:12px 14px;background:rgba(88,166,255,0.06);border:1px solid rgba(88,166,255,0.18);border-radius:6px;margin-top:4px">
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px">
+                <div>
+                  <span style="font-size:12px;font-weight:600;color:var(--text)">🔬 Xray Cloud API Keys</span>
+                  <span style="font-weight:400;color:var(--text-muted);font-size:11px;margin-left:6px">Required for uploading test steps &amp; setting the repository folder</span>
+                </div>
+                <button class="btn btn-outline btn-sm" id="btnTestXray" onclick="testXrayConnection()">🔬 Test Xray Auth</button>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">
+                Generate keys in Jira → <strong>Apps</strong> → <strong>Manage Apps</strong> → <strong>Xray</strong> (left sidebar) → <strong>API Keys</strong> → <em>Generate</em>.
+              </div>
+              <!-- Status banner (hidden until test is run) -->
+              <div id="xrayConnStatus" style="display:none;font-size:12px;padding:7px 10px;border-radius:5px;margin-bottom:10px"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="form-group" style="margin:0">
+                  <label class="form-label">Client ID</label>
+                  <input class="form-control" id="xrayClientId" placeholder="Xray Client ID" />
+                </div>
+                <div class="form-group" style="margin:0">
+                  <label class="form-label">Client Secret</label>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <input class="form-control" id="xrayClientSecret" type="password" placeholder="Xray Client Secret" style="flex:1" />
+                    <button type="button" class="btn btn-outline btn-sm" style="padding:6px 10px;flex-shrink:0"
+                      onclick="const f=document.getElementById('xrayClientSecret');const show=f.type==='password';f.type=show?'text':'password';this.textContent=show?'🙈':'👁'">👁</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Jira Actions -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div class="card" style="margin:0;padding:14px">
+            <div style="font-weight:600;margin-bottom:10px">Upload Test Cases</div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label class="form-label" style="font-size:11px">Test Repository Path <span style="color:var(--text-muted);font-weight:400">(Xray folder)</span></label>
+              <input class="form-control form-control-sm" id="jiraTestPath" placeholder="e.g. Regression /" />
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label class="form-label" style="font-size:11px">Labels <span style="color:var(--text-muted);font-weight:400">(comma-separated)</span></label>
+              <input class="form-control form-control-sm" id="jiraLabels" placeholder="e.g. regression, smoke, automation" />
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="bulkCreateTestCases()">
+              📤 Upload to Jira
+            </button>
+          </div>
+
+          <div class="card" style="margin:0;padding:14px">
+            <div style="font-weight:600;margin-bottom:6px">Create Bug Tickets</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
+              Create bug tickets for failed tests with labels, description, assignee and screenshots.
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="openCreateBugModal()">
+              🐛 Create Bug
+            </button>
+          </div>
+
+          <div class="card" style="margin:0;padding:14px">
+            <div style="font-weight:600;margin-bottom:6px">Upload Results</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
+              Paste a Jira issue key, optionally attach a file, then click Upload.
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+              <input class="form-control" id="resultIssueKey" placeholder="QA-123 (Jira issue key)" style="flex:1" />
+              <button class="btn btn-primary btn-sm" onclick="uploadResults()">⬆ Upload</button>
+            </div>
+            <label class="form-label" style="font-size:11px;margin-bottom:5px;display:block">
+              Attach file <span style="color:var(--text-dim);font-weight:400">— optional · defaults to JSON export of current test cases</span>
+            </label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <label class="result-file-label" for="resultFileInput">
+                <span class="result-file-icon">📎</span>
+                <span id="resultFileNameDisplay">Choose file…</span>
+              </label>
+              <input type="file" id="resultFileInput"
+                accept=".json,.xml,.html,.csv,.txt,.zip,.pdf,.xlsx,.xls"
+                onchange="onResultFileChange(event)"
+                style="display:none" />
+              <button class="btn btn-outline btn-sm" id="resultFileClearBtn"
+                onclick="clearResultFile()" style="display:none">✕ Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div style="margin-top:14px">
+          <div class="form-label" style="margin-bottom:6px">📋 Activity Log</div>
+          <div id="jiraLog" style="font-size:12px;color:var(--text-muted);font-family:Consolas,monospace;max-height:150px;overflow-y:auto;background:var(--bg);padding:12px;border-radius:var(--radius)">
+            Waiting for actions…
+          </div>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-outline" onclick="goToStep(4)">← Back</button>
+        <button class="btn btn-primary" onclick="goToStep(6)">🎭 Playwright →</button>
+      </div>
+    </div>
+
+    <!-- STEP 6: Playwright Scripts ─────────────────────────────────────────── -->
+    <div class="step-panel" id="step6">
+
+      <!-- ── Unified Playwright Automation ───────────────────────────────────── -->
+      <div class="card pw-lib-card" style="margin-bottom:16px">
+        <div class="card-header">
+          <div class="card-title">🎭 Playwright Automation
+            <span id="repoStatusBadge" style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:8px">Checking repo…</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span id="pwLibCount" class="pw-lib-badge">0 scripts</span>
+            <button class="btn btn-outline btn-sm" id="btnClearExecLog" onclick="clearExecLogs()" title="Clear the execution logs">🗑 Clear Log</button>
+            <button class="btn btn-danger btn-sm" id="agentStopBtn" onclick="stopBrowserAgent()" style="display:none">⏹ Stop</button>
+          </div>
+        </div>
+
+        <!-- Repo link bar (shared by all modes) -->
+        <div style="display:flex;align-items:center;gap:8px;margin:0 12px 12px;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid rgba(255,255,255,.06)">
+          <label style="font-size:11px;color:var(--text-muted);white-space:nowrap">Codebase Path:</label>
+          <input class="form-control" id="agentRepoPath" style="font-size:12px;padding:4px 8px;flex:1" placeholder="C:\path\to\automation-repo" />
+          <button class="btn btn-outline btn-sm" onclick="reconnectAgentRepo()" style="font-size:11px;padding:2px 10px" title="Check connection">🔗 Connect</button>
+        </div>
+
+        <!-- Mode tabs -->
+        <div style="display:flex;gap:6px;margin:0 12px 14px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm active" id="tabAutomate" onclick="switchAgentTab('automate')">🤖 Automate a Test Case</button>
+          <button class="btn btn-outline btn-sm"        id="tabExecute"  onclick="switchAgentTab('execute')">🌐 Free Prompt</button>
+          <button class="btn btn-outline btn-sm"        id="tabRepo"     onclick="switchAgentTab('repo')">📂 Repo Scripts</button>
+        </div>
+
+        <!-- ===== AUTOMATE A TEST CASE ===== -->
+        <div id="agentTabAutomate" style="padding:0 12px">
+          <p style="color:var(--text-muted);font-size:12px;margin-bottom:10px">
+            Pick a test case (click <strong>Automation</strong> on a row in Step 4), or download from a Jira
+            <strong>Test Execution</strong> / <strong>Test Set</strong>. Then either <strong>Record</strong> the steps in a real
+            browser, or let the <strong>AI automate</strong> it — and convert &amp; save into your repo.
+          </p>
+
+          <!-- Selected TC -->
+          <div id="selectedTcForAgent" style="padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--text-muted);margin-bottom:10px">
+            No test case selected — pick one from Step 4 or download from Jira below.
+          </div>
+
+          <!-- Download from Jira (Test Execution / Test Set) -->
+          <div style="padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <select id="agentImportType" class="form-control" style="font-size:12px;padding:4px 8px;width:auto">
+                <option value="execution">Test Execution</option>
+                <option value="set">Test Set</option>
+              </select>
+              <input id="agentImportKey" class="form-control" style="font-size:12px;padding:4px 8px;flex:1;min-width:200px" placeholder="Jira key (e.g. PROJ-1234)" />
+              <button class="btn btn-outline btn-sm" id="btnImportTests" onclick="importTestsForAgent()" style="font-size:11px;padding:4px 12px">📥 Download from Jira</button>
+            </div>
+            <div style="font-size:10.5px;color:var(--text-muted);margin-top:6px">
+              Uses Xray steps when configured, otherwise reads steps from each Jira card. Test runs can be uploaded back to this execution.
+            </div>
+            <div id="agentImportList" style="margin-top:10px;display:none"></div>
+          </div>
+
+          <!-- Edit AI instruction -->
+          <div style="margin-bottom:10px">
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">✎ AI instruction (sent to the agent — pre-filled from the test steps, edit as needed)</label>
+            <textarea id="agentInstruction" class="form-control" rows="3" style="font-size:12px"
+              placeholder="Select a test case to pre-fill its steps here, or type custom guidance for the AI…"></textarea>
+          </div>
+
+          <!-- Start URL (codegen / agent open here — never blank) -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <label style="font-size:11px;color:var(--text-muted);white-space:nowrap">Start URL:</label>
+            <input class="form-control" id="pwStartUrl" style="font-size:12px;padding:4px 8px;flex:1" placeholder="https://your-app.example.com" />
+          </div>
+
+          <!-- Actions: Record OR Ask AI -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-outline" id="btnRecordSelected" onclick="recordSelectedTc()">🎭 Record Script</button>
+            <button class="btn btn-primary" id="btnAutomateTc" onclick="startAutomateAgent()" disabled>🤖 Agentic Automate</button>
+            <span style="font-size:10.5px;color:var(--text-dim)">→ at the end, the run is converted &amp; saved into your linked repo.</span>
+          </div>
+
+          <!-- Recorded scripts list -->
+          <div id="pwLibList" style="margin-top:12px">
+            <div class="pw-lib-empty">No recorded scripts yet.</div>
+          </div>
+        </div>
+
+        <!-- ===== FREE PROMPT (EXECUTE) ===== -->
+        <div id="agentTabExecute" style="display:none;padding:0 12px">
+          <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+            Type a natural-language instruction. The AI drives the <strong>live browser</strong> to complete the flow.
+          </p>
+          <textarea id="agentExecutePrompt" class="form-control" rows="3"
+            placeholder="e.g. Log in as a standard user and navigate to the Orders page…"
+            style="font-size:13px;margin-bottom:10px"></textarea>
+          <button class="btn btn-primary" id="btnExecuteFlow" onclick="startExecuteAgent()">🌐 Execute in Browser</button>
+        </div>
+
+        <!-- ===== REPO SCRIPTS (one-click execution) ===== -->
+        <div id="agentTabRepo" style="display:none;padding:0 12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+            <p style="color:var(--text-muted);font-size:12px;margin:0">
+              Existing Playwright specs in your linked repo. <strong>Run</strong> executes the spec in the repo (its own config), then you can <strong>upload the PDF evidence</strong> to Jira.
+            </p>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-danger btn-sm" id="btnRepoStop" onclick="stopRepoScript()" style="display:none">⏹ Stop</button>
+              <button class="btn btn-outline btn-sm" onclick="loadRepoScripts()">↺ Refresh</button>
+            </div>
+          </div>
+          <div id="repoScriptsList">
+            <div class="pw-lib-empty">Link the repo and click Refresh to list its scripts.</div>
+          </div>
+          <div id="repoRunFeed" style="display:none;margin-top:12px;background:#080705;border-radius:8px;padding:10px 12px;max-height:260px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px"></div>
+        </div>
+
+        <!-- Shared live AI feed -->
+        <div id="agentFeed" style="margin:14px 12px 4px;background:#080705;border-radius:8px;padding:10px 12px;min-height:60px;max-height:280px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;display:none"></div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-outline" onclick="goToStep(5)">← Back</button>
+        <button class="btn btn-primary" onclick="goToStep(7)">
+          🚀 Trigger Pipeline →
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 7: Pipeline & Scheduler ───────────────────────────────────── -->
+    <div class="step-panel" id="step7">
+
+      <!-- ── Pipeline ──────────────────────────────────────────────────── -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <div class="card-title">🚀 GitLab Pipeline</div>
+        </div>
+        <div class="grid-2">
+          <!-- Config -->
+          <div>
+            <div class="form-group">
+              <label class="form-label">GitLab URL</label>
+              <input class="form-control" id="glUrl" placeholder="https://gitlab.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project ID</label>
+              <input class="form-control" id="glProjectId" placeholder="12345678" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Trigger Token</label>
+              <input class="form-control" id="glTriggerToken" type="password" placeholder="glptt-…" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Branch / Ref</label>
+              <input class="form-control" id="glBranch" placeholder="main" value="main" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pipeline Variables (JSON)</label>
+              <textarea class="form-control" id="glVars" rows="3" placeholder='{"TEST_SUITE":"regression","ENV":"staging"}'></textarea>
+            </div>
+            <button class="btn btn-primary" style="width:100%" onclick="triggerPipeline()">🚀 Trigger Pipeline</button>
+          </div>
+
+          <!-- Status -->
+          <div>
+            <div class="card-title" style="margin-bottom:12px">📊 Status</div>
+            <div class="pipeline-status" id="pipelineStatus">
+              <span class="status-icon">⏸</span>
+              <div>
+                <div class="ps-label">Status</div>
+                <div class="ps-value pending" id="psValue">Not Triggered</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-bottom:12px">
+              <div class="stat-card" style="flex:1">
+                <div class="stat-num" id="pipelineId" style="font-size:18px">—</div>
+                <div class="stat-label">Pipeline ID</div>
+              </div>
+              <div class="stat-card" style="flex:1">
+                <div class="stat-num" id="pipelineDuration" style="font-size:18px">—</div>
+                <div class="stat-label">Duration</div>
+              </div>
+            </div>
+            <div id="jobsList" style="margin-top:12px"></div>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="btn btn-outline btn-sm" id="btnRefreshPipeline" onclick="refreshPipeline()" style="display:none">↺ Refresh</button>
+              <a id="pipelineWebUrl" href="#" target="_blank" class="btn btn-outline btn-sm" style="display:none">🔗 Open in GitLab</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scheduler ──────────────────────────────────────────────────── -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⏰ Scheduler</div>
+        </div>
+        <div class="grid-2" style="gap:16px">
+          <!-- New Schedule form -->
+          <div>
+            <div class="form-group">
+              <label class="form-label">Schedule Name</label>
+              <input class="form-control" id="schedName" placeholder="Nightly Regression Run" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cron Expression
+                <a href="https://crontab.guru" target="_blank" style="color:var(--primary);font-size:11px;margin-left:6px">crontab.guru ↗</a>
+              </label>
+              <input class="form-control" id="schedCron" placeholder="0 2 * * *" />
+              <div id="schedCronHint" style="color:var(--text-muted);font-size:11px;margin-top:4px">e.g. "0 2 * * *" = every day at 2 AM</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Timezone</label>
+              <input class="form-control" id="schedTz" placeholder="UTC" value="UTC" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">GitLab URL</label>
+              <input class="form-control" id="schedGlUrl" placeholder="https://gitlab.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project ID</label>
+              <input class="form-control" id="schedProjectId" placeholder="12345678" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Trigger Token</label>
+              <input class="form-control" id="schedTriggerToken" type="password" placeholder="glptt-…" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Branch</label>
+              <input class="form-control" id="schedBranch" placeholder="main" value="main" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pipeline Variables (JSON)</label>
+              <textarea class="form-control" id="schedVars" rows="2" placeholder='{"ENV":"staging"}'></textarea>
+            </div>
+            <button class="btn btn-primary" style="width:100%" onclick="createSchedule()">✚ Add Schedule</button>
+          </div>
+
+          <!-- Active schedules -->
+          <div class="card" style="margin:0">
+            <div class="card-header">
+              <div class="card-title">📅 Active Schedules</div>
+              <button class="btn btn-outline btn-sm" onclick="loadSchedules()">↺ Refresh</button>
+            </div>
+            <div id="scheduleList" style="min-height:100px">
+              <div style="color:var(--text-dim);padding:20px;text-align:center">No schedules yet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-outline" onclick="goToStep(6)">← Back</button>
+        <button class="btn btn-success" onclick="showSummary()">✅ View Summary</button>
+      </div>
+    </div>
+
+    <!-- STEP: PerfForge — performance testing (standalone) ─────────────────── -->
+    <div class="step-panel" id="stepPerf">
+      <div class="wf-topbar">
+        <div>
+          <div class="wf-title">Perf<em>Forge</em> · Performance Studio</div>
+          <div class="wf-subtitle">AI-driven exploration &amp; load testing — find slow pages and APIs, then hammer them</div>
+        </div>
+        <div class="spacer" style="flex:1"></div>
+        <div class="wf-controls">
+          <span class="header-pill" id="pfEnginePill"><span class="dot"></span>checking…</span>
+          <button class="btn btn-danger btn-sm pf-hidden" id="pfStopBtn" onclick="pfStop()">⏹ Stop</button>
+        </div>
+      </div>
+
+      <div class="grid-2" style="align-items:start;gap:18px;margin-top:14px">
+        <!-- ── Config ── -->
+        <div class="card">
+          <div class="tabs">
+            <div class="tab active" id="pfTabExplore" onclick="pfTab('explore', this)">🤖 AI Explorer</div>
+            <div class="tab" id="pfTabLoad" onclick="pfTab('load', this)">⚡ Load Test</div>
+          </div>
+
+          <!-- AI Explorer -->
+          <div id="pfExploreFields">
+            <div class="form-group"><label class="form-label">What should the AI do?</label>
+              <textarea class="form-control" id="pf_goal" rows="2" placeholder="Log in and explore the dashboard, reports and search; find slow pages and APIs."></textarea></div>
+            <div class="form-group"><label class="form-label">Application URL</label>
+              <input class="form-control" id="pf_url" placeholder="https://app.example.com/login" /></div>
+            <div class="pf-row2">
+              <div class="form-group"><label class="form-label">Username</label><input class="form-control" id="pf_user" placeholder="optional" /></div>
+              <div class="form-group"><label class="form-label">Password</label><input class="form-control" id="pf_pass" type="password" placeholder="optional" /></div>
+            </div>
+            <div class="pf-row2">
+              <div class="form-group"><label class="form-label">Engine <span id="pf_engineStatus" style="font-weight:400;color:var(--text-muted)"></span></label>
+                <select class="form-control" id="pf_engine">
+                  <option value="ai">AI navigation — uses ⚙ Settings provider</option>
+                  <option value="heuristic">Heuristic crawl — no AI</option>
+                </select></div>
+              <div class="form-group"><label class="form-label">Max steps</label><input class="form-control" id="pf_steps" type="number" value="12" /></div>
+            </div>
+            <div class="form-group" style="display:flex;gap:18px;flex-wrap:wrap">
+              <label style="display:flex;gap:7px;align-items:center;cursor:pointer"><input type="checkbox" id="pf_headless" checked /> Headless browser</label>
+              <label style="display:flex;gap:7px;align-items:center;cursor:pointer"><input type="checkbox" id="pf_loadtest" checked /> Auto load-test discovered APIs</label>
+              <label style="display:flex;gap:7px;align-items:center;cursor:pointer"><input type="checkbox" id="pf_manual" /> Manual login</label>
+            </div>
+            <div class="form-group" style="font-size:11px;color:var(--text-muted);margin-top:-6px">
+              For SSO / federated / MFA logins (where you authenticate on an external page): tick <b>Manual login</b> — a visible browser opens, you sign in yourself, and the AI starts exploring once you're past the login page (waits up to 3 min). The Username/Password fields above are only for simple form logins.
+            </div>
+            <div class="pf-row2">
+              <div class="form-group"><label class="form-label">LT concurrency</label><input class="form-control" id="pf_ex_conc" type="number" value="10" /></div>
+              <div class="form-group"><label class="form-label">LT duration (s)</label><input class="form-control" id="pf_ex_dur" type="number" value="20" /></div>
+            </div>
+          </div>
+
+          <!-- Load Test -->
+          <div id="pfLoadFields" class="pf-hidden">
+            <div class="form-group"><label class="form-label">Test name</label><input class="form-control" id="pf_name" value="My load test" /></div>
+            <div class="form-group"><label class="form-label">Target URL</label><input class="form-control" id="pf_lt_url" placeholder="https://api.example.com/health" /></div>
+            <div class="pf-row2">
+              <div class="form-group"><label class="form-label">Method</label>
+                <select class="form-control" id="pf_method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>HEAD</option></select></div>
+              <div class="form-group"><label class="form-label">Timeout (s)</label><input class="form-control" id="pf_timeout" type="number" value="30" /></div>
+            </div>
+            <div class="form-group"><label class="form-label">Headers (Key: Value per line)</label><textarea class="form-control" id="pf_headers" rows="2"></textarea></div>
+            <div class="form-group"><label class="form-label">Body</label><textarea class="form-control" id="pf_body" rows="2"></textarea></div>
+            <div class="pf-row3">
+              <div class="form-group"><label class="form-label">Concurrency</label><input class="form-control" id="pf_conc" type="number" value="10" /></div>
+              <div class="form-group"><label class="form-label">Duration (s)</label><input class="form-control" id="pf_dur" type="number" value="30" /></div>
+              <div class="form-group"><label class="form-label">Ramp-up (s)</label><input class="form-control" id="pf_ramp" type="number" value="0" /></div>
+            </div>
+            <div class="pf-row2">
+              <div class="form-group"><label class="form-label">SLA max p95 (ms)</label><input class="form-control" id="pf_sla_p95" type="number" placeholder="—" /></div>
+              <div class="form-group"><label class="form-label">SLA max error (%)</label><input class="form-control" id="pf_sla_err" type="number" placeholder="—" /></div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="pfStartBtn" onclick="pfStart()" style="width:100%;margin-top:6px">▶ Start</button>
+          <div class="pf-log" id="pfStatus" style="margin-top:8px;color:var(--text-muted)">Idle.</div>
+        </div>
+
+        <!-- ── Results ── -->
+        <div>
+          <div class="card pf-hidden" id="pfSlaBanner" style="margin-bottom:14px"></div>
+          <div class="pf-grid4">
+            <div class="pf-stat"><div class="k">Throughput</div><div class="v" id="pfRps">0<span class="u"> req/s</span></div></div>
+            <div class="pf-stat"><div class="k">Avg latency</div><div class="v" id="pfAvg">0<span class="u"> ms</span></div></div>
+            <div class="pf-stat"><div class="k">p95 latency</div><div class="v" id="pfP95">0<span class="u"> ms</span></div></div>
+            <div class="pf-stat"><div class="k">Error rate</div><div class="v good" id="pfErr">0<span class="u"> %</span></div></div>
+          </div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-title" style="font-size:13px;margin-bottom:10px">Live throughput &amp; latency</div>
+            <canvas id="pfChart" height="220"></canvas>
+          </div>
+          <div class="card pf-hidden" id="pfLogPanel" style="margin-bottom:14px">
+            <div class="card-title" style="font-size:13px;margin-bottom:8px">AI Explorer activity</div>
+            <div class="pf-log" id="pfLog"></div>
+          </div>
+          <div class="card pf-hidden" id="pfFindings" style="margin-bottom:14px">
+            <div class="card-title" style="font-size:13px;margin-bottom:8px">Performance findings</div>
+            <div id="pfSummary" style="font-size:12px;color:var(--text-muted)"></div>
+            <div id="pfIssues" style="margin-top:8px"></div>
+            <div class="pf-diag pf-hidden" id="pfDiag"></div>
+            <div class="card-title" style="font-size:12px;margin:14px 0 6px">Pages measured</div>
+            <table class="pf-table"><thead><tr><th>Page</th><th>TTFB</th><th>FCP</th><th>LCP</th><th>Load</th></tr></thead><tbody id="pfPages"></tbody></table>
+            <div class="card-title" style="font-size:12px;margin:14px 0 6px">Slowest requests</div>
+            <table class="pf-table"><thead><tr><th>Method</th><th>URL</th><th>Type</th><th>ms</th><th>KB</th></tr></thead><tbody id="pfReqs"></tbody></table>
+          </div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-title" style="font-size:13px;margin-bottom:8px">Latency distribution</div>
+            <div class="pf-row3">
+              <div><div style="font-size:10px;color:var(--text-muted)">min</div><div id="pfMin">0 ms</div></div>
+              <div><div style="font-size:10px;color:var(--text-muted)">p50</div><div id="pfP50">0 ms</div></div>
+              <div><div style="font-size:10px;color:var(--text-muted)">p90</div><div id="pfP90">0 ms</div></div>
+            </div>
+            <div class="pf-row3" style="margin-top:10px">
+              <div><div style="font-size:10px;color:var(--text-muted)">p99</div><div id="pfP99">0 ms</div></div>
+              <div><div style="font-size:10px;color:var(--text-muted)">max</div><div id="pfMax">0 ms</div></div>
+              <div><div style="font-size:10px;color:var(--text-muted)">total</div><div id="pfTotal">0</div></div>
+            </div>
+            <div class="pf-codes" id="pfCodes"></div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="font-size:13px;margin-bottom:8px">Run history</div>
+            <table class="pf-table"><thead><tr><th>Name</th><th>Mode</th><th>Reqs</th><th>RPS</th><th>p95</th><th>Errors</th><th>SLA</th></tr></thead>
+              <tbody id="pfHistory"><tr><td colspan="7" style="color:var(--text-dim)">No runs yet.</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- /main -->
+
+  </div><!-- /content-layout -->
+</div><!-- /app -->
+
+<!-- ── Reference Library Drawer ──────────────────────────────────────────── -->
+<!-- ── Reference Library Full Page ───────────────────────────────────────── -->
+<div id="rlPage" style="display:none;position:fixed;inset:0;z-index:800;background:#0a0a08;overflow-y:auto">
+
+  <!-- Page top-bar (mirrors the app header style) -->
+  <div class="rl-page-topbar">
+    <button class="rl-back-btn" onclick="closeRefLibPage()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Back
+    </button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:22px">📚</span>
+      <div>
+        <div style="font-family:'Fraunces',serif;font-weight:600;font-size:20px;line-height:1">Reference <em style="color:#f4c869;font-style:italic">Library</em></div>
+        <div style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;margin-top:2px">The AI's living knowledge engine · knowledge base for all generations</div>
+      </div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <button class="btn btn-outline btn-sm" onclick="loadKnowledge()">↺ Refresh</button>
+      <button class="btn btn-outline btn-sm" onclick="openAddKnowledge()">+ Add Rule</button>
+    </div>
+  </div>
+
+  <!-- Page content wrapper -->
+  <div class="rl-page-body">
+
+    <!-- Stats strip -->
+    <div class="rl-stats" id="rlStats">
+      <div class="rl-stat v-violet"><div class="rl-stat-k">Knowledge units</div><div class="rl-stat-v" id="rlStatTotal">—</div></div>
+      <div class="rl-stat v-gold"><div class="rl-stat-k">Pending review</div><div class="rl-stat-v" id="rlStatPending">—</div></div>
+      <div class="rl-stat v-teal"><div class="rl-stat-k">Modules covered</div><div class="rl-stat-v" id="rlStatModules">—</div></div>
+      <div class="rl-stat"><div class="rl-stat-k">Times reused</div><div class="rl-stat-v" id="rlStatUses">—<small> total</small></div></div>
+    </div>
+
+    <!-- Mode tabs -->
+    <div class="rl-modes">
+      <button class="rl-mode on" id="rlModeRules" onclick="setKnowledgeMode('rules',this)">📐 Rules</button>
+      <button class="rl-mode"    id="rlModeFlow"  onclick="setKnowledgeMode('flow',this)">🗺️ App Flow Map</button>
+      <button class="rl-mode"    id="rlModeSrc"   onclick="setKnowledgeMode('sources',this)">🗃️ Sources</button>
+      <button class="rl-mode"    id="rlModeTwin"  onclick="setKnowledgeMode('twin',this)">🧬 Digital Twin</button>
+    </div>
+
+    <!-- ── RULES mode ──────────────────────────────────────────────── -->
+    <div id="rlRulesPane" class="rl-main-grid">
+      <div class="rl-filter-rail">
+        <input class="rl-search" id="rlSearch" placeholder="🔍  search rules…" oninput="filterKnowledgeList()" />
+        <div class="rl-fhead">Scope</div>
+        <div class="rl-ftag on" id="rlScopeAll"    onclick="setKnowledgeScope('all',this)">All <span class="rl-fn" id="rlCountAll">0</span></div>
+        <div class="rl-ftag"    id="rlScopeModule" onclick="setKnowledgeScope('module',this)">Module rules <span class="rl-fn" id="rlCountModule">0</span></div>
+        <div class="rl-ftag"    id="rlScopeGlobal" onclick="setKnowledgeScope('global',this)">Global rules <span class="rl-fn" id="rlCountGlobal">0</span></div>
+        <div class="rl-fsep"></div>
+        <div class="rl-fhead">Status</div>
+        <div class="rl-ftag" id="rlFiltApproved" onclick="setKnowledgeStatus('approved',this)">Approved <span class="rl-fn" id="rlCountApproved">0</span></div>
+        <div class="rl-ftag" id="rlFiltPending"  onclick="setKnowledgeStatus('pending',this)">Pending <span class="rl-fn" id="rlCountPending">0</span></div>
+        <div class="rl-fsep"></div>
+        <div class="rl-fhead">Module</div>
+        <div id="rlModuleFilters"></div>
+      </div>
+      <div class="rl-panel" id="knowledgeList">
+        <div style="color:var(--text-dim);font-size:12px;padding:20px;text-align:center">Loading…</div>
+      </div>
+    </div>
+
+    <!-- ── FLOW MAP mode ─────────────────────────────────────────────── -->
+    <div id="rlFlowPane" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:12px;color:var(--text-muted)">Visualise and document your app's user flows. Used by AI for context.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" style="color:#e0786b;border-color:rgba(224,120,107,.4)" onclick="deleteAllFlows()">🗑 Clear All</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('flowFigmaFileInput').click()">📐 Upload Screenshots</button>
+          <button class="btn btn-outline btn-sm" onclick="openPullFigmaModal()">📥 Fetch From Figma</button>
+          <button class="btn btn-primary btn-sm" onclick="openNewFlowModal()">+ New Flow</button>
+        </div>
+      </div>
+      <!-- Hidden file input for screenshot upload -->
+      <input type="file" id="flowFigmaFileInput" accept=".png,.jpg,.jpeg,.pdf" multiple style="display:none" onchange="uploadFigmaToFlows()" />
+      <div id="flowUploadStatus" style="display:none;font-size:12px;color:var(--text-muted);padding:6px 0 10px"></div>
+      <div id="rlFlowContent">
+        <div style="color:var(--text-dim);font-size:12px;padding:20px;text-align:center">No flows yet — create one manually or generate from Figma.</div>
+      </div>
+    </div>
+
+    <!-- ── SOURCES mode ──────────────────────────────────────────────── -->
+    <div id="rlSrcPane" style="display:none">
+
+      <!-- Test Case & Scenario Chats · Requirements / Jira · Curated Notes (top) -->
+      <div class="rl-panel" id="rlSrcContent" style="margin-bottom:14px">
+        <div style="color:var(--text-dim);font-size:12px;padding:10px;text-align:center">Loading…</div>
+      </div>
+
+      <!-- Confluence Import -->
+      <div class="rl-panel" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-weight:600;font-size:13px">📄 Import from Confluence</div>
+        </div>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:10px">
+          Import a Confluence FRD page as functional requirements context. The AI uses this to understand the full flow for scenario & test case generation.
+        </p>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <input class="form-control" id="rlConfluenceUrl" placeholder="https://your-domain.atlassian.net/wiki/spaces/…/pages/…" style="flex:1;font-size:12px" />
+          <button class="btn btn-sm btn-primary" onclick="importConfluenceAsKnowledge()">📥 Import</button>
+        </div>
+        <div id="rlConfluenceStatus" style="display:none;margin-top:8px;font-size:12px"></div>
+      </div>
+
+      <!-- TC Library upload (bottom) -->
+      <div class="rl-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-weight:600;font-size:13px">📁 TC Library Upload</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="badge" id="refLibBadge" style="background:rgba(255,255,255,.04);color:var(--text-muted);border:1px solid rgba(255,255,255,.1);font-size:11px;padding:2px 10px;border-radius:999px">Not loaded</span>
+            <button class="btn btn-sm btn-outline" id="refLibClearBtn" style="display:none" onclick="clearRefLibrary(event)">🗑 Clear</button>
+          </div>
+        </div>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+          Upload your existing TC dump (Excel, Word, PDF, CSV). The AI learns patterns, naming conventions
+          and coverage — injected into every future generation to avoid duplicates and stay consistent.
+        </p>
+        <div id="refLibStats" class="ref-lib-stats" style="display:none"></div>
+        <div id="refLibSources" class="ref-lib-sources" style="display:none"></div>
+        <div class="upload-zone" id="refLibUploadZone" style="min-height:72px">
+          <input type="file" id="refLibFileInput" accept=".pdf,.xlsx,.xls,.docx,.doc,.csv,.txt,.md" multiple onchange="handleRefLibUpload(event)" />
+          <div class="upload-icon" style="font-size:18px">📁</div>
+          <div class="upload-text"><strong>Drop or click to upload TC dump</strong></div>
+          <div class="upload-types">Excel · Word · PDF · CSV · Text</div>
+        </div>
+        <div id="refLibProgress" style="display:none;margin-top:10px;color:var(--text-muted);font-size:13px;text-align:center">
+          ⏳ Analysing test case dump with AI…
+        </div>
+        <div style="margin-top:12px;display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="refLibAutoUpdate" checked style="accent-color:var(--primary)" />
+          <label for="refLibAutoUpdate" style="font-size:12px;color:var(--text-muted);cursor:pointer">
+            Auto-update library when new test cases are generated
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DIGITAL TWIN mode ─────────────────────────────────────────── -->
+    <div id="rlTwinPane" style="display:none">
+
+      <!-- Section A — Twin Status -->
+      <div class="rl-panel" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <div style="font-weight:600;font-size:13px">🧬 Twin Status</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-outline" onclick="loadTwinStatus()">↺ Refresh</button>
+            <button class="btn btn-sm btn-outline" style="color:#e0786b;border-color:rgba(224,120,107,.4)" onclick="resetTwin()">🗑 Reset Twin</button>
+            <button class="btn btn-sm btn-primary" id="twinRecrawlBtn" onclick="startTwinCrawl()">⟳ Re-crawl Now</button>
+          </div>
+        </div>
+        <div class="rl-stats" id="twinStats">
+          <div class="rl-stat v-teal"><div class="rl-stat-k">Last crawled</div><div class="rl-stat-v" id="twinLastCrawled" style="font-size:13px">—</div></div>
+          <div class="rl-stat v-violet"><div class="rl-stat-k">Routes discovered</div><div class="rl-stat-v" id="twinRoutes">—</div></div>
+          <div class="rl-stat v-gold"><div class="rl-stat-k">Elements captured</div><div class="rl-stat-v" id="twinElements">—</div></div>
+          <div class="rl-stat"><div class="rl-stat-k">APIs captured</div><div class="rl-stat-v" id="twinApis">—</div></div>
+        </div>
+        <!-- Live crawl feed -->
+        <div id="twinCrawlFeed" style="display:none;margin-top:12px;background:#0a0a08;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;max-height:220px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.6"></div>
+      </div>
+
+      <!-- Section B — Crawl Config -->
+      <div class="rl-panel" style="margin-bottom:14px">
+        <div style="font-weight:600;font-size:13px;margin-bottom:10px">⚙️ Crawl Config</div>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+          The crawler reuses the Browser Agent's login (deep-DOM, shadow-root aware). This app uses a <strong>SingPass/CorpPass mock</strong> — provide <strong>UIN</strong> (and <strong>UEN</strong> for CorpPass) plus a <strong>UUID</strong>. UIN only = SingPass; UIN + UEN = CorpPass. Blank fields fall back to <code>APP_UIN</code> / <code>APP_UEN</code> / <code>TEST_UUID</code> in <code>.env</code>. Leave routes blank to auto-discover from the base URL (BFS, depth 4).
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Base URL <span style="color:var(--danger)">*</span></label>
+            <input class="form-control" id="twinBaseUrl" placeholder="https://your-app.example.com" style="font-size:12px" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Login route <span style="color:var(--text-muted);font-size:10px">(blank = base URL)</span></label>
+            <input class="form-control" id="twinLoginRoute" placeholder="/login" style="font-size:12px" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">UIN / NRIC / FIN <span style="color:var(--text-muted);font-size:10px">(SingPass)</span></label>
+            <input class="form-control" id="twinUin" placeholder="e.g. S1234567A (blank = .env APP_UIN)" style="font-size:12px" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">UEN <span style="color:var(--text-muted);font-size:10px">(CorpPass — blank = SingPass)</span></label>
+            <input class="form-control" id="twinUen" placeholder="e.g. 201912345A (blank = .env APP_UEN)" style="font-size:12px" />
+          </div>
+          <div class="form-group" style="grid-column:1 / -1">
+            <label class="form-label">UUID <span style="color:var(--text-muted);font-size:10px">(blank = .env TEST_UUID · "generate" = fresh each crawl)</span></label>
+            <input class="form-control" id="twinUuid" placeholder="b583026f-350c-4ecf-8950-73851b6f2ed0" style="font-size:12px;font-family:'JetBrains Mono',monospace" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Known routes <span style="color:var(--text-muted);font-size:10px">(one per line — blank = auto-discover)</span></label>
+          <textarea class="form-control" id="twinRoutesList" rows="3" placeholder="/dashboard&#10;/profile/edit&#10;/transactions" style="font-size:12px;font-family:'JetBrains Mono',monospace"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-sm btn-outline" onclick="saveTwinConfig()">💾 Save Config</button>
+          <button class="btn btn-sm btn-primary" onclick="startTwinCrawl()">▶ Start Crawl</button>
+        </div>
+      </div>
+
+      <!-- Section B2 — Record a Module (guided) -->
+      <div class="rl-panel" style="margin-bottom:14px;border-color:rgba(244,200,105,.25)">
+        <div style="font-weight:600;font-size:13px;margin-bottom:10px">🎥 Record a Module <span style="color:var(--text-muted);font-weight:400;font-size:11px">(guided — you drive the flow)</span></div>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
+          Prefer to capture a specific flow exactly? Start a recording, then <strong>navigate the module start-to-end yourself</strong> in the browser that opens. Every page you land on is captured (elements + APIs) and tagged with the module name. Uses the same login + Base URL from Crawl Config above. Click <strong>Stop Recording</strong> (or just close the browser) when you reach the end.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Module name <span style="color:var(--text-muted);font-size:10px">(optional)</span></label>
+            <input class="form-control" id="twinModuleName" placeholder="e.g. Company Incorporation" style="font-size:12px" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Start route <span style="color:var(--text-muted);font-size:10px">(optional — blank = base URL)</span></label>
+            <input class="form-control" id="twinStartRoute" placeholder="/incorporation/start" style="font-size:12px" />
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-sm btn-primary" id="twinRecordBtn" onclick="startTwinGuided()" style="background:#f4c869;color:#1a1a14">🎥 Start Recording</button>
+          <button class="btn btn-sm btn-outline" id="twinStopBtn" onclick="stopTwinCrawl()" style="display:none;color:#e0786b;border-color:rgba(224,120,107,.4)">⏹ Stop Recording</button>
+        </div>
+      </div>
+
+      <!-- Section C — Twin Explorer -->
+      <div class="rl-main-grid">
+        <div class="rl-panel" style="padding:0;overflow:hidden">
+          <div style="font-weight:600;font-size:13px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08)">🗺️ Twin Explorer</div>
+          <div id="twinExplorer" style="max-height:420px;overflow-y:auto">
+            <div style="color:var(--text-dim);font-size:12px;padding:20px;text-align:center">No routes crawled yet.</div>
+          </div>
+        </div>
+        <div class="rl-panel">
+          <div style="font-weight:600;font-size:13px;margin-bottom:10px">📦 Route Context</div>
+          <div id="twinContextPanel" style="font-size:12px;color:var(--text-muted)">
+            Click a route in the explorer to view its full Digital Twin context (elements, rules, transitions, APIs).
+          </div>
+        </div>
+      </div>
+
+      <!-- Section D — Source Extraction -->
+      <div class="rl-panel" style="margin-top:14px;margin-bottom:14px">
+        <div style="font-weight:600;font-size:13px;margin-bottom:10px">📄 Source Extraction</div>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:10px">
+          Paste a Confluence HTML export, PPT text, or requirement doc. The AI extracts business rules, personas, acceptance criteria and flow steps, then merges them into the twin (matched to crawled routes by name).
+        </p>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <label class="form-label" style="margin:0">Source type:</label>
+          <select class="form-control" id="twinSourceType" style="width:auto;font-size:12px">
+            <option value="confluence">Confluence</option>
+            <option value="ppt">PPT / slides</option>
+            <option value="manual">Requirement doc</option>
+          </select>
+          <input class="form-control" id="twinSourceUrl" placeholder="source URL (optional)" style="flex:1;font-size:12px" />
+        </div>
+        <textarea class="form-control" id="twinSourceText" rows="5" placeholder="Paste document text or HTML here…" style="font-size:12px;margin-bottom:8px"></textarea>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-sm btn-primary" onclick="extractTwinSource()">🔍 Extract &amp; Merge</button>
+        </div>
+        <div id="twinExtractStatus" style="display:none;margin-top:10px;font-size:12px"></div>
+      </div>
+
+      <!-- Section E — Sync Settings -->
+      <div class="rl-panel">
+        <div style="font-weight:600;font-size:13px;margin-bottom:10px">🔄 Sync Settings</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <input type="checkbox" id="twinAutoRecrawl" style="accent-color:var(--primary)" onchange="saveTwinConfig()" />
+          <label for="twinAutoRecrawl" style="font-size:12px;color:var(--text-muted);cursor:pointer">Auto re-crawl on app deploy (via webhook trigger)</label>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Webhook secret <span style="color:var(--text-muted);font-size:10px">(for CI/CD <code>POST /api/twin/webhook/deploy</code>)</span></label>
+            <input class="form-control" id="twinWebhookSecret" type="password" placeholder="shared secret for X-Webhook-Secret header" style="font-size:12px" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Re-crawl every N hours <span style="color:var(--text-muted);font-size:10px">(0 = off)</span></label>
+            <input class="form-control" id="twinCronHours" type="number" min="0" value="0" style="font-size:12px" />
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-sm btn-outline" onclick="saveTwinConfig()">💾 Save Sync Settings</button>
+        </div>
+        <p style="color:var(--text-dim);font-size:11px;margin-top:8px">
+          CI/CD example: <code>curl -X POST http://localhost:3000/api/twin/webhook/deploy -H "X-Webhook-Secret: &lt;secret&gt;"</code>
+        </p>
+      </div>
+
+    </div><!-- /rlTwinPane -->
+
+  </div><!-- /rl-page-body -->
+</div><!-- /rlPage -->
+
+<!-- ── Add / Edit Knowledge Rule Modal ────────────────────────────────────── -->
+<div class="modal-overlay" id="ruleModal" style="display:none" onclick="if(event.target===this)closeRuleModal()">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title" id="ruleModalTitle">📐 Add Rule</div>
+      <button class="modal-close" onclick="closeRuleModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px">
+      <div class="form-group">
+        <label class="form-label">Rule / Guidance <span style="color:var(--danger)">*</span></label>
+        <textarea class="form-control" id="ruleGuidance" rows="4" placeholder="e.g. For the checkout flow, always include a NEGATIVE scenario for an expired payment method"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">Module <span style="color:var(--text-muted);font-size:10px">(blank = global)</span></label>
+          <input class="form-control" id="ruleModule" placeholder="e.g. BUM021, Login, Payment…" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kind</label>
+          <select class="form-control" id="ruleKind">
+            <option value="rule">Rule</option>
+            <option value="preference">Preference</option>
+            <option value="pattern">Pattern</option>
+            <option value="insight">Insight</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">Weight <span style="color:var(--text-muted);font-size:10px">(1–10, higher = stronger)</span></label>
+          <input class="form-control" id="ruleWeight" type="number" min="1" max="10" step="0.5" value="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" id="ruleStatus">
+            <option value="approved">Approved</option>
+            <option value="pending">Pending Review</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border)">
+      <button class="btn btn-outline" onclick="closeRuleModal()">Cancel</button>
+      <button class="btn btn-primary" id="ruleModalSaveBtn" onclick="saveRule()">Save Rule</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Create Bug Modal ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="createBugModal" style="display:none" onclick="if(event.target===this)closeCreateBugModal()">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div class="modal-title">🐛 Create Bug Ticket</div>
+      <button class="modal-close" onclick="closeCreateBugModal()">✕</button>
+    </div>
+    <div style="padding:0 24px;overflow-y:auto;max-height:72vh">
+
+      <!-- Failed TCs info -->
+      <div id="bugModalFailedInfo" style="padding:10px 12px;background:rgba(224,120,107,.07);border:1px solid rgba(224,120,107,.25);border-radius:10px;font-size:12px;color:#e0786b;margin-bottom:16px">
+        Loading failed tests…
+      </div>
+
+      <!-- Summary -->
+      <div class="form-group">
+        <label class="form-label">Summary * <span style="color:var(--text-muted);font-weight:400">(Jira issue title)</span></label>
+        <input class="form-control" id="bugSummary" placeholder="e.g. [BUG] Login fails with valid credentials" />
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" id="bugDesc" rows="4"
+          placeholder="Describe the bug — steps to reproduce, expected vs actual behaviour, environment…"></textarea>
+      </div>
+
+      <!-- Assignee & Labels row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">Assignee <span style="color:var(--text-muted);font-weight:400">(Jira account ID or email)</span></label>
+          <input class="form-control" id="bugAssignee" placeholder="e.g. accountId or email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Labels <span style="color:var(--text-muted);font-weight:400">(comma-separated)</span></label>
+          <input class="form-control" id="bugLabels" placeholder="e.g. regression, automation, sprint-3" />
+        </div>
+      </div>
+
+      <!-- Priority -->
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-control" id="bugPriority">
+          <option value="Highest">🔴 Highest</option>
+          <option value="High">🟠 High</option>
+          <option value="Medium" selected>🟡 Medium</option>
+          <option value="Low">🟢 Low</option>
+          <option value="Lowest">⚪ Lowest</option>
+        </select>
+      </div>
+
+      <!-- Screenshot upload -->
+      <div class="form-group">
+        <label class="form-label">Screenshots <span style="color:var(--text-muted);font-weight:400">(optional — attached to the bug)</span></label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label class="result-file-label" for="bugScreenshotInput" style="flex:none;min-width:180px">
+            <span class="result-file-icon">📸</span>
+            <span id="bugScreenshotDisplay">Choose screenshots…</span>
+          </label>
+          <input type="file" id="bugScreenshotInput" accept="image/*,.pdf"
+            multiple onchange="onBugScreenshotChange(event)" style="display:none" />
+          <button class="btn btn-outline btn-sm" id="bugScreenshotClearBtn"
+            onclick="clearBugScreenshots()" style="display:none">✕ Clear</button>
+        </div>
+        <div id="bugScreenshotList" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeCreateBugModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="submitCreateBug()" id="bugCreateBtn">🐛 Create Bug</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scenario Edit Modal ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="scenarioEditModal" style="display:none" onclick="closeScenarioEditOutside(event)">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title" id="scenarioEditTitle">Test Scenario</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="tc-mode-toggle">
+          <button id="scenModeViewBtn" class="tc-mode-btn active" onclick="_scenModalSetMode('view')">📋 View</button>
+          <button id="scenModeEditBtn" class="tc-mode-btn" onclick="_scenModalSetMode('edit')">✏ Edit</button>
+        </div>
+        <button class="modal-close" onclick="closeScenarioEditModal()">✕</button>
+      </div>
+    </div>
+
+    <!-- ── VIEW PANE ─────────────────────────────────────────────────── -->
+    <div id="scenModalViewPane" style="padding:0 24px;overflow-y:auto;max-height:68vh">
+      <!-- populated by renderScenViewPane() -->
+    </div>
+
+    <!-- ── EDIT PANE ─────────────────────────────────────────────────── -->
+    <div id="scenModalEditPane" style="padding:0 24px;overflow-y:auto;max-height:68vh;display:none">
+      <input type="hidden" id="seOriginalId" />
+      <div class="form-group">
+        <label class="form-label">ID</label>
+        <input class="form-control" id="seId" placeholder="TS-001" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input class="form-control" id="seTitle" placeholder="Scenario title" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Module</label>
+        <input class="form-control" id="seModule" placeholder="e.g. Authentication" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" id="seDesc" rows="2" placeholder="One-line description"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-control" id="seType">
+            <option value="functional">Functional</option>
+            <option value="regression">Regression</option>
+            <option value="integration">Integration</option>
+            <option value="e2e">E2E</option>
+            <option value="negative">Negative</option>
+            <option value="performance">Performance</option>
+            <option value="security">Security</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-control" id="sePriority">
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags <span style="color:var(--text-muted);font-weight:400">(comma-separated)</span></label>
+        <input class="form-control" id="seTags" placeholder="smoke, regression, login" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Acceptance Criteria <span style="color:var(--text-muted);font-weight:400">(one per line)</span></label>
+        <textarea class="form-control" id="seAC" rows="4" placeholder="Given…&#10;When…&#10;Then…"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeScenarioEditModal()">Close</button>
+      <button class="btn btn-outline" id="scenModalEditToggleBtn" onclick="_scenModalSetMode('edit')" style="display:none">✏ Edit</button>
+      <button class="btn btn-primary" id="scenModalSaveBtn" onclick="saveScenario()" style="display:none">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Test Case Edit Modal ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="tcEditModal" style="display:none" onclick="closeTcEditOutside(event)">
+  <div class="modal" style="max-width:760px">
+    <div class="modal-header">
+      <div class="modal-title" id="tcEditTitle">Test Case</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="tc-mode-toggle">
+          <button id="tcModeViewBtn" class="tc-mode-btn active" onclick="_tcModalSetMode('view')">📋 View</button>
+          <button id="tcModeEditBtn" class="tc-mode-btn" onclick="_tcModalSetMode('edit')">✏ Edit</button>
+        </div>
+        <button class="modal-close" onclick="closeTcEditModal()">✕</button>
+      </div>
+    </div>
+
+    <!-- ── VIEW PANE ─────────────────────────────────────────────────── -->
+    <div id="tcModalViewPane" style="padding:0 24px;overflow-y:auto;max-height:70vh">
+      <!-- populated by renderTcViewPane() -->
+    </div>
+
+    <!-- ── EDIT PANE ─────────────────────────────────────────────────── -->
+    <div id="tcModalEditPane" style="padding:0 24px;overflow-y:auto;max-height:70vh;display:none">
+      <input type="hidden" id="tceOriginalId" />
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">ID</label>
+          <input class="form-control" id="tceId" placeholder="TC-001" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Scenario ID</label>
+          <input class="form-control" id="tceScenarioId" placeholder="TS-001" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input class="form-control" id="tceTitle" placeholder="Test case title" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">Module</label>
+          <input class="form-control" id="tceModule" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-control" id="tcePriority">
+            <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-control" id="tceType">
+            <option>Functional</option><option>Regression</option><option>Integration</option>
+            <option>E2E</option><option>Negative</option><option>Boundary</option>
+            <option>Performance</option><option>Security</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preconditions <span style="color:var(--text-muted);font-weight:400">(one per line)</span></label>
+        <textarea class="form-control" id="tcePreconditions" rows="2" placeholder="User is logged in&#10;Test data is available"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Test Steps</label>
+        <div id="tceStepsContainer" class="tc-steps-editor"></div>
+        <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="addTcEditStep()">+ Add Step</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Overall Expected Result</label>
+        <textarea class="form-control" id="tceExpected" rows="2"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">Automation Notes</label>
+          <input class="form-control" id="tceAutoNotes" placeholder="Selector hints, data setup…" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Labels <span style="color:var(--text-muted);font-weight:400">(comma-separated)</span></label>
+          <input class="form-control" id="tceLabels" placeholder="regression, smoke" />
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeTcEditModal()">Close</button>
+      <button class="btn btn-outline" id="tcModalEditToggleBtn" onclick="_tcModalSetMode('edit')" style="display:none">✏ Edit</button>
+      <button class="btn btn-primary" id="tcModalSaveBtn" onclick="saveTcEdit()" style="display:none">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings Modal ────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="settingsModal" style="display:none" onclick="closeSettingsOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚙ Settings</div>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchSettingsTab('ai', this)">🤖 AI Provider</div>
+      <div class="tab" onclick="switchSettingsTab('gitlab', this)">GitLab</div>
+      <div class="tab" onclick="switchSettingsTab('jira', this)">Jira</div>
+      <div class="tab" onclick="switchSettingsTab('figma', this)">Figma</div>
+      <div class="tab" onclick="switchSettingsTab('confluence', this)">Confluence</div>
+    </div>
+
+    <!-- AI Provider settings -->
+    <div id="settings-ai">
+
+      <!-- Provider selector cards -->
+      <div class="form-group">
+        <label class="form-label">Active Provider</label>
+        <div id="providerCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px">
+          <div class="provider-card active" data-provider="claude" onclick="selectProvider('claude')">
+            <div class="provider-logo">🟣</div>
+            <div class="provider-name">Claude</div>
+            <div class="provider-sub">Anthropic</div>
+          </div>
+          <div class="provider-card" data-provider="openai" onclick="selectProvider('openai')">
+            <div class="provider-logo">🟢</div>
+            <div class="provider-name">ChatGPT</div>
+            <div class="provider-sub">OpenAI</div>
+          </div>
+          <div class="provider-card" data-provider="gemini" onclick="selectProvider('gemini')">
+            <div class="provider-logo">🔵</div>
+            <div class="provider-name">Gemini</div>
+            <div class="provider-sub">Google</div>
+          </div>
+          <div class="provider-card" data-provider="copilot" onclick="selectProvider('copilot')">
+            <div class="provider-logo">⚡</div>
+            <div class="provider-name">Copilot</div>
+            <div class="provider-sub">VS Code / GitHub</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-provider key + model (shown based on selection) -->
+      <div id="provider-fields-claude">
+        <div class="form-group">
+          <label class="form-label">Anthropic API Key
+            <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--primary);font-size:11px;margin-left:6px">Get key ↗</a>
+            <span style="color:var(--success);font-size:11px;margin-left:8px;font-weight:400">optional</span>
+          </label>
+          <input class="form-control" id="settAnthropicKey" type="password" placeholder="sk-ant-…  (leave blank to use Claude Code CLI)" />
+          <div style="font-size:11px;color:var(--text-muted);margin-top:5px;display:flex;align-items:center;gap:6px">
+            <span id="cliStatusDot" style="width:7px;height:7px;border-radius:50%;background:var(--text-dim);display:inline-block"></span>
+            <span id="cliStatusText">Leave blank to route through the local Claude Code CLI (no API key needed)</span>
+            <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:10px" onclick="testClaudeCLI()">Test CLI</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Model</label>
+          <select class="form-control" id="settModelClaude">
+            <option value="claude-opus-4-8">Claude Opus 4.8 — most capable</option>
+            <option value="claude-opus-4-7">Claude Opus 4.7</option>
+            <option value="claude-sonnet-4-6">Claude Sonnet 4.6 — balanced</option>
+            <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — fastest</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="provider-fields-openai" style="display:none">
+        <div class="form-group">
+          <label class="form-label">OpenAI API Key
+            <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--primary);font-size:11px;margin-left:6px">Get key ↗</a>
+          </label>
+          <input class="form-control" id="settOpenaiKey" type="password" placeholder="sk-…" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Model</label>
+          <select class="form-control" id="settModelOpenai">
+            <option value="gpt-4o">GPT-4o — flagship</option>
+            <option value="gpt-4o-mini">GPT-4o Mini — fast &amp; cheap</option>
+            <option value="o3-mini">o3 Mini — reasoning</option>
+            <option value="o1-preview">o1 Preview — deep reasoning</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="provider-fields-gemini" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Google AI API Key
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--primary);font-size:11px;margin-left:6px">Get key ↗</a>
+          </label>
+          <input class="form-control" id="settGeminiKey" type="password" placeholder="AIza…" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Model</label>
+          <select class="form-control" id="settModelGemini">
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash — fast</option>
+            <option value="gemini-2.0-flash-thinking-exp">Gemini 2.0 Flash Thinking — reasoning</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro — capable</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash — balanced</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="provider-fields-copilot" style="display:none">
+        <div class="form-group">
+          <label class="form-label">GitHub Personal Access Token
+            <span style="color:var(--success);font-size:11px;margin-left:8px;font-weight:400">optional — not needed with VS Code Bridge</span>
+          </label>
+          <input class="form-control" id="settCopilotToken" type="password" placeholder="Leave blank to use VS Code Bridge (recommended)" />
+          <div style="font-size:11px;color:var(--text-muted);margin-top:5px;display:flex;align-items:center;gap:6px">
+            <span id="copilotStatusDot" style="width:7px;height:7px;border-radius:50%;background:var(--text-dim);display:inline-block"></span>
+            <span id="copilotStatusText">Uses VS Code Copilot Bridge — no token needed if extension is installed</span>
+            <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:10px" onclick="testCopilotToken()">Test Connection</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:8px;padding:8px;background:var(--bg-alt);border-radius:6px">
+            <strong>Setup:</strong> In VS Code press <code>Ctrl+Shift+P</code> → run <code>Test Alchemist: Start Copilot Bridge</code><br>
+            The bridge routes AI requests through your already-authenticated Copilot session.
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Model</label>
+          <select class="form-control" id="settModelCopilot">
+            <option value="claude-opus-4.6">Claude Opus 4.6 — most capable</option>
+            <option value="claude-sonnet-4.6">Claude Sonnet 4.6 — balanced</option>
+            <option value="claude-haiku-4.5">Claude Haiku 4.5 — fastest</option>
+            <option value="gpt-5.4">GPT-5.4 — flagship</option>
+            <option value="gpt-5.4-mini">GPT-5.4 Mini — fast</option>
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro — capable</option>
+          </select>
+        </div>
+      </div>
+
+    </div><!-- /settings-ai -->
+
+    <div id="settings-gitlab" style="display:none">
+      <div class="form-group"><label class="form-label">GitLab URL</label>
+        <input class="form-control" id="settGlUrl" placeholder="https://gitlab.com" /></div>
+      <div class="form-group"><label class="form-label">Personal Access Token</label>
+        <input class="form-control" id="settGlToken" type="password" placeholder="glpat-…" /></div>
+      <div class="form-group"><label class="form-label">Default Project ID</label>
+        <input class="form-control" id="settGlProjectId" placeholder="12345678" /></div>
+      <div class="form-group"><label class="form-label">Trigger Token</label>
+        <input class="form-control" id="settGlTriggerToken" type="password" placeholder="glptt-…" /></div>
+      <div class="form-group" style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)">
+        <label class="form-label">Automation Repo Path <span style="color:var(--text-muted);font-weight:400">(local Playwright project folder)</span></label>
+        <input class="form-control" id="settAutoRepoPath" placeholder="C:\path\to\your\playwright-automation-repo" />
+        <p style="font-size:11px;color:var(--text-dim);margin-top:4px">The local folder containing your Playwright test repository (page objects, specs, seed templates). Used by Browser Agent in Step 6.</p>
+      </div>
+    </div>
+
+    <div id="settings-jira" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:12px;color:var(--text-muted)">Pre-configured from <code>.env</code> — add your API token below.</span>
+        <button class="btn btn-outline btn-sm" onclick="loadDefaultsFromServer(true)" title="Reload all fields from the .env file">↺ Load from .env</button>
+      </div>
+      <div class="form-group"><label class="form-label">Jira Base URL</label>
+        <input class="form-control" id="settJiraUrl" placeholder="https://yourorg.atlassian.net" /></div>
+      <div class="form-group"><label class="form-label">Email</label>
+        <input class="form-control" id="settJiraEmail" placeholder="email@company.com" /></div>
+      <div class="form-group"><label class="form-label">API Token</label>
+        <input class="form-control" id="settJiraToken" type="password" placeholder="Atlassian API token" /></div>
+      <div class="form-group"><label class="form-label">Default Project Key</label>
+        <input class="form-control" id="settJiraProjectKey" placeholder="QA" /></div>
+    </div>
+
+    <div id="settings-figma" style="display:none">
+      <div class="form-group"><label class="form-label">Figma Access Token</label>
+        <input class="form-control" id="settFigmaToken" type="password" placeholder="figd_…" /></div>
+    </div>
+
+    <div id="settings-confluence" style="display:none">
+      <div class="form-group"><label class="form-label">Confluence Base URL</label>
+        <input class="form-control" id="settConfluenceBaseUrl" placeholder="https://your-domain.atlassian.net" /></div>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:4px">Uses the same Email &amp; API Token from the <strong>Jira</strong> tab (Atlassian Cloud shares credentials).</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TC Detail Modal ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="tcModal" style="display:none" onclick="closeTcModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="tcModalTitle">Test Case Detail</div>
+      <button class="modal-close" onclick="closeTcModal()">✕</button>
+    </div>
+    <div id="tcModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeTcModal()">Close</button>
+      <button class="btn btn-primary" id="tcModalEditBtn" onclick="">✏ Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast Container ─────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ── Right-side Execution Log Drawer ───────────────────────────────── -->
+<div class="log-drawer" id="logDrawer">
+  <div class="log-drawer-header">
+    <span class="log-drawer-title">
+      <span class="exec-live-dot" id="execLiveDot"></span>
+      ⚡ Execution Log
+    </span>
+    <div class="log-drawer-actions">
+      <span id="logDrawerCount" style="font-size:10px;color:var(--text-dim)"></span>
+      <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:10px" onclick="clearLogDrawer()">Clear</button>
+      <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:10px" onclick="toggleLogDrawer()">✕</button>
+    </div>
+  </div>
+  <!-- Step filter chips -->
+  <div class="log-drawer-filters" id="logFilters">
+    <button class="log-filter-btn active" data-filter="all"    onclick="setLogFilter('all',this)">All</button>
+    <button class="log-filter-btn"        data-filter="1"      onclick="setLogFilter('1',this)">Step 1</button>
+    <button class="log-filter-btn"        data-filter="2"      onclick="setLogFilter('2',this)">Step 2</button>
+    <button class="log-filter-btn"        data-filter="3"      onclick="setLogFilter('3',this)">Step 3</button>
+    <button class="log-filter-btn"        data-filter="4"      onclick="setLogFilter('4',this)">Step 4</button>
+    <button class="log-filter-btn"        data-filter="5"      onclick="setLogFilter('5',this)">Step 5</button>
+    <button class="log-filter-btn"        data-filter="6"      onclick="setLogFilter('6',this)">Step 6</button>
+    <button class="log-filter-btn"        data-filter="7"      onclick="setLogFilter('7',this)">Step 7</button>
+    <button class="log-filter-btn"        data-filter="ai"     onclick="setLogFilter('ai',this)">🤖 AI</button>
+    <button class="log-filter-btn"        data-filter="jira"   onclick="setLogFilter('jira',this)">🔖 Jira</button>
+    <button class="log-filter-btn"        data-filter="error"  onclick="setLogFilter('error',this)">❌ Errors</button>
+  </div>
+  <div class="log-drawer-body" id="logDrawerBody">
+    <div class="exec-log" id="logDrawerLog">
+      <div class="exec-placeholder">No activity yet — run any operation to see live logs here.</div>
+    </div>
+  </div>
+  <div class="log-drawer-footer">
+    <span id="logFooterStatus">Ready</span>
+    <span id="logDrawerTotal">0 entries</span>
+  </div>
+</div>
+
+<!-- ── Progress System ────────────────────────────────────────────────── -->
+<!-- Top bar sweeps left→right across the page -->
+<div class="pgbar-track" id="pgbarTrack">
+  <div class="pgbar-fill" id="pgbarFill"></div>
+</div>
+<!-- Floating progress card (slides up from bottom-right) -->
+<div class="pg-card" id="pgCard">
+  <div class="pg-card-inner">
+    <span class="pg-icon" id="pgIcon">⚗️</span>
+    <div class="pg-content">
+      <div class="pg-label" id="pgLabel">Processing…</div>
+      <div class="pg-track">
+        <div class="pg-bar" id="pgBar"></div>
+      </div>
+    </div>
+    <div class="pg-pct" id="pgPct">0%</div>
+  </div>
+</div>
+
+<!-- ── App Flow Edit Modal ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="flowEditModal" style="display:none" onclick="if(event.target===this)closeFlowEditModal()">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <div class="modal-title" id="flowEditTitle">New App Flow</div>
+      <button class="modal-close" onclick="closeFlowEditModal()">✕</button>
+    </div>
+    <div style="padding:0 24px;overflow-y:auto;max-height:72vh">
+      <input type="hidden" id="flowEditId" />
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="form-group">
+          <label class="form-label">Flow Name *</label>
+          <input class="form-control" id="flowEditName" placeholder="e.g. Transfer of Shares" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Module</label>
+          <input class="form-control" id="flowEditModule" placeholder="e.g. BUM021" />
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Description</label>
+        <input class="form-control" id="flowEditDesc" placeholder="One-line description" />
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label class="form-label" style="margin:0">Steps</label>
+        <button class="btn btn-outline btn-sm" onclick="addFlowStep()">+ Add Step</button>
+      </div>
+      <div id="flowStepsList" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeFlowEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFlowEdit()">💾 Save Flow</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Pull Flows from Figma File Modal (2-step) ─────────────────────────── -->
+<div class="modal-overlay" id="pullFigmaModal" style="display:none" onclick="if(event.target===this)closePullFigmaModal()">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <div class="modal-title">📥 Pull Flows from Figma</div>
+      <button class="modal-close" onclick="closePullFigmaModal()">✕</button>
+    </div>
+    <div style="padding:0 24px 8px">
+
+      <!-- Step 1: URL entry -->
+      <div id="pullFigmaStep1">
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">
+          Paste your Figma file URL. The app will fetch all pages so you can choose which ones to import.
+          Your <code>FIGMA_ACCESS_TOKEN</code> from <code>.env</code> is used automatically.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Figma File URL</label>
+          <input class="form-control" id="pullFigmaUrl" placeholder="https://www.figma.com/file/ABC123/My-App-Design" />
+        </div>
+        <div id="pullFigmaFetchStatus" style="display:none;font-size:12px;color:var(--text-muted);padding:6px 0">
+          ⏳ Fetching pages from Figma…
+        </div>
+      </div>
+
+      <!-- Step 2: Page selection (hidden until fetch completes) -->
+      <div id="pullFigmaStep2" style="display:none">
+        <!-- File info row -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;padding:8px 10px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px">
+          <div style="min-width:0;flex:1">
+            <div id="pullFigmaFileName" style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+            <div id="pullFigmaPageCount" style="font-size:11px;color:var(--text-muted);margin-top:2px"></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn btn-outline btn-sm" style="padding:3px 10px;font-size:11px" onclick="pullFigmaSelectAll(true)">Select all</button>
+            <button class="btn btn-outline btn-sm" style="padding:3px 10px;font-size:11px" onclick="pullFigmaSelectAll(false)">Clear</button>
+          </div>
+        </div>
+        <!-- Page list -->
+        <div id="pullFigmaPageList" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding:2px 0"></div>
+        <div id="pullFigmaProgress" style="display:none;font-size:12px;color:var(--text-muted);padding:8px 0 4px">
+          ⏳ Generating flows with AI — <span id="pullFigmaProgressTxt">processing…</span>
+        </div>
+        <div id="pullFigmaResults"></div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closePullFigmaModal()">Close</button>
+      <button class="btn btn-outline" id="pullFigmaBackBtn" style="display:none" onclick="pullFigmaGoBack()">← Back</button>
+      <button class="btn btn-primary" id="pullFigmaBtn" onclick="pullFigmaAction()">🔍 Fetch Pages</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Figma / AI Flow Modal ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="figmaFlowModal" style="display:none" onclick="if(event.target===this)closeFigmaFlowModal()">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header">
+      <div class="modal-title">🎨 Generate Flow from Figma / Description</div>
+      <button class="modal-close" onclick="closeFigmaFlowModal()">✕</button>
+    </div>
+    <div style="padding:0 24px">
+      <div class="form-group">
+        <label class="form-label">Figma File URL <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+        <input class="form-control" id="figmaFlowUrl" placeholder="https://www.figma.com/file/…" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Describe the feature / flow</label>
+        <textarea class="form-control" id="figmaFlowDesc" rows="3"
+          placeholder="e.g. A user places an order from cart to confirmation. Steps: open cart → enter shipping → pay → order confirmed…"></textarea>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px">
+        AI will extract ordered steps, rules, and key facts from the Figma design or your description.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeFigmaFlowModal()">Cancel</button>
+      <button class="btn btn-primary" id="figmaFlowGenBtn" onclick="generateFlowFromFigma()">✨ Generate Flow</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Floating AI Chat Widget ──────────────────────────────────────────── -->
+<div id="aiChatWidget" class="ai-chat-widget collapsed">
+  <button id="aiChatToggle" class="ai-chat-fab" onclick="toggleAiChat()" title="AI Assistant">
+    <span class="fab-icon">🧠</span>
+    <span class="fab-badge" id="aiChatBadge" style="display:none"></span>
+  </button>
+  <div class="ai-chat-drawer">
+    <div class="ai-chat-header">
+      <span class="ai-chat-title">🧠 AI Assistant</span>
+      <span class="ai-chat-ctx" id="aiChatCtxLabel">Auto-context</span>
+      <button class="ai-chat-new" onclick="clearAiChat()" title="New Chat">🗑️</button>
+      <button class="ai-chat-close" onclick="toggleAiChat()">✕</button>
+    </div>
+    <div class="ai-chat-messages" id="aiChatMessages">
+      <div class="ai-chat-welcome">
+        <p><strong>I have full context</strong> of your requirements, scenarios, test cases, and app flows.</p>
+        <p>Give me feedback and I'll remember it for the next generation.</p>
+        <p style="margin-top:6px"><strong>⚡ Bulk edits:</strong> Select scenarios or TCs, then type a command.</p>
+        <p style="font-size:11px;opacity:.7">Examples: "Change priority to High" · "Add MFA as precondition" · "Set type to Security" · "Remove login tag"</p>
+      </div>
+    </div>
+    <div class="ai-chat-composer">
+      <textarea id="aiChatInput" rows="1" placeholder="Feedback, questions, or bulk changes (select items first)…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiChat();}"></textarea>
+      <button class="ai-chat-send" onclick="sendAiChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Runtime config (replaced by build script for S3 deployments) ────── -->
+<script>
+  window.API_BASE = '';   /* e.g. https://api.your-domain.com  – injected at build time */
+  window.WS_HOST  = '';   /* e.g. api.your-domain.com          – injected at build time */
+</script>
+<!-- ── Scripts ─────────────────────────────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="/js/exec-pane.js?v=60"></script>
+<script src="/js/app.js?v=60"></script>
+<script src="/js/perfforge.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{
+  "_comment": "Jira / Xray test case upload template. Populate and POST to /api/jira/bulk-create-testcases",
+  "testcases": [
+    {
+      "id": "TC-001",
+      "scenario_id": "TS-001",
+      "title": "Verify user can login with valid credentials",
+      "module": "Authentication",
+      "priority": "Critical",
+      "type": "Functional",
+      "preconditions": [
+        "User account exists in the system",
+        "Application is accessible"
+      ],
+      "test_data": {
+        "username": "testuser@example.com",
+        "password": "Test@123"
+      },
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to /login",
+          "test_data": "",
+          "expected_result": "Login page is displayed with username and password fields"
+        },
+        {
+          "step_number": 2,
+          "action": "Enter valid username",
+          "test_data": "testuser@example.com",
+          "expected_result": "Username is entered in the username field"
+        },
+        {
+          "step_number": 3,
+          "action": "Enter valid password",
+          "test_data": "Test@123",
+          "expected_result": "Password is masked and entered"
+        },
+        {
+          "step_number": 4,
+          "action": "Click the Login button",
+          "test_data": "",
+          "expected_result": "User is redirected to the dashboard"
+        }
+      ],
+      "expected_result": "User is successfully authenticated and lands on the dashboard page",
+      "actual_result": "",
+      "status": "Not Executed",
+      "automation_notes": "Use selector: input[name='email'], input[name='password'], button[type='submit']",
+      "labels": ["smoke", "regression", "authentication"],
+      "jira_fields": {
+        "issue_type": "Test",
+        "priority": "Critical",
+        "labels": ["automated", "smoke"],
+        "components": ["Authentication"]
+      }
+    }
+  ]
+}

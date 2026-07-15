@@ -1,0 +1,38 @@
+node_modules/
+.env
+# Per-deployment project profile (identity for THIS target project).
+# Ship project.config.example.json instead; each deployment writes its own.
+project.config.json
+uploads/
+playwright-report/
+test-results/
+playwright-tests/generated/
+.pwlib-runs/
+.pwlib-reports/
+*.zip
+.DS_Store
+Thumbs.db
+
+# Runtime SQLite DB — per-machine state, held open by the server (locks on zip).
+# Stop the server before backing it up, or exclude these from the archive.
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Per-machine runtime data (history, sessions, schedules, reference library, perf runs)
+data/sessions/
+data/reference-source/
+data/perfforge/
+data/reference-library.json
+data/schedules.json
+
+# Stray server / tool logs
+*.log
+*.err
+
+# Machine / dev-tool specific
+ip-whitelist.txt
+.claude/
+.vscode/
+vscode-bridge/
+server.out.log

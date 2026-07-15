@@ -1,0 +1,25 @@
+{
+  "$schema": "./project.config.schema (see USAGE_GUIDE.md → Point it at a project)",
+  "_comment": "Declarative per-project profile. Copy to project.config.json and edit — or run `npm run init`, which writes it for you. Contains NO secrets: API keys and tokens live in .env. Values here are fallbacks; .env and the Settings modal override them.",
+
+  "appName": "My Project QA",
+  "port": 3000,
+  "appBaseUrl": "https://app-under-test.example.com",
+  "automationRepoPath": "",
+
+  "jira": {
+    "baseUrl": "https://yourorg.atlassian.net",
+    "projectKey": "QA",
+    "testIssueType": "Test"
+  },
+
+  "gitlab": {
+    "url": "https://gitlab.com",
+    "projectId": "",
+    "defaultBranch": "main"
+  },
+
+  "confluence": {
+    "baseUrl": ""
+  }
+}

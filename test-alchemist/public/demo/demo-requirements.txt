@@ -1,0 +1,31 @@
+PROJECT: Acme Shop — Product Search
+MODULE: Search
+SPRINT: Demo
+
+USER STORY:
+As a registered customer,
+I want to search for a product by its SKU
+So that I can check its availability before placing an order.
+
+ACCEPTANCE CRITERIA:
+1. User navigates to the application home page
+2. User logs in with valid credentials (username + password)
+3. After login, the dashboard is displayed with the main navigation menu visible
+4. User navigates to the Product Search section from the dashboard menu
+5. User enters a valid SKU in the search field and submits
+6. System returns search results showing the product name and stock status
+7. User can click on a result to view the product details page
+
+OUT OF SCOPE: Checkout, payments, negative paths for login failures
+
+TEST DATA:
+- URL: https://demo.example.com/
+- Username: demo_user
+- Password: demo_pass
+- SKU (valid): SKU-100234
+- SKU (invalid): SKU-000000
+
+GENERATE EXACTLY 3 TEST CASES:
+TC1 — Happy path: Search with valid SKU → results are displayed
+TC2 — Negative path: Search with invalid SKU → no results / error message shown
+TC3 — Boundary: Search field is empty → validation error shown, no API call made
