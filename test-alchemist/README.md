@@ -489,6 +489,25 @@ playwright:
 
 ---
 
+## Measuring generation quality
+
+AI output is only useful if it's actually good — so measure it, don't assume it.
+Put requirements you know well (with the coverage you'd expect) in
+[`scripts/eval-goldenset.json`](scripts/eval-goldenset.json), then, with the server
+running against your configured model:
+
+```bash
+npm run eval        # scores each requirement's coverage vs. the golden set
+```
+
+It reports a coverage % per item (and the exact areas missed) plus an aggregate —
+a repeatable signal to track as you tune prompts or switch models. Exits non-zero
+below the bar, so it can gate CI.
+
+Health check anytime: `npm run doctor` (Node, SQLite, Playwright browser, AI provider, auth).
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |

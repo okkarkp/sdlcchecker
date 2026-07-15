@@ -36,7 +36,9 @@ Rules:
 - One Page class per module in pages/ (export default class)
 - One spec file per module in tests/
 - Use @playwright/test imports (test, expect, Page)
-- Prefer data-testid locators, fall back to role/label/CSS
+- Prefer user-facing locators in order: getByRole({name}) → getByLabel → getByPlaceholder → getByText → getByTestId. CSS last; NEVER nth-child, absolute XPath, or hashed class names
+- Use web-first auto-waiting assertions: await expect(locator).toBeVisible()/toHaveText(). NEVER page.waitForTimeout() or hard sleeps
+- Keep locators as Page Object fields; read data by field name, never hardcode secrets
 - Wrap tests in test.describe blocks
 - Use beforeEach for navigation/auth setup
 - Include playwright.config.ts with baseURL, retries: 1, reporter: 'html'

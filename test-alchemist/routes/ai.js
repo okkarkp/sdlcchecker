@@ -154,7 +154,13 @@ Return JSON with this exact shape:
 }
 
 Rules:
-• Cover happy path, negative, edge cases, boundary conditions, and integration points.
+• Cover the full spectrum — do not stop at the happy path. Explicitly include, where applicable:
+  – Boundary & limits: min/max length, zero, empty, whitespace-only, very large values, off-by-one.
+  – Invalid input: wrong format/type, special characters, injection-like payloads, malformed data.
+  – Negative & error paths: rejected actions, validation messages, failed dependencies, timeouts/network errors.
+  – State & concurrency: unauthenticated/expired session, insufficient permissions, duplicate/concurrent submits, back-navigation, refresh mid-flow.
+  – Integration & data: upstream/downstream API failures, empty result sets, pagination edges.
+• Prefer breadth of realistic edge cases over many near-duplicate happy-path variants.
 • Group by module/feature.
 • Tag scenarios with smoke, regression, e2e as appropriate.
 • id MUST use TS-### format (e.g. TS-001, TS-002). NEVER use TC in the id.
@@ -487,6 +493,16 @@ router.post('/generate-testcases', async (req, res) => {
 // ── POST /api/ai/generate-playwright ──────────────────────────────────────────
 const repoCtx = require('../lib/repo-context');
 
+// Shared rules that make generated Playwright resilient instead of flaky.
+const PW_RESILIENCE_RULES = `
+RESILIENT LOCATOR & STABILITY RULES (write tests that don't flake):
+• Prefer user-facing locators, in this order: page.getByRole(role, { name }) → getByLabel → getByPlaceholder → getByText → getByTestId ([data-testid]).
+  Use CSS only as a last resort and NEVER nth-child, absolute XPath, or auto-generated/hashed class names.
+• Use web-first, auto-waiting assertions: await expect(locator).toBeVisible() / toHaveText() / toHaveValue(). Do NOT assert on ElementHandles or raw booleans.
+• NEVER use page.waitForTimeout() or hard sleeps — rely on Playwright auto-waiting and expect() retries. Use expect(...).toBeVisible() to wait for state.
+• await every action and assertion. Keep all locators as Page Object fields; read credentials/data by field name, never hardcode secrets.
+• Scope locators to a container when a name is ambiguous (e.g., getByRole within a section) to avoid strict-mode violations.`;
+
 router.post('/generate-playwright', async (req, res) => {
   try {
     const { testcases, baseUrl = process.env.APP_BASE_URL || '', applicationName = process.env.APP_NAME || 'the application' } = req.body;
@@ -535,6 +551,7 @@ Generate the following files (mirror the conventions in the repo context above):
 
 3. Test data template — list the column/field names the spec needs to read.
    Derive them from the test cases (e.g., TestCaseName, URL, and any feature-specific fields).
+${PW_RESILIENCE_RULES}
 
 Return ONLY valid JSON:
 {
@@ -564,7 +581,7 @@ Rules:
 • Use @playwright/test with JavaScript (ES6 modules).
 • One POM class per module.
 • Each test case maps to one test() block.
-• Use expect() assertions.
+${PW_RESILIENCE_RULES}
 • Return ONLY the JSON.`;
 
     const data = await callAI(prompt, 16000, aiOpts);

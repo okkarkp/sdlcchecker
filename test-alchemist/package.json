@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "init": "node scripts/init.js",
     "doctor": "node scripts/doctor.js",
+    "eval": "node scripts/eval.js",
     "package": "node scripts/package.js",
     "test": "playwright test",
     "test:headed": "playwright test --headed",

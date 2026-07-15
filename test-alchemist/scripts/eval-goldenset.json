@@ -1,0 +1,26 @@
+{
+  "_comment": "Golden set for `npm run eval`. Each item is a requirement you already understand well, plus the coverage you'd expect a good QA engineer to produce. `expectAreas` are keywords/topics that should appear across the generated scenarios (case-insensitive substring match). Replace these with YOUR real requirements + expected coverage — the score is only as meaningful as this set.",
+  "items": [
+    {
+      "name": "Login with lockout",
+      "requirement": "As a registered user I can log in with email and password. Invalid credentials show an error. After 5 failed attempts the account locks for 15 minutes. Passwords are case-sensitive.",
+      "applicationName": "Auth",
+      "expectMin": 6,
+      "expectAreas": ["valid", "invalid", "error", "lock", "5", "15", "case", "empty", "expire"]
+    },
+    {
+      "name": "File upload",
+      "requirement": "Users can upload a profile picture. Allowed types: PNG, JPG. Max size 5 MB. Uploading an unsupported type or an oversized file shows a validation message. Upload can be cancelled mid-way.",
+      "applicationName": "Profile",
+      "expectMin": 6,
+      "expectAreas": ["png", "jpg", "unsupported", "size", "5", "validation", "cancel", "empty", "large"]
+    },
+    {
+      "name": "Search with pagination",
+      "requirement": "A search box returns matching products. Results are paginated 20 per page. No matches shows an empty state. Search is case-insensitive and trims whitespace. Special characters must not break the query.",
+      "applicationName": "Catalog",
+      "expectMin": 6,
+      "expectAreas": ["match", "pagination", "20", "empty", "no result", "case", "whitespace", "special character", "boundary"]
+    }
+  ]
+}
