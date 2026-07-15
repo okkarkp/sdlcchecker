@@ -13,6 +13,15 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 
 // Bypass self-signed / corporate-proxy certificates
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
+// Returns the list of missing required Jira settings (empty = configured).
+function missingJiraCfg(cfg = {}) {
+  const missing = [];
+  if (!(cfg.jiraUrl   || process.env.JIRA_BASE_URL))  missing.push('Jira Base URL');
+  if (!(cfg.jiraEmail || process.env.JIRA_EMAIL))     missing.push('Email');
+  if (!(cfg.jiraToken || process.env.JIRA_API_TOKEN)) missing.push('API Token');
+  return missing;
+}
+
 function jiraClient(cfg = {}) {
   const base  = cfg.jiraUrl   || process.env.JIRA_BASE_URL;
   const email = cfg.jiraEmail || process.env.JIRA_EMAIL;
@@ -176,6 +185,8 @@ router.get('/fields', async (req, res) => {
 
 // ── GET /api/jira/projects ─────────────────────────────────────────────────────
 router.get('/projects', async (req, res) => {
+  const missing = missingJiraCfg(req.query);
+  if (missing.length) return res.status(400).json({ error: `Missing: ${missing.join(', ')}` });
   try {
     const api = jiraClient(req.query);
     const { data } = await api.get('/project/search', { params: { maxResults: 50 } });

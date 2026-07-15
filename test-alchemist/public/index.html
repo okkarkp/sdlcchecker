@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/styles.css?v=60" />
+  <link rel="stylesheet" href="/css/styles.css?v=61" />
   <link rel="stylesheet" href="/css/perfforge.css?v=1" />
   <!-- Prism syntax highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
@@ -35,7 +35,17 @@
       <!-- Project & Xray status pills -->
       <span class="header-pill proj" id="projectStatusPill"><span class="dot"></span><span id="projectStatusLabel">Project · —</span></span>
       <span class="header-pill xray" id="xrayStatusPill" style="display:none"><span class="dot"></span>Xray · connected</span>
-      <span id="activeProviderBadge">🟣 Claude</span>
+      <span class="hdr-ai" title="Active AI provider and model — changes apply immediately">
+        <select id="hdrProvider" class="hdr-select" onchange="onHeaderProviderChange(this.value)" aria-label="AI provider">
+          <option value="claude">🟣 Claude</option>
+          <option value="openai">🟢 ChatGPT</option>
+          <option value="gemini">🔵 Gemini</option>
+          <option value="copilot">⚡ Copilot</option>
+          <option value="custom">🧩 Custom</option>
+        </select>
+        <select id="hdrModel" class="hdr-select" onchange="onHeaderModelChange(this.value)" aria-label="AI model"></select>
+        <span id="hdrAiMode" class="hdr-ai-mode"></span>
+      </span>
       <span class="ws-indicator">
         <span class="ws-dot" id="wsDot"></span>
         <span id="wsLabel">Connecting…</span>
@@ -1590,7 +1600,7 @@
       <!-- Provider selector cards -->
       <div class="form-group">
         <label class="form-label">Active Provider</label>
-        <div id="providerCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px">
+        <div id="providerCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:10px;margin-top:6px">
           <div class="provider-card active" data-provider="claude" onclick="selectProvider('claude')">
             <div class="provider-logo">🟣</div>
             <div class="provider-name">Claude</div>
@@ -1610,6 +1620,11 @@
             <div class="provider-logo">⚡</div>
             <div class="provider-name">Copilot</div>
             <div class="provider-sub">VS Code / GitHub</div>
+          </div>
+          <div class="provider-card" data-provider="custom" onclick="selectProvider('custom')">
+            <div class="provider-logo">🧩</div>
+            <div class="provider-name">Custom</div>
+            <div class="provider-sub">Azure · gateway · local</div>
           </div>
         </div>
       </div>
@@ -1701,6 +1716,39 @@
             <option value="gpt-5.4-mini">GPT-5.4 Mini — fast</option>
             <option value="gemini-2.5-pro">Gemini 2.5 Pro — capable</option>
           </select>
+        </div>
+      </div>
+
+      <div id="provider-fields-custom" style="display:none">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;padding:8px;background:var(--bg-alt);border-radius:6px">
+          Any OpenAI-compatible endpoint — an internal LLM gateway, a local model
+          (Ollama <code>http://localhost:11434/v1</code>, vLLM, LM Studio), or Azure OpenAI.
+          For <strong>Azure</strong>, set the API version below; Model = your deployment name.
+        </div>
+        <div class="form-group">
+          <label class="form-label">Base URL</label>
+          <input class="form-control" id="settCustomBaseUrl" placeholder="https://gateway.internal/v1  or  https://xxx.openai.azure.com/openai/deployments/gpt-4o" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">API Key
+            <span style="color:var(--success);font-size:11px;margin-left:8px;font-weight:400">optional — leave blank for keyless local models</span>
+          </label>
+          <input class="form-control" id="settCustomKey" type="password" placeholder="key / token (if the endpoint requires one)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Model / deployment name</label>
+          <input class="form-control" id="settCustomModel" placeholder="gpt-4o  ·  llama3.1  ·  (Azure: deployment name)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Azure API version
+            <span style="color:var(--text-muted);font-size:11px;margin-left:8px;font-weight:400">Azure only — leave blank otherwise</span>
+          </label>
+          <input class="form-control" id="settCustomApiVersion" placeholder="e.g. 2024-06-01" />
+          <div style="font-size:11px;color:var(--text-muted);margin-top:5px;display:flex;align-items:center;gap:6px">
+            <span id="customStatusDot" style="width:7px;height:7px;border-radius:50%;background:var(--text-dim);display:inline-block"></span>
+            <span id="customStatusText">Set Base URL + Model, then test the connection</span>
+            <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:10px" onclick="testCustomEndpoint()">Test Connection</button>
+          </div>
         </div>
       </div>
 

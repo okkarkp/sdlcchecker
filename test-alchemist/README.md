@@ -428,6 +428,20 @@ npm run test:report    # view HTML report
 
 ## Deployment
 
+Two models — **local per-user** (recommended) or a **central shared instance** when
+local install isn't possible. Full guide: **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
+```bash
+# Local (Node)                     # Local or central (Docker)
+npm install                        docker compose up -d
+npm run init                       #  → http://localhost:3000
+npm start                          #  (SQLite persists in ./data)
+```
+
+> ⚠ The app has **no user login** (only an IP allowlist, open by default). Before
+> exposing a central instance, restrict `ALLOWED_IPS` or put it behind a VPN/SSO — see
+> [DEPLOYMENT.md](DEPLOYMENT.md) § Central.
+
 ### Reuse on a new project (handoff asset)
 
 Test Alchemist is designed to be stood up fresh per engagement. Build a clean,
@@ -445,10 +459,12 @@ keeps its own local SQLite DB, so projects stay isolated.
 
 ### Other targets
 
-- **Docker** — see [`Dockerfile`](Dockerfile).
+- **Docker** — [`Dockerfile`](Dockerfile) + [`docker-compose.yml`](docker-compose.yml)
+  (Chromium bundled for the browser agent; `./data` volume for persistence).
 - **AWS (S3 + CloudFront + Elastic Beanstalk)** — helper scripts in `scripts/`
   (`build:s3`, `upload:s3`, `package:eb`, `check:deploy`) and the setup guide in
-  [`aws/cloudfront-setup.md`](aws/cloudfront-setup.md).
+  [`aws/cloudfront-setup.md`](aws/cloudfront-setup.md). Mind the guardrails in
+  [DEPLOYMENT.md](DEPLOYMENT.md) § Central (no auth, persistence, reachability).
 
 ### GitLab CI Integration
 

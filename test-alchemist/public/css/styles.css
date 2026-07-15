@@ -308,12 +308,18 @@ body::after {
 .ws-dot.connected { background: var(--success); box-shadow: 0 0 8px var(--success); }
 
 /* Active provider badge */
-#activeProviderBadge {
-  display: inline-flex; align-items: center; gap: 4px;
+.hdr-ai { display: inline-flex; align-items: center; gap: 6px; }
+.hdr-select {
   background: var(--bg-hover); border: 1px solid var(--border);
   border-radius: 999px; padding: 4px 10px;
   font-size: 11px; color: var(--text-muted);
   font-family: 'JetBrains Mono', monospace;
+  max-width: 200px; cursor: pointer;
+}
+.hdr-select:hover { border-color: var(--primary); color: var(--text-primary); }
+.hdr-ai-mode {
+  font-size: 10px; color: var(--primary);
+  font-family: 'JetBrains Mono', monospace; white-space: nowrap;
 }
 
 /* ── Nav Rail Sidebar (74px icon-only) ──────────────────────────── */

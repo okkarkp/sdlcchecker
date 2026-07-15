@@ -33,6 +33,10 @@ function extractAiOpts(body) {
     openaiApiKey:    body.openaiApiKey,
     geminiApiKey:    body.geminiApiKey,
     copilotToken:    body.copilotToken,
+    // Custom / OpenAI-compatible endpoint (gateway · local · Azure)
+    customBaseUrl:   body.customBaseUrl,
+    customApiKey:    body.customApiKey,
+    customApiVersion: body.customApiVersion,
   };
 }
 
@@ -810,6 +814,23 @@ router.post('/test-copilot', async (req, res) => {
       const text = await response.text().catch(() => '');
       res.json({ ok: false, error: `HTTP ${response.status}: ${text.slice(0, 200)}` });
     }
+  } catch (err) {
+    res.json({ ok: false, error: err.message });
+  }
+});
+
+// ── POST /api/ai/test-custom — verify a custom / OpenAI-compatible endpoint ────
+router.post('/test-custom', async (req, res) => {
+  try {
+    const text = await callAI('Reply with just: ok', 16, {
+      provider:         'custom',
+      model:            req.body.model,
+      customBaseUrl:    req.body.customBaseUrl,
+      customApiKey:     req.body.customApiKey,
+      customApiVersion: req.body.customApiVersion,
+      rawText:          true,
+    });
+    res.json({ ok: true, message: `Endpoint reachable — model replied (${String(text).trim().slice(0, 40)})` });
   } catch (err) {
     res.json({ ok: false, error: err.message });
   }

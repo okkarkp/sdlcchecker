@@ -2204,6 +2204,7 @@ const PROVIDER_META = {
   openai:  { label: 'ChatGPT', emoji: '🟢', keyField: 'settOpenaiKey',    modelField: 'settModelOpenai' },
   gemini:  { label: 'Gemini',  emoji: '🔵', keyField: 'settGeminiKey',    modelField: 'settModelGemini' },
   copilot: { label: 'Copilot', emoji: '⚡', keyField: 'settCopilotToken', modelField: 'settModelCopilot' },
+  custom:  { label: 'Custom',  emoji: '🧩', keyField: 'settCustomKey',    modelField: 'settCustomModel', freeModel: true },
 };
 
 function selectProvider(provider) {
@@ -2212,7 +2213,7 @@ function selectProvider(provider) {
   document.querySelectorAll('.provider-card').forEach(c =>
     c.classList.toggle('active', c.dataset.provider === provider));
   // Show correct fields
-  ['claude','openai','gemini','copilot'].forEach(p =>
+  ['claude','openai','gemini','copilot','custom'].forEach(p =>
     document.getElementById(`provider-fields-${p}`).style.display = p === provider ? '' : 'none');
 }
 
@@ -2237,6 +2238,10 @@ function saveSettings() {
     modelOpenai:    document.getElementById('settModelOpenai').value,
     modelGemini:    document.getElementById('settModelGemini').value,
     modelCopilot:   document.getElementById('settModelCopilot').value,
+    customBaseUrl:    document.getElementById('settCustomBaseUrl').value,
+    customKey:        document.getElementById('settCustomKey').value,
+    customModel:      document.getElementById('settCustomModel').value,
+    customApiVersion: document.getElementById('settCustomApiVersion').value,
     glUrl:          document.getElementById('settGlUrl').value,
     glToken:        document.getElementById('settGlToken').value,
     glProjectId:    document.getElementById('settGlProjectId').value,
@@ -2268,6 +2273,8 @@ function loadSettings() {
       settCopilotToken: 'copilotToken',
       settModelClaude: 'modelClaude',   settModelOpenai: 'modelOpenai', settModelGemini: 'modelGemini',
       settModelCopilot: 'modelCopilot',
+      settCustomBaseUrl: 'customBaseUrl', settCustomKey: 'customKey',
+      settCustomModel: 'customModel',    settCustomApiVersion: 'customApiVersion',
       settGlUrl: 'glUrl', settGlToken: 'glToken',
       settGlProjectId: 'glProjectId',   settGlTriggerToken: 'glTriggerToken',
       settAutoRepoPath: 'autoRepoPath',
@@ -2286,12 +2293,62 @@ function loadSettings() {
   } catch {}
 }
 
+const MODEL_KEY     = { claude: 'modelClaude', openai: 'modelOpenai', gemini: 'modelGemini', copilot: 'modelCopilot', custom: 'customModel' };
+const MODEL_DEFAULT = { claude: 'claude-opus-4-8', openai: 'gpt-4o', gemini: 'gemini-2.0-flash', copilot: 'claude-sonnet-4.6', custom: '' };
+
+function persistSettings() {
+  localStorage.setItem('qahub_settings', JSON.stringify(State.settings));
+}
+
+// Fill the header model dropdown by cloning the Settings <select> options for this
+// provider — single source of truth, so header and Settings never drift.
+function populateHeaderModels(provider) {
+  const hdr = document.getElementById('hdrModel');
+  if (!hdr) return;
+  // Custom uses a free-text model (no fixed catalogue) — show the configured value.
+  if (PROVIDER_META[provider].freeModel) {
+    const m = getSetting(MODEL_KEY[provider]);
+    hdr.innerHTML = `<option value="${m || ''}">${m || 'set in ⚙ Settings'}</option>`;
+    hdr.disabled = true;   // change it in Settings → Custom
+    return;
+  }
+  hdr.disabled = false;
+  const src = document.getElementById(PROVIDER_META[provider].modelField);
+  if (!src) return;
+  hdr.innerHTML = src.innerHTML;
+  hdr.value = getSetting(MODEL_KEY[provider]) || MODEL_DEFAULT[provider];
+}
+
+// Sync the header switcher (provider dropdown, model list, mode caption) to state.
+// Named updateProviderBadge for back-compat with existing call sites.
 function updateProviderBadge() {
   const p = State.settings.activeProvider || 'copilot';
-  const meta = PROVIDER_META[p];
-  const usingCLI = p === 'claude' && !getSetting('anthropicKey');
-  document.getElementById('activeProviderBadge').textContent =
-    `${meta.emoji} ${meta.label}${usingCLI ? ' (CLI)' : p === 'copilot' ? ' (VS Code)' : ''}`;
+  const hdrP = document.getElementById('hdrProvider');
+  if (hdrP) hdrP.value = p;
+  populateHeaderModels(p);
+  // Keyless modes: Claude with no API key → local CLI; Copilot with no token → VS Code bridge.
+  const usingCLI    = p === 'claude'  && !getSetting('anthropicKey');
+  const usingBridge = p === 'copilot' && !getSetting('copilotToken');
+  const mode = document.getElementById('hdrAiMode');
+  if (mode) mode.textContent = usingCLI ? 'local CLI' : usingBridge ? 'VS Code' : p === 'custom' ? (getSetting('customApiVersion') ? 'Azure' : 'custom') : '';
+}
+
+// Header → change provider on the fly (also keeps the Settings modal in sync).
+function onHeaderProviderChange(provider) {
+  State.settings.activeProvider = provider;
+  selectProvider(provider);      // toggles Settings modal cards/fields (present in DOM even when closed)
+  updateProviderBadge();         // repopulates the model list + mode caption
+  persistSettings();
+}
+
+// Header → change model on the fly for the active provider.
+function onHeaderModelChange(model) {
+  const p = State.settings.activeProvider || 'copilot';
+  State.settings[MODEL_KEY[p]] = model;
+  const src = document.getElementById(PROVIDER_META[p].modelField);
+  if (src) src.value = model;    // keep the Settings modal select in sync
+  updateProviderBadge();         // refresh mode caption (model doesn't change it, but harmless)
+  persistSettings();
 }
 
 async function testClaudeCLI() {
@@ -2337,13 +2394,41 @@ async function testCopilotToken() {
   }
 }
 
+async function testCustomEndpoint() {
+  const dot  = document.getElementById('customStatusDot');
+  const text = document.getElementById('customStatusText');
+  dot.style.background = 'var(--warn)';
+  text.textContent     = 'Testing custom endpoint…';
+  try {
+    const res = await apiFetch('/api/ai/test-custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customBaseUrl:    document.getElementById('settCustomBaseUrl').value,
+        customApiKey:     document.getElementById('settCustomKey').value,
+        model:            document.getElementById('settCustomModel').value,
+        customApiVersion: document.getElementById('settCustomApiVersion').value,
+      }),
+    }).then(r => r.json());
+    if (res.ok) {
+      dot.style.background = 'var(--success)';
+      text.textContent     = `✅ ${res.message || 'Connected'}`;
+    } else {
+      throw new Error(res.error || 'Test failed');
+    }
+  } catch (err) {
+    dot.style.background = 'var(--danger)';
+    text.textContent     = `❌ ${err.message}`;
+  }
+}
+
 function getSetting(key) { return State.settings[key] || ''; }
 
 // Returns AI provider credentials for the currently selected provider.
 function aiOpts() {
   const provider = getSetting('activeProvider') || 'copilot';
-  const modelKey = { claude: 'modelClaude', openai: 'modelOpenai', gemini: 'modelGemini', copilot: 'modelCopilot' }[provider];
-  const defaults = { claude: 'claude-opus-4-8', openai: 'gpt-4o', gemini: 'gemini-2.0-flash', copilot: 'claude-sonnet-4.6' };
+  const modelKey = { claude: 'modelClaude', openai: 'modelOpenai', gemini: 'modelGemini', copilot: 'modelCopilot', custom: 'customModel' }[provider];
+  const defaults = { claude: 'claude-opus-4-8', openai: 'gpt-4o', gemini: 'gemini-2.0-flash', copilot: 'claude-sonnet-4.6', custom: '' };
   return {
     clientId:        CLIENT_ID,
     provider,
@@ -2352,6 +2437,10 @@ function aiOpts() {
     openaiApiKey:    getSetting('openaiKey'),
     geminiApiKey:    getSetting('geminiKey'),
     copilotToken:    getSetting('copilotToken'),
+    // Custom / OpenAI-compatible endpoint
+    customBaseUrl:    getSetting('customBaseUrl'),
+    customApiKey:     getSetting('customKey'),
+    customApiVersion: getSetting('customApiVersion'),
   };
 }
 

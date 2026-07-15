@@ -1,0 +1,28 @@
+# Keep the image small and free of secrets / local state.
+node_modules
+npm-debug.log
+.git
+.gitignore
+.claude
+.vscode
+vscode-bridge
+
+# Secrets & per-deployment config — inject at runtime instead.
+.env
+project.config.json
+ip-whitelist.txt
+
+# Local runtime state (mounted as a volume for the central deploy).
+data
+uploads
+playwright-report
+test-results
+playwright-tests/generated
+.pwlib-runs
+.pwlib-reports
+
+# Build artifacts / archives / logs
+dist
+*.zip
+*.log
+*.err

@@ -1,0 +1,26 @@
+# Run Test Alchemist in a container — works the same locally or on a central host.
+#
+#   1. npm run init            # creates .env + project.config.json (or copy the examples)
+#   2. docker compose up -d    # build + run
+#   3. open http://localhost:3000
+#
+# State (the SQLite DB) persists in ./data on the host via the volume below.
+services:
+  test-alchemist:
+    build: .
+    image: test-alchemist:latest
+    # Host:container port. Change the host side (left) to expose a different port.
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - PORT=3000
+      # NODE_ENV, secrets, and integration creds are read from .env below.
+    # Secrets (API keys, Jira/GitLab tokens). Never bake these into the image.
+    env_file:
+      - .env
+    volumes:
+      # Persist the SQLite database across restarts/redeploys.
+      - ./data:/app/data
+      # Project identity, editable without rebuilding the image (read-only).
+      - ./project.config.json:/app/project.config.json:ro
+    restart: unless-stopped

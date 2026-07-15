@@ -397,6 +397,46 @@ async function callCopilot(prompt, maxTokens, opts) {
   return opts.rawText ? content : parseJSON(content);
 }
 
+// ── Custom / OpenAI-compatible endpoint ───────────────────────────────────────
+// One provider for any OpenAI-compatible API: an internal LLM gateway, a local
+// model server (Ollama / vLLM / LM Studio), or Azure OpenAI. Set an api-version to
+// switch to Azure mode (adds the api-version query + api-key header); the model
+// field then names the Azure deployment.
+async function callCustom(prompt, maxTokens, opts) {
+  const OpenAI     = require('openai');
+  const baseURL    = opts.customBaseUrl    || process.env.CUSTOM_AI_BASE_URL || '';
+  const apiKey     = opts.customApiKey     || process.env.CUSTOM_AI_KEY || 'not-needed'; // local servers need none
+  const model      = opts.model            || process.env.CUSTOM_AI_MODEL || '';
+  const apiVersion = opts.customApiVersion || process.env.CUSTOM_AI_API_VERSION || '';
+
+  if (!baseURL) throw new Error('Custom endpoint: Base URL not set. Add it in ⚙ Settings → AI Provider → Custom.');
+  if (!model)   throw new Error('Custom endpoint: Model (or Azure deployment) name not set. Add it in ⚙ Settings → AI Provider → Custom.');
+
+  const clientOpts = { baseURL, apiKey };
+  if (apiVersion) {                                   // Azure OpenAI style
+    clientOpts.defaultQuery   = { 'api-version': apiVersion };
+    clientOpts.defaultHeaders = { 'api-key': apiKey };
+  }
+  const client = new OpenAI(clientOpts);
+  const sysMsg = opts.systemPrompt || SYSTEM_PROMPT;
+
+  _emit(opts, `→ Custom (${model}) @ ${baseURL}${apiVersion ? ' [azure]' : ''} — max ${maxTokens} tokens`);
+  const t0 = Date.now();
+
+  const response = await client.chat.completions.create({
+    model,
+    max_tokens: maxTokens,
+    messages: [{ role: 'system', content: sysMsg }, { role: 'user', content: prompt }],
+  });
+
+  const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+  const u = response.usage || {};
+  _emit(opts, `← Custom — ${u.prompt_tokens ?? '?'} in / ${u.completion_tokens ?? '?'} out — ${elapsed}s · finish: ${response.choices[0]?.finish_reason}`);
+
+  const text = response.choices[0].message.content;
+  return opts.rawText ? text : parseJSON(text);
+}
+
 // ── Public interface ───────────────────────────────────────────────────────────
 async function callAI(prompt, maxTokens = 8192, opts = {}) {
   const provider = opts.provider || detectProvider(opts.model) || 'copilot';
@@ -404,6 +444,7 @@ async function callAI(prompt, maxTokens = 8192, opts = {}) {
     case 'openai':  return callOpenAI(prompt, maxTokens, opts);
     case 'gemini':  return callGemini(prompt, maxTokens, opts);
     case 'copilot': return callCopilot(prompt, maxTokens, opts);
+    case 'custom':  return callCustom(prompt, maxTokens, opts);
     default:        return callClaude(prompt, maxTokens, opts);
   }
 }
@@ -421,7 +462,33 @@ async function callAIWithImages(prompt, images, maxTokens = 4096, opts = {}) {
 
   let text;
 
-  if (provider === 'claude') {
+  if (provider === 'custom') {
+    // OpenAI-compatible vision (image_url). Works with Azure GPT-4o / gateways that
+    // support vision; local models without vision will return a clear API error.
+    const OpenAI     = require('openai');
+    const baseURL    = opts.customBaseUrl    || process.env.CUSTOM_AI_BASE_URL || '';
+    const apiKey     = opts.customApiKey     || process.env.CUSTOM_AI_KEY || 'not-needed';
+    const model      = opts.model            || process.env.CUSTOM_AI_MODEL || '';
+    const apiVersion = opts.customApiVersion || process.env.CUSTOM_AI_API_VERSION || '';
+    if (!baseURL || !model) throw new Error('Custom endpoint: set Base URL and Model in ⚙ Settings → AI Provider → Custom.');
+    const clientOpts = { baseURL, apiKey };
+    if (apiVersion) { clientOpts.defaultQuery = { 'api-version': apiVersion }; clientOpts.defaultHeaders = { 'api-key': apiKey }; }
+    const client = new OpenAI(clientOpts);
+    const imgParts = images
+      .filter(img => img.mimeType !== 'application/pdf')
+      .map(img => ({ type: 'image_url', image_url: { url: `data:${img.mimeType};base64,${img.base64}` } }));
+    const resp = await client.chat.completions.create({
+      model, max_tokens: maxTokens,
+      messages: [
+        { role: 'system', content: sysMsg },
+        { role: 'user', content: [{ type: 'text', text: prompt }, ...imgParts] },
+      ],
+    });
+    text = resp.choices[0]?.message?.content;
+    if (!text) throw new Error('Custom endpoint returned empty response for vision');
+  }
+
+  else if (provider === 'claude') {
     const key = resolveKey(opts, 'claude');
     if (!key) throw new Error('Claude API key required for vision — CLI does not support images');
     const Anthropic = require('@anthropic-ai/sdk');
