@@ -41,14 +41,30 @@ automation repo, then work through the pipeline.
 ```bash
 # from the Test Alchemist folder
 npm install            # first run only (installs deps + Playwright)
+npm run init           # guided setup: writes project.config.json + .env
 ```
 
-Start / stop (Windows):
-```bat
-start.bat              # launches http://localhost:3000  (start.bat 3005 for another port)
-stop.bat               # stops the server (frees the port)
+> **Native module note:** `better-sqlite3` compiles a native binary during
+> `npm install`. On most machines the prebuilt binary downloads automatically. On a
+> locked-down machine (corporate policy, or npm configured to block install scripts —
+> e.g. `ignore-scripts=true`), that step can be skipped and the server then fails at
+> startup with *"Could not locate the bindings file" / "invalid ELF header"*. Fix with:
+> ```bash
+> npm rebuild better-sqlite3          # rebuild the native binary
+> # if that is blocked by policy:
+> npm install --foreground-scripts    # allow build scripts for this install
+> ```
+> Rebuilding needs C/C++ build tools: **Windows** → "Desktop development with C++"
+> (Visual Studio Build Tools) or `npm i -g windows-build-tools`; **macOS** → `xcode-select
+> --install`; **Linux** → `build-essential` + `python3`.
+
+Start / stop — cross-platform:
+```bash
+npm start              # launches http://localhost:<port from project.config.json>
 ```
-Or directly: `node server.js`. Open **http://localhost:3000**.
+Platform shortcuts (double-clickable): **macOS** `start.command` / `stop.command`;
+**Windows** `start.bat` / `stop.bat` (`start.bat 3005` for another port).
+Or directly: `node server.js`.
 
 > **Backups/zips:** stop the server first (`stop.bat`) — the SQLite DB is held open while
 > running and will otherwise fail to zip ("in use by Node.js"). The DB lives in `data/` and
@@ -255,8 +271,9 @@ Project: ____________________     Jira key: ______     App URL: ________________
 
 | Symptom | Fix |
 |---|---|
-| Can't zip — "db in use by Node.js" | Stop the server (`stop.bat`) first; the SQLite DB is held open while running. |
-| Header shows wrong/no project name | Check `JIRA_*` — the name comes from the Jira connection. |
+| Startup crash — "Could not locate the bindings file" / "invalid ELF header" (`better-sqlite3`) | Native binary wasn't built during install. Run `npm rebuild better-sqlite3` (or `npm install --foreground-scripts` if scripts are blocked). Needs C/C++ build tools — see §2. |
+| Can't zip — "db in use by Node.js" | Stop the server (`stop.command` / `stop.bat`) first; the SQLite DB is held open while running. Or use `npm run package`, which excludes the live DB. |
+| Header shows wrong/no project name | Set `appName` in `project.config.json`, or check `JIRA_*` — the name can also come from the Jira connection. |
 | "No automation repo connected" on generate/convert | Set **Codebase Path → Connect** (or `AUTOMATION_REPO_PATH`). |
 | Agent asks for manual login | The test case has no credentials — add `username/password` or `uin/uen` to its `test_data`. |
 | Record opens a blank page | Set the **Start URL** in the panel (defaults from `APP_BASE_URL`); it opens there directly. |
