@@ -241,7 +241,7 @@ Rules:
 
 // ── GET /api/app-map/:clientId ───────────────────────────────────────────────
 router.get('/:clientId', (req, res) => {
-  const { clientId } = req.params;
+  const clientId = req.tenantId || req.params.clientId;
   const appMap = appMapCache.get(clientId) || loadAppMap(clientId);
   if (!appMap) return res.json({ success: true, appMap: null });
   res.json({ success: true, appMap });
@@ -250,7 +250,7 @@ router.get('/:clientId', (req, res) => {
 // ── GET /api/app-map/:clientId/context ───────────────────────────────────────
 // Returns the compact text context for injection into AI prompts
 router.get('/:clientId/context', (req, res) => {
-  const { clientId } = req.params;
+  const clientId = req.tenantId || req.params.clientId;
   const appMap = appMapCache.get(clientId) || loadAppMap(clientId);
   if (!appMap) return res.json({ success: true, context: '' });
 
@@ -263,7 +263,7 @@ router.get('/:clientId/context', (req, res) => {
 
 // ── DELETE /api/app-map/:clientId ────────────────────────────────────────────
 router.delete('/:clientId', (req, res) => {
-  const { clientId } = req.params;
+  const clientId = req.tenantId || req.params.clientId;
   appMapCache.delete(clientId);
   deleteAppMap(clientId);
   res.json({ success: true });

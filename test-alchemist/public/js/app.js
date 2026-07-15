@@ -50,7 +50,11 @@ function showLoginOverlay() { const el = document.getElementById('loginOverlay')
 function hideLoginOverlay() { const el = document.getElementById('loginOverlay'); if (el) el.style.display = 'none'; }
 function showAuthedUser(user) {
   const box = document.getElementById('authUserBox');
-  if (box) { box.style.display = ''; document.getElementById('authUserName').textContent = user.username; }
+  if (box) {
+    box.style.display = '';
+    const ws = user.workspace && user.workspace !== 'default' ? ` · ${user.workspace}` : '';
+    document.getElementById('authUserName').textContent = user.username + ws;
+  }
 }
 async function submitLogin(e) {
   if (e) e.preventDefault();

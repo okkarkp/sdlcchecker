@@ -146,6 +146,9 @@ try {
 try {
   db.exec(`ALTER TABLE playwright_script ADD COLUMN execution_key TEXT DEFAULT ''`);
 } catch (_) {} // column already exists
+try {
+  db.exec(`ALTER TABLE playwright_script ADD COLUMN tenant_id TEXT DEFAULT 'default'`);
+} catch (_) {} // column already exists (multi-tenant scoping)
 
 // ── Digital Twin: structured, queryable model of the target application ────────
 db.exec(`
@@ -576,32 +579,32 @@ function parseRow(row) {
 function parseRows(rows) { return rows.map(parseRow); }
 
 // ── Playwright Script Library queries ────────────────────────────────────────
-// Global — no client_id, visible across all sessions
+// Scoped by tenant_id (workspace). Defaults to 'default' for single-tenant/local.
 
-function listPwScripts() {
-  return db.prepare('SELECT id,tc_id,tc_title,module,jira_test_key,execution_key,created_at,updated_at FROM playwright_script ORDER BY created_at DESC').all();
+function listPwScripts(tenantId = 'default') {
+  return db.prepare('SELECT id,tc_id,tc_title,module,jira_test_key,execution_key,created_at,updated_at FROM playwright_script WHERE tenant_id=? ORDER BY created_at DESC').all(tenantId);
 }
 
-function getPwScript(id) {
-  return db.prepare('SELECT * FROM playwright_script WHERE id=?').get(id);
+function getPwScript(id, tenantId = 'default') {
+  return db.prepare('SELECT * FROM playwright_script WHERE id=? AND tenant_id=?').get(id, tenantId);
 }
 
-function savePwScript({ id, tcId, tcTitle, module: mod, script, jiraTestKey, executionKey }) {
+function savePwScript({ id, tcId, tcTitle, module: mod, script, jiraTestKey, executionKey, tenantId = 'default' }) {
   const ts = now();
   const rowId = id || uid();
   db.prepare(`
-    INSERT INTO playwright_script(id,tc_id,tc_title,module,script,jira_test_key,execution_key,created_at,updated_at)
-    VALUES(?,?,?,?,?,?,?,?,?)
-  `).run(rowId, tcId || null, tcTitle, mod || '', script, jiraTestKey || '', executionKey || '', ts, ts);
+    INSERT INTO playwright_script(id,tc_id,tc_title,module,script,jira_test_key,execution_key,tenant_id,created_at,updated_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?)
+  `).run(rowId, tcId || null, tcTitle, mod || '', script, jiraTestKey || '', executionKey || '', tenantId, ts, ts);
   return rowId;
 }
 
-function updatePwScript(id, script) {
-  db.prepare('UPDATE playwright_script SET script=?,updated_at=? WHERE id=?').run(script, now(), id);
+function updatePwScript(id, script, tenantId = 'default') {
+  db.prepare('UPDATE playwright_script SET script=?,updated_at=? WHERE id=? AND tenant_id=?').run(script, now(), id, tenantId);
 }
 
-function deletePwScript(id) {
-  db.prepare('DELETE FROM playwright_script WHERE id=?').run(id);
+function deletePwScript(id, tenantId = 'default') {
+  db.prepare('DELETE FROM playwright_script WHERE id=? AND tenant_id=?').run(id, tenantId);
 }
 
 // ── App Flow queries ──────────────────────────────────────────────────────────

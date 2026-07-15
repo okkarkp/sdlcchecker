@@ -135,7 +135,7 @@ async function buildPdf(scriptId, screenshotDir, tcTitle) {
 // ── GET /api/pw-scripts ───────────────────────────────────────────────────────
 router.get('/', (req, res) => {
   try {
-    res.json({ success: true, scripts: db.listPwScripts() });
+    res.json({ success: true, scripts: db.listPwScripts(req.tenantId || 'default') });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -146,16 +146,17 @@ router.get('/', (req, res) => {
 // Must be defined BEFORE /:id so "testcases" isn't treated as an id param.
 router.get('/testcases', (req, res) => {
   try {
-    const rows = db.db.prepare(`
+    const T = req.tenantId;   // set when auth enabled → scope to workspace
+    const sql = `
       SELECT t.id, t.tc_id, t.title, t.module,
              g.title  AS gen_title,
              g.app_name
       FROM   test_case t
       JOIN   generation g ON g.id = t.generation_id
-      WHERE  t.status != 'archived'
+      WHERE  t.status != 'archived'${T ? ' AND t.client_id = ?' : ''}
       ORDER  BY t.created_at DESC
-      LIMIT  500
-    `).all();
+      LIMIT  500`;
+    const rows = T ? db.db.prepare(sql).all(T) : db.db.prepare(sql).all();
     res.json({ success: true, testcases: rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -164,7 +165,7 @@ router.get('/testcases', (req, res) => {
 
 // ── GET /api/pw-scripts/:id ───────────────────────────────────────────────────
 router.get('/:id', (req, res) => {
-  const row = db.getPwScript(req.params.id);
+  const row = db.getPwScript(req.params.id, req.tenantId || 'default');
   if (!row) return res.status(404).json({ error: 'Script not found' });
   res.json({ success: true, script: row });
 });
@@ -258,8 +259,8 @@ router.post('/', (req, res) => {
       }\n});\n`;
     }
 
-    const id    = db.savePwScript({ tcId: tcId || null, tcTitle, module: mod || '', script, jiraTestKey, executionKey });
-    const saved = db.getPwScript(id);
+    const id    = db.savePwScript({ tcId: tcId || null, tcTitle, module: mod || '', script, jiraTestKey, executionKey, tenantId: req.tenantId || 'default' });
+    const saved = db.getPwScript(id, req.tenantId || 'default');
 
     bc({ type: 'pw_lib_codegen_done', success: true, script: saved });
   });
@@ -269,15 +270,16 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const { script } = req.body;
   if (!script) return res.status(400).json({ error: 'script content required' });
-  const row = db.getPwScript(req.params.id);
+  const T = req.tenantId || 'default';
+  const row = db.getPwScript(req.params.id, T);
   if (!row) return res.status(404).json({ error: 'Script not found' });
-  db.updatePwScript(req.params.id, script);
+  db.updatePwScript(req.params.id, script, T);
   res.json({ success: true });
 });
 
 // ── DELETE /api/pw-scripts/:id ────────────────────────────────────────────────
 router.delete('/:id', (req, res) => {
-  db.deletePwScript(req.params.id);
+  db.deletePwScript(req.params.id, req.tenantId || 'default');
   res.json({ success: true });
 });
 
@@ -290,7 +292,7 @@ router.post('/:id/run', (req, res) => {
   const { id } = req.params;
   const { clientId = 'anon' } = req.body;
 
-  const row = db.getPwScript(id);
+  const row = db.getPwScript(id, req.tenantId || 'default');
   if (!row) return res.status(404).json({ error: 'Script not found' });
 
   // Write files inside APP_ROOT so require('@playwright/test') resolves correctly
@@ -406,7 +408,7 @@ router.get('/:id/report', (req, res) => {
   if (!pdfPath || !fs.existsSync(pdfPath)) {
     return res.status(404).json({ error: 'No PDF report available — run the script first.' });
   }
-  const row = db.getPwScript(req.params.id);
+  const row = db.getPwScript(req.params.id, req.tenantId || 'default');
   const name = (row?.tc_title || 'playwright-report').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60);
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="${name}-report.pdf"`);
@@ -417,7 +419,7 @@ router.get('/:id/report', (req, res) => {
 // Runs the same repo-conversion the Agentic Automate flow uses, but on a saved codegen
 // script. Merges into the per-module page/spec/data files in the connected repo.
 router.post('/:id/convert', (req, res) => {
-  const row = db.getPwScript(req.params.id);
+  const row = db.getPwScript(req.params.id, req.tenantId || 'default');
   if (!row) return res.status(404).json({ error: 'Script not found' });
 
   const clientId = req.body.clientId || 'anon';

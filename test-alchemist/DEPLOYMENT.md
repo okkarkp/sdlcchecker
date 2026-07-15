@@ -7,7 +7,7 @@ and credentials isolated. Use **central** only when local install isn't possible
 |---|---|---|
 | Runs on | each person's machine | one host everyone connects to |
 | Needs on device | Node.js **or** Docker | just a browser |
-| Data isolation | per person (own SQLite DB) | shared DB, shared credentials |
+| Data isolation | per person (own SQLite DB) | per **workspace** (multi-tenant, one DB) |
 | Setup effort | minutes | one-time host setup + guardrails |
 | Best for | individuals, most teams | teams who can't install Node locally |
 
@@ -64,6 +64,13 @@ tokens and use the configured Jira/GitLab credentials.
    scrypt-hashed in `data/users.json` (git-ignored). Also set `ALLOWED_IPS` and/or put
    the host behind a VPN for defence in depth. Still, do not bind it to the public
    internet without at least auth enabled.
+
+   **Multi-tenant (workspaces).** Each user belongs to a workspace (`AUTH_ADMIN_TENANT`,
+   or the `tenant` field in `data/users.json`) and sees only that workspace's data —
+   generations, test cases, knowledge, and the Playwright library. Scoping is enforced
+   server-side from the session, so one workspace can't reach another's data. One
+   instance can serve many teams. *(The Digital Twin is not yet workspace-scoped — it
+   remains shared; per-tenant twin is planned.)*
 2. **Persist the database.** The `./data` volume in
    [docker-compose.yml](docker-compose.yml) keeps SQLite across restarts. On ephemeral
    platforms (Elastic Beanstalk, ECS/Fargate) attach durable storage (EFS) — otherwise

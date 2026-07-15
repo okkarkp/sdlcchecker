@@ -62,13 +62,13 @@ function findUser(username) {
   const u = String(username || '').toLowerCase();
   return readUsers().find(x => x.username.toLowerCase() === u) || null;
 }
-function addUser(username, password, role = 'user') {
+function addUser(username, password, role = 'user', tenant = 'default') {
   if (!username || !password) throw new Error('username and password required');
   const users = readUsers();
   if (users.some(x => x.username.toLowerCase() === username.toLowerCase())) throw new Error(`User "${username}" already exists`);
-  users.push({ username, passwordHash: hashPassword(password), role, createdAt: new Date().toISOString() });
+  users.push({ username, passwordHash: hashPassword(password), role, tenant: tenant || 'default', createdAt: new Date().toISOString() });
   writeUsers(users);
-  return { username, role };
+  return { username, role, tenant };
 }
 
 // Seed an admin from env on first boot (idempotent).
@@ -76,8 +76,8 @@ function seedAdmin() {
   const u = process.env.AUTH_ADMIN_USER;
   const p = process.env.AUTH_ADMIN_PASSWORD;
   if (u && p && !findUser(u)) {
-    addUser(u, p, 'admin');
-    console.log(`[auth] Seeded admin user "${u}" from AUTH_ADMIN_* env`);
+    addUser(u, p, 'admin', process.env.AUTH_ADMIN_TENANT || 'default');
+    console.log(`[auth] Seeded admin user "${u}" (workspace "${process.env.AUTH_ADMIN_TENANT || 'default'}") from AUTH_ADMIN_* env`);
   }
 }
 
@@ -130,10 +130,20 @@ function clearSessionCookie(res) {
 function login(username, password) {
   const user = findUser(username);
   if (!user || !verifyPassword(password, user.passwordHash)) return null;
-  return signToken({ u: user.username, r: user.role || 'user', exp: Date.now() + SESSION_TTL_MS });
+  return signToken({ u: user.username, r: user.role || 'user', t: user.tenant || 'default', exp: Date.now() + SESSION_TTL_MS });
 }
 function currentUser(req) {
   return verifyToken(parseCookies(req)[COOKIE]);
+}
+
+// Server-authoritative tenant (workspace) for the request. Returns null when auth
+// is disabled (single-tenant local mode) so callers fall back to existing behavior.
+// NEVER derived from client input — only from the verified session — so a client
+// cannot access another workspace's data by spoofing a clientId.
+function tenantOf(req) {
+  if (!isAuthEnabled()) return null;
+  const u = currentUser(req);
+  return u ? (u.t || 'default') : null;
 }
 function requireAuth(req, res, next) {
   if (!isAuthEnabled()) return next();
@@ -144,7 +154,7 @@ function requireAuth(req, res, next) {
 
 module.exports = {
   isAuthEnabled, seedAdmin, addUser, findUser, readUsers,
-  login, currentUser, requireAuth,
+  login, currentUser, tenantOf, requireAuth,
   setSessionCookie, clearSessionCookie,
   hashPassword, verifyPassword,   // exported for tests
   COOKIE,

@@ -6,7 +6,7 @@ const auth    = require('../lib/auth');
 router.get('/me', (req, res) => {
   if (!auth.isAuthEnabled()) return res.json({ authEnabled: false, authenticated: true });
   const u = auth.currentUser(req);
-  res.json({ authEnabled: true, authenticated: !!u, user: u ? { username: u.u, role: u.r } : null });
+  res.json({ authEnabled: true, authenticated: !!u, user: u ? { username: u.u, role: u.r, workspace: u.t || 'default' } : null });
 });
 
 // POST /api/auth/login — verify credentials, set the session cookie.

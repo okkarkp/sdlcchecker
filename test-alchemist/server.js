@@ -119,11 +119,18 @@ wss.on('connection', (ws, req) => {
     return;
   }
   // clientId arrives as a query-string param: ws://host?clientId=xxx
+  // When auth is enabled, force it to the caller's workspace so broadcasts stay
+  // within the tenant and match the (also tenant-scoped) HTTP route broadcasts.
   let clientId = 'anon';
   try {
-    const url  = new URL(req.url, 'ws://localhost');
-    const raw  = url.searchParams.get('clientId') || '';
-    clientId   = raw.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) || 'anon';
+    const tenant = auth.tenantOf(req);
+    if (tenant) {
+      clientId = tenant;
+    } else {
+      const url = new URL(req.url, 'ws://localhost');
+      const raw = url.searchParams.get('clientId') || '';
+      clientId  = raw.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) || 'anon';
+    }
   } catch {}
 
   ws.clientId = clientId;
@@ -160,6 +167,22 @@ global.broadcastTo = (clientId, data) => {
 // ── Auth: public endpoints, then gate everything else under /api ────────────────
 app.use('/api/auth', authRoutes);        // login / logout / me — never gated
 app.use('/api', auth.requireAuth);       // all other /api/* require a session (when auth enabled)
+
+// ── Multi-tenancy: force the data-scoping key to the caller's workspace ─────────
+// When auth is enabled, every request's clientId is overridden (server-side, from
+// the verified session) with the user's workspace/tenant. All client_id-scoped
+// tables therefore isolate by workspace, and a client can't reach another
+// workspace's data by sending a different clientId. When auth is off, this is a
+// no-op and the browser-supplied clientId is used (single-tenant local mode).
+app.use('/api', (req, res, next) => {
+  const tenant = auth.tenantOf(req);
+  if (tenant) {
+    req.tenantId = tenant;
+    if (req.body && typeof req.body === 'object') req.body.clientId = tenant;
+    if (req.query) req.query.clientId = tenant;
+  }
+  next();
+});
 
 // ── API Routes ─────────────────────────────────────────────────────────────────
 app.use('/api/ai',         aiRoutes);
