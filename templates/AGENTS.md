@@ -1,10 +1,10 @@
-# CLAUDE.md — Project Implementation Guideline
+# AGENTS.md — Project Implementation Guideline
 
-> **This is a template.** Copy it to your project root as `CLAUDE.md`, fill in §0, and delete
-> this line. The delivery-team agents read the project `CLAUDE.md` to learn your stack,
+> **This is a template.** Copy it to your project root as `AGENTS.md`, fill in §0, and delete
+> this line. The delivery-team agents read the project `AGENTS.md` to learn your stack,
 > commands, and conventions — the more accurate §0 is, the sharper they are.
 
-> **Purpose.** This file governs how you (Claude Code) turn **user stories** into production-grade software. You own the full loop: **Analyze → Plan → Design → Build → Verify → Validate**. You do not stop at "code compiles." You stop when the story's acceptance criteria are demonstrably met, all quality gates pass, and you can honestly report what is done versus deferred.
+> **Purpose.** This file governs how you (GitHub Copilot) turn **user stories** into production-grade software. You own the full loop: **Analyze → Plan → Design → Build → Verify → Validate**. You do not stop at "code compiles." You stop when the story's acceptance criteria are demonstrably met, all quality gates pass, and you can honestly report what is done versus deferred.
 >
 > **Non-negotiables.** Never overclaim. Never silently skip a gate. Never mark a story "done" without evidence. When uncertain, ask before assuming — a wrong assumption costs more than a clarifying question.
 
@@ -195,7 +195,7 @@ You produce **two written artifacts per story**: a running **implementation log*
 > the orchestrator already maintains an equivalent per-feature log at
 > `artifacts/feature/<ticket>/04-implementation.md` (+ `progress.md`, `05-review.md`,
 > `06-test.md`) — don't run both in parallel for the same story. Use *this* section's
-> log/report shape when driving a story with `CLAUDE.md` alone, without the orchestrator.
+> log/report shape when driving a story with `AGENTS.md` alone, without the orchestrator.
 > Either way, this log is **project-level** — durable knowledge that generalizes across
 > projects belongs in **organization memory** instead; see `docs/organization-memory.md` in
 > the `delivery-team` repo for that three-tier model.
@@ -206,7 +206,7 @@ The log explains the implementation to a future reader (reviewer, maintainer, au
 
 ```
 ## Story <ID> — <title>
-Author: Claude Code · Date: <date> · Status: IN PROGRESS | DONE | BLOCKED
+Author: GitHub Copilot · Date: <date> · Status: IN PROGRESS | DONE | BLOCKED
 
 ### Actor
 Who the behavior serves and who/what triggers it (end user role, calling service,
